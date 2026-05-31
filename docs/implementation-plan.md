@@ -369,6 +369,16 @@ Toolchain defaults: Zod as the shared schema layer (drizzle-zod ↔ ts-rest), dr
 Zod-validated env config, Vitest (unit) + Playwright (e2e) + Supertest (NestJS), pino logging,
 GitHub Actions CI (lint/typecheck/test on Turborepo `--affected`, then deploy), Docker for api+worker.
 
+### 11.1.1 Bootstrap boundary
+
+The first scaffold pass is defined in [bootstrap-plan.md](bootstrap-plan.md) and intentionally builds
+only the plumbing needed to prove the stack. It creates the monorepo, shared packages, Vite apps,
+NestJS api/worker, Drizzle readiness, Redis/Postgres health checks, Docker/Railway/CI wiring, and a
+sample UI page that consumes the shared health contract. It does **not** implement Better Auth,
+domain tables, payment/WhatsApp/SMS/email/storage ports, Sentry instrumentation, PDF generation,
+Razorpay/Meta/MSG91/R2 adapters, or business workflows. Those remain the next implementation phase
+after the scaffold is green.
+
 ### 11.2 Monorepo layout
 
 ```
@@ -382,7 +392,7 @@ corral/                      # Turborepo + pnpm
     schema/                  # Zod schemas + ts-rest contracts (FE/BE source of truth)
     db/                      # Drizzle schema, migrations, repositories
     ui/                      # shadcn components + design tokens (design-system.md)
-    config/                  # eslint / tsconfig / tailwind / env presets
+    config/                  # tsconfig bases + env helpers/presets
 ```
 
 ### 11.3 System diagram

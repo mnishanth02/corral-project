@@ -12,11 +12,11 @@
       replaces the deprecated tailwindcss-animate)
 
    Fonts:
-     Imported via CSS below for portability. For production with Vite, prefer
-     self-hosting the fonts (e.g. @fontsource-variable/* or local woff2 +
-     @font-face) for performance and no layout shift.
-     English-only for MVP — Tamil (Noto Sans Tamil) is deferred; see the note at
-     the @import below and in --font-sans for where to re-add it.
+     Self-host fonts in the scaffold; do not use Google Fonts @import in shipped
+     CSS. Install font packages (for example @fontsource-variable/inter and an
+     Oswald font package) or add local woff2 files + @font-face in the app/UI
+     package. English-only for MVP — Tamil (Noto Sans Tamil) is deferred; see
+     --font-sans below for where to re-add it.
 
    ACCESSIBILITY NOTES (see also the design review):
      • Brand fills (orange/amber/emerald/red) FAIL AA as text on light.
@@ -27,10 +27,10 @@
        orange controls (navy-on-orange ~5.6:1).
    ========================================================================== */
 
-/* English-only for MVP. To re-enable Tamil later, append
-   &family=Noto+Sans+Tamil:wght@400;500;600;700 here and add "Noto Sans Tamil"
-   back into --font-sans below. */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap");
+/* English-only for MVP. Import self-hosted font CSS before this file in each app
+  or define local @font-face rules here. To re-enable Tamil later, add a
+  self-hosted Noto Sans Tamil source and put "Noto Sans Tamil" before sans-serif
+  in --font-sans below. */
 
 @import "tailwindcss";
 @import "tw-animate-css";
