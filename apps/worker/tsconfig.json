@@ -1,0 +1,10 @@
+{
+  "extends": "@corral/config/tsconfig/nestjs",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "ignoreDeprecations": "6.0",
+    "types": ["node", "vitest/globals"]
+  },
+  "include": ["src", "vitest.config.ts"]
+}

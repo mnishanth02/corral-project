@@ -1,0 +1,10 @@
+node_modules
+.git
+.turbo
+dist
+coverage
+playwright-report
+test-results
+*.log
+Dockerfile
+.dockerignore

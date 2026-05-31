@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.output/
+build/
+.turbo/
+coverage/
+
+# Vite / TanStack
+*.tsbuildinfo
+
+# Drizzle
+packages/db/drizzle/meta/_journal.json.bak
+
+# Env
+.env
+.env.*.local
+*.local
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# NOTE: do NOT ignore generated TanStack route trees — they are committed.
+# routeTree.gen.ts is intentionally tracked.

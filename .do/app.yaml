@@ -1,0 +1,69 @@
+# ==========================================================================
+# Corral — DigitalOcean App Platform PROD stub (region BLR1 / Bangalore).
+# NOT deployed during the scaffold phase — filled in when prod deploy happens.
+# api + worker run as Dockerfile services; SPAs go to Cloudflare Pages instead.
+# Managed Postgres + Redis (DO, Bangalore) attach via ${db.*}/${redis.*} vars.
+# ==========================================================================
+name: corral
+region: blr1
+
+services:
+  - name: api
+    dockerfile_path: apps/api/Dockerfile
+    source_dir: /
+    github:
+      repo: your-org/corral
+      branch: main
+      deploy_on_push: true
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: basic-xs
+    health_check:
+      http_path: /health
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: API_PORT
+        value: "3000"
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${corral-pg.DATABASE_URL}
+      - key: REDIS_URL
+        scope: RUN_TIME
+        value: ${corral-redis.REDIS_URL}
+      - key: CORS_ORIGINS
+        value: https://corral.app,https://console.corral.app
+
+  - name: worker
+    dockerfile_path: apps/worker/Dockerfile
+    source_dir: /
+    github:
+      repo: your-org/corral
+      branch: main
+      deploy_on_push: true
+    http_port: 3100
+    instance_count: 1
+    instance_size_slug: basic-xs
+    health_check:
+      http_path: /health
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: WORKER_PORT
+        value: "3100"
+      - key: REDIS_URL
+        scope: RUN_TIME
+        value: ${corral-redis.REDIS_URL}
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${corral-pg.DATABASE_URL}
+
+databases:
+  - name: corral-pg
+    engine: PG
+    version: "16"
+    production: true
+  - name: corral-redis
+    engine: REDIS
+    version: "7"
+    production: true

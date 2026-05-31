@@ -1,0 +1,7 @@
+{
+  "extends": "@corral/config/tsconfig/react",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src"]
+}

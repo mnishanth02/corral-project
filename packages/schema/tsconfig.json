@@ -1,0 +1,7 @@
+{
+  "extends": "@corral/config/tsconfig/base",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts", "tsup.config.ts"]
+}

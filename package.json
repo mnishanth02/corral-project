@@ -1,0 +1,37 @@
+{
+  "name": "corral",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "biome check --write .",
+    "biome:ci": "biome ci .",
+    "db:push": "pnpm --filter @corral/db db:push",
+    "db:generate": "pnpm --filter @corral/db db:generate",
+    "db:migrate": "pnpm --filter @corral/db db:migrate",
+    "db:studio": "pnpm --filter @corral/db db:studio",
+    "e2e": "pnpm --filter @corral/web e2e",
+    "upgrade": "pnpm -r --include-workspace-root update --latest"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
+    "turbo": "^2.9.16",
+    "typescript": "^6.0.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@swc/core",
+      "esbuild",
+      "msgpackr-extract"
+    ]
+  }
+}
