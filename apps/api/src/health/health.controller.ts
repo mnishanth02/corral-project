@@ -1,6 +1,7 @@
 import { checkDbHealth } from "@corral/db";
 import { type HealthResponse, healthContract } from "@corral/schema";
 import { Controller } from "@nestjs/common";
+import { AllowAnonymous } from "@thallesp/nestjs-better-auth";
 import { TsRestHandler, tsRestHandler } from "@ts-rest/nest";
 import { RedisHealthService } from "../redis/redis-health.service";
 
@@ -8,6 +9,7 @@ import { RedisHealthService } from "../redis/redis-health.service";
 export class HealthController {
   constructor(private readonly redis: RedisHealthService) {}
 
+  @AllowAnonymous()
   @TsRestHandler(healthContract.check)
   async check() {
     return tsRestHandler(healthContract.check, async () => {

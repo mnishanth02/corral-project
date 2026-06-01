@@ -9,12 +9,12 @@
     "ignoreUnknown": true,
     "includes": [
       "**",
-      "!**/dist/**",
-      "!**/.turbo/**",
-      "!**/build/**",
-      "!**/.output/**",
-      "!**/coverage/**",
-      "!**/drizzle/**",
+      "!**/dist",
+      "!**/.turbo",
+      "!**/build",
+      "!**/.output",
+      "!**/coverage",
+      "!**/drizzle",
       "!**/routeTree.gen.ts",
       "!**/*.gen.ts",
       "!**/pnpm-lock.yaml"

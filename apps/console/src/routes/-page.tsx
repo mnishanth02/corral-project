@@ -1,10 +1,12 @@
 import type { HealthResponse } from "@corral/schema";
+import { Alert, AlertDescription } from "@corral/ui/components/alert";
 import { Button } from "@corral/ui/components/button";
 import { StatusBadge } from "@corral/ui/components/status-badge";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import { apiClient } from "../lib/api";
+import { authClient } from "../lib/auth";
 
 type StatusKind = "ok" | "error" | "warning";
 
@@ -124,6 +126,23 @@ function useRaceDayTheme() {
 
 export function IndexPage() {
   const { enabled, setEnabled } = useRaceDayTheme();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
+
+  async function handleSignOut() {
+    setIsSigningOut(true);
+    setSignOutError(null);
+
+    const result = await authClient.signOut();
+
+    if (result.error) {
+      setSignOutError(result.error.message ?? "Unable to sign out.");
+      setIsSigningOut(false);
+      return;
+    }
+
+    window.location.href = "/login";
+  }
 
   return (
     <main className="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[18rem_1fr]">
@@ -169,15 +188,26 @@ export function IndexPage() {
               one navy operations surface.
             </p>
           </div>
-          <Button
-            type="button"
-            variant={enabled ? "default" : "outline"}
-            onClick={() => setEnabled((value) => !value)}
-            aria-pressed={enabled}
-          >
-            {enabled ? "Race-day dark on" : "Enable race-day dark"}
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              type="button"
+              variant={enabled ? "default" : "outline"}
+              onClick={() => setEnabled((value) => !value)}
+              aria-pressed={enabled}
+            >
+              {enabled ? "Race-day dark on" : "Enable race-day dark"}
+            </Button>
+            <Button type="button" variant="outline" onClick={handleSignOut} disabled={isSigningOut}>
+              {isSigningOut ? "Signing out…" : "Sign out"}
+            </Button>
+          </div>
         </header>
+
+        {signOutError ? (
+          <Alert variant="destructive" className="mt-6">
+            <AlertDescription>{signOutError}</AlertDescription>
+          </Alert>
+        ) : null}
 
         <div className="mt-10 grid gap-6 xl:grid-cols-[1fr_22rem]">
           <SystemStatusCard />

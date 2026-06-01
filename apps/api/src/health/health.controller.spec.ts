@@ -58,4 +58,8 @@ describe("HealthController", () => {
 
     expect(response.body).toMatchObject({ status: "error", db: true, redis: false });
   });
+
+  it("is marked as anonymous for the global auth guard", () => {
+    expect(Reflect.getMetadata("PUBLIC", HealthController.prototype.check)).toBe(true);
+  });
 });
