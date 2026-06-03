@@ -1,3 +1,7 @@
+// Side-effect import: loads the root `.env` (via env.ts dotenv config) BEFORE
+// `@corral/db` initializes its connection from `process.env.DATABASE_URL`.
+// Biome does not reorder side-effect imports, so this stays first.
+import "../env";
 import { queryClient } from "@corral/db";
 import { getEnv } from "../env";
 import { auth } from "./auth";

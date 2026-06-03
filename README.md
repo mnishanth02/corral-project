@@ -52,6 +52,41 @@ Then:
 - Worker health: `curl localhost:3100/health`
 - Web: http://localhost:5173 · Console: http://localhost:5174 (System status card shows live health)
 
+## Logging in (local)
+
+There is **no public sign-up** — it is intentionally disabled in
+[`apps/api/src/auth/auth.ts`](apps/api/src/auth/auth.ts) (`disableSignUp: true` for both
+email/password and Google). Accounts are created by admins.
+
+First-time setup creates the bootstrap admin from your `.env`:
+
+```bash
+# Requires docker compose up -d + pnpm db:migrate to have run first.
+pnpm --filter @corral/api auth:seed-admin
+```
+
+This reads `AUTH_BOOTSTRAP_ADMIN_EMAIL`, `AUTH_BOOTSTRAP_ADMIN_PASSWORD`, and
+`AUTH_BOOTSTRAP_ADMIN_NAME` from the root `.env`. The script is idempotent — if the user already
+exists it leaves the password and role unchanged.
+
+Then sign in at the console login page (http://localhost:5174/login, or :5274 if that is your
+console port) with the email/password from `.env`, or via Google for an already-provisioned account.
+Once signed in as admin you can create additional users from the admin users screen.
+
+Quick validation that credentials work, without the UI:
+
+```bash
+curl -s -X POST http://localhost:3000/api/auth/sign-in/email \
+  -H "Content-Type: application/json" \
+  -d '{"email":"<admin-email>","password":"<admin-password>"}' -w "\nHTTP %{http_code}\n"
+# Expect HTTP 200 with a JSON body containing "role":"admin".
+```
+
+> Note: `auth:seed-admin` must load the root `.env` before `@corral/db` initializes its connection.
+> This is guaranteed by the side-effect `import "../env"` kept first in
+> [`apps/api/src/auth/seed-admin.ts`](apps/api/src/auth/seed-admin.ts) (Biome does not reorder
+> side-effect imports). Without it the script fails with `DATABASE_URL is required`.
+
 ## Scripts
 
 | Command | Description |

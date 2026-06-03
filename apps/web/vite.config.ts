@@ -8,7 +8,8 @@ import { defineConfig } from "vite";
 const config = {
   plugins: [tanstackRouter({ target: "react", autoCodeSplitting: true }), react(), tailwindcss()],
   server: {
-    port: 5173,
+    port: 5273,
+    strictPort: true,
   },
   test: {
     environment: "jsdom",

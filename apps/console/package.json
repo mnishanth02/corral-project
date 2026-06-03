@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --port 5174",
+    "dev": "vite --port 5274 --strictPort",
     "build": "vite build",
-    "preview": "vite preview --port 5174",
+    "preview": "vite preview --port 5274 --strictPort",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "test": "vitest run",
