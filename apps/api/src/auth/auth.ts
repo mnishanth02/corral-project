@@ -1,5 +1,4 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-import { db, schema } from "@corral/db";
 import { Logger } from "@nestjs/common";
 import { betterAuth } from "better-auth";
 import { admin } from "better-auth/plugins";
@@ -7,6 +6,7 @@ import { getEnv, parseCsv } from "../env";
 
 const env = getEnv();
 const logger = new Logger("BetterAuth");
+const { db, schema } = require("@corral/db") as typeof import("@corral/db");
 
 export const auth = betterAuth({
   appName: "Corral",

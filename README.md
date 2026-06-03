@@ -33,7 +33,7 @@ packages/
 ## Prerequisites
 
 - Node `>=22` (verified on 24.13.1) — `.nvmrc` pins `22`
-- pnpm `10.33.0` (`corepack enable`)
+- pnpm `11.5.1` (`corepack enable`)
 - Docker (for local Postgres + Redis)
 
 ## Quick start
@@ -42,7 +42,7 @@ packages/
 pnpm install
 cp .env.example .env          # local infra values
 docker compose up -d          # postgres:16 + redis:7
-pnpm db:push                  # push (empty) Drizzle schema
+pnpm db:migrate               # apply committed Drizzle migrations
 pnpm dev                      # all 4 apps with hot reload
 ```
 
@@ -63,7 +63,24 @@ Then:
 | `pnpm test` | Vitest across workspaces |
 | `pnpm format` | `biome check --write .` |
 | `pnpm biome:ci` | `biome ci .` (CI mode) |
-| `pnpm db:push` / `db:generate` / `db:migrate` / `db:studio` | Drizzle Kit |
+| `pnpm db:generate` | Generate SQL migrations from `packages/db/src/schema` changes |
+| `pnpm db:migrate` | Apply committed Drizzle migrations to `DATABASE_URL` |
+| `pnpm db:reset:local` | Drop local auth tables + Drizzle metadata, then rerun migrations |
+| `pnpm db:push` | Prototype-only direct schema sync; do not mix with migrations for shared DBs |
+| `pnpm db:studio` | Open Drizzle Studio |
+
+## Database workflow
+
+Use the versioned migration flow for normal development and deployments:
+
+1. Edit schema under `packages/db/src/schema`.
+2. Run `pnpm db:generate` and inspect the generated SQL under `packages/db/drizzle`.
+3. Run `pnpm db:migrate` locally, then deploy/apply the same migrations in staging/prod.
+
+`pnpm db:push` directly mutates the target database and does not create migration history. Keep it for
+throwaway local prototyping only. If a local database was pushed and then `db:migrate` fails because
+tables already exist, run `pnpm db:reset:local` to reset the empty local auth schema and replay the
+committed migrations.
 
 ## Deployment
 

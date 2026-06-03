@@ -1,7 +1,7 @@
 # ==========================================================================
 # Corral — Dev infrastructure ONLY (Postgres + Redis).
 # Apps run on the host via `pnpm dev` (hot reload); they are NOT in this file.
-# Usage: cp .env.example .env  ->  docker compose up -d  ->  pnpm db:push  ->  pnpm dev
+# Usage: cp .env.example .env  ->  docker compose up -d  ->  pnpm db:migrate  ->  pnpm dev
 # ==========================================================================
 
 services:
@@ -18,7 +18,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-corral} -d ${POSTGRES_DB:-corral}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-corral} -d ${POSTGRES_DB:-corral}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 10

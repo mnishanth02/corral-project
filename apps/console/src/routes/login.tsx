@@ -95,7 +95,7 @@ function LoginPage() {
     <main className="min-h-screen bg-background px-6 py-10 text-foreground">
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-6xl items-center justify-center">
         <div className="grid w-full gap-8 lg:grid-cols-[1fr_28rem] lg:items-center">
-          <section className="rounded-[2rem] border border-border/70 bg-card/80 p-8 shadow-2xl shadow-slate-950/10">
+          <section className="rounded-4xl border border-border/70 bg-card/80 p-8 shadow-2xl shadow-slate-950/10">
             <p className="text-xs font-bold uppercase tracking-[0.35em] text-primary">
               Corral console
             </p>
@@ -108,51 +108,51 @@ function LoginPage() {
             </p>
           </section>
 
-          <Card className="rounded-[2rem] shadow-2xl shadow-slate-950/10">
+          <Card className="rounded-4xl shadow-2xl shadow-slate-950/10">
             <CardHeader>
               <CardTitle className="font-display text-3xl uppercase">Welcome back</CardTitle>
               <CardDescription>Email/password and Google sign-in are supported.</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleEmailSignIn}>
+              <form onSubmit={ handleEmailSignIn }>
                 <FieldGroup>
-                  {error ? (
+                  { error ? (
                     <Alert variant="destructive">
                       <AlertTitle>Sign-in failed</AlertTitle>
-                      <AlertDescription>{error}</AlertDescription>
+                      <AlertDescription>{ error }</AlertDescription>
                     </Alert>
-                  ) : null}
+                  ) : null }
 
                   <Field>
-                    <FieldLabel htmlFor={emailId}>Email</FieldLabel>
+                    <FieldLabel htmlFor={ emailId }>Email</FieldLabel>
                     <Input
-                      id={emailId}
+                      id={ emailId }
                       name="email"
                       type="email"
                       autoComplete="email"
                       placeholder="captain@example.com"
-                      disabled={isSubmitting}
+                      disabled={ isSubmitting }
                       required
                     />
                   </Field>
 
                   <Field>
-                    <FieldLabel htmlFor={passwordId}>Password</FieldLabel>
+                    <FieldLabel htmlFor={ passwordId }>Password</FieldLabel>
                     <Input
-                      id={passwordId}
+                      id={ passwordId }
                       name="password"
                       type="password"
                       autoComplete="current-password"
-                      disabled={isSubmitting}
+                      disabled={ isSubmitting }
                       required
                     />
                     <FieldDescription>Accounts are created by Corral admins.</FieldDescription>
                   </Field>
 
-                  <FieldError>{error}</FieldError>
+                  <FieldError>{ error }</FieldError>
 
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    {mode === "email" ? <Spinner /> : null}
+                  <Button type="submit" className="w-full" disabled={ isSubmitting }>
+                    { mode === "email" ? <Spinner /> : null }
                     Sign in with email
                   </Button>
 
@@ -162,10 +162,10 @@ function LoginPage() {
                     type="button"
                     variant="outline"
                     className="w-full"
-                    onClick={handleGoogleSignIn}
-                    disabled={isSubmitting}
+                    onClick={ handleGoogleSignIn }
+                    disabled={ isSubmitting }
                   >
-                    {mode === "google" ? <Spinner /> : null}
+                    { mode === "google" ? <Spinner /> : null }
                     Sign in with Google
                   </Button>
                 </FieldGroup>
