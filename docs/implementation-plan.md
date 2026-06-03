@@ -4,6 +4,10 @@
 > spec-level detail: module specs, phased roadmap, the 90-day plan, payments/compliance, legal,
 > privacy, support runbook, and metrics. When the two disagree, `plan.md` wins.
 
+> Current execution status, blockers, and next recommended work are tracked in
+> [product-progress.md](product-progress.md). Future implementation agents should read that file
+> before starting a new slice.
+
 ---
 
 ## 1. MVP Module Specs

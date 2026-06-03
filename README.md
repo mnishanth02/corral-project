@@ -3,8 +3,10 @@
 Registration → roster → WhatsApp → results → certificates platform for Indian running events
 (Coimbatore beachhead). This repository is an **all-TypeScript Turborepo** monorepo.
 
-> This is the **scaffold/bootstrap** stage — base structure and plumbing only, **no business
-> logic**. See [`docs/bootstrap-plan.md`](docs/bootstrap-plan.md).
+> Current build/progress source of truth: [`docs/product-progress.md`](docs/product-progress.md).
+> Scaffold decisions live in [`docs/bootstrap-plan.md`](docs/bootstrap-plan.md); product strategy and
+> MVP specs live in [`docs/plan.md`](docs/plan.md) and
+> [`docs/implementation-plan.md`](docs/implementation-plan.md).
 
 ## Stack
 
