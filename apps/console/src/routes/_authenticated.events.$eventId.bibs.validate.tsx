@@ -41,19 +41,19 @@ function BibValidationRoute() {
 
   return (
     <BibPageShell
-      eventId={eventId}
+      eventId={ eventId }
       currentStep="validation"
-      eyebrow={`${getEventName(eventId)} · BIB management`}
+      eyebrow={ `${getEventName(eventId)} · BIB management` }
       title="Duplicate validation"
       description="Surface duplicate-BIB warnings, blank BIB rows, and timing-export blockers before the race desk prints packets."
-      demo={demo}
-      back={{ to: "/events/$eventId/bibs", label: "Back to assignment" }}
+      demo={ demo }
+      back={ { to: "/events/$eventId/bibs", label: "Back to assignment" } }
       actions={
         <>
           <Button variant="outline">Revalidate roster</Button>
-          {clean ? (
+          { clean ? (
             <Button asChild>
-              <Link to={"/events/$eventId/bibs/chips"} params={{ eventId }} search={{ demo }}>
+              <Link to={ "/events/$eventId/bibs/chips" } params={ { eventId } } search={ { demo } }>
                 Go to BIB ↔ Chip Mapping
               </Link>
             </Button>
@@ -61,13 +61,13 @@ function BibValidationRoute() {
             <Button disabled aria-disabled="true">
               Resolve duplicates first
             </Button>
-          )}
+          ) }
         </>
       }
     >
       <div className="space-y-6">
         <StatGrid
-          stats={[
+          stats={ [
             {
               label: "Duplicate BIBs",
               value: duplicateCount,
@@ -87,10 +87,10 @@ function BibValidationRoute() {
               helper: "Asia/Kolkata",
               status: "info",
             },
-          ]}
+          ] }
         />
 
-        {disabled ? (
+        { disabled ? (
           <Alert className="border-warning/40 bg-warning/5">
             <span aria-hidden="true">⚠</span>
             <AlertTitle>Read-only validation mode</AlertTitle>
@@ -98,11 +98,11 @@ function BibValidationRoute() {
               Corrections and intentional overrides are disabled for this persona.
             </AlertDescription>
           </Alert>
-        ) : null}
+        ) : null }
 
-        <DuplicateValidationPanel clean={clean} loading={loading} />
+        <DuplicateValidationPanel clean={ clean } loading={ loading } />
 
-        {!clean && !loading ? (
+        { !clean && !loading ? (
           <div className="space-y-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -113,9 +113,9 @@ function BibValidationRoute() {
               </div>
               <StatusBadge status="error" label="Timing export blocked" />
             </div>
-            <DuplicateGroupsTable disabled={disabled} />
+            <DuplicateGroupsTable disabled={ disabled } />
           </div>
-        ) : null}
+        ) : null }
 
         <div className="grid gap-6 xl:grid-cols-[1fr_24rem]">
           <AuditReasonCard
@@ -129,13 +129,13 @@ function BibValidationRoute() {
             </CardHeader>
             <CardContent className="space-y-3">
               <Button asChild variant="outline" className="w-full">
-                <Link to={"/events/$eventId/bibs"} params={{ eventId }} search={{ demo }}>
+                <Link to={ "/events/$eventId/bibs" } params={ { eventId } } search={ { demo } }>
                   Back to BIB Assignment
                 </Link>
               </Button>
-              {clean ? (
+              { clean ? (
                 <Button asChild className="w-full">
-                  <Link to={"/events/$eventId/bibs/chips"} params={{ eventId }} search={{ demo }}>
+                  <Link to={ "/events/$eventId/bibs/chips" } params={ { eventId } } search={ { demo } }>
                     Continue to Chip Mapping
                   </Link>
                 </Button>
@@ -143,23 +143,23 @@ function BibValidationRoute() {
                 <Button className="w-full" disabled aria-disabled="true">
                   Resolve duplicates first
                 </Button>
-              )}
-              {!clean ? (
+              ) }
+              { !clean ? (
                 <p className="text-danger-text text-sm">
                   Resolve duplicate BIBs before continuing to vendor export.
                 </p>
-              ) : null}
+              ) : null }
             </CardContent>
           </Card>
         </div>
 
         <DemoUrls
-          urls={[
+          urls={ [
             `/events/${eventIdForDisplay}/bibs/validate?demo=validation-error`,
             `/events/${eventIdForDisplay}/bibs/validate?demo=success`,
             `/events/${eventIdForDisplay}/bibs/validate?demo=loading`,
             `/events/${eventIdForDisplay}/bibs/validate?demo=permission-denied&as=org-readonly`,
-          ]}
+          ] }
         />
       </div>
     </BibPageShell>

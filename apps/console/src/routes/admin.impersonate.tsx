@@ -40,21 +40,21 @@ function AdminImpersonatePage() {
         title="Act-on-behalf"
         description="Select an organizer/event, record the audit reason, and set the persistent impersonation banner used across the admin shell."
         actions={
-          <Button variant="outline" onClick={() => clearImpersonation()}>
+          <Button variant="outline" onClick={ () => clearImpersonation() }>
             Clear impersonation
           </Button>
         }
       />
-      {demo === "success" || impersonation.organizerId ? (
+      { demo === "success" || impersonation.organizerId ? (
         <Alert className="border-warning/40 bg-warning/10">
           <span aria-hidden="true">audit</span>
           <AlertTitle>Banner is active</AlertTitle>
           <AlertDescription>
-            Acting on behalf of {organizer?.name} · {event.name} · staff: Nisha Menon. Exit from the
+            Acting on behalf of { organizer?.name } · { event.name } · staff: Nisha Menon. Exit from the
             global banner or this page.
           </AlertDescription>
         </Alert>
-      ) : null}
+      ) : null }
       <div className="grid gap-6 xl:grid-cols-[1fr_24rem]">
         <DetailCard
           title="Choose context"
@@ -62,21 +62,21 @@ function AdminImpersonatePage() {
         >
           <div className="grid gap-2 text-sm font-semibold">
             <span id="organizer-select-label">Organizer</span>
-            <Select value={organizerId} onValueChange={setOrganizerId}>
+            <Select value={ organizerId } onValueChange={ setOrganizerId }>
               <SelectTrigger aria-labelledby="organizer-select-label">
                 <SelectValue placeholder="Organizer" />
               </SelectTrigger>
               <SelectContent>
-                {mockOrganizers.map((item) => (
-                  <SelectItem key={item.id} value={item.id}>
-                    {item.name}
+                { mockOrganizers.map((item) => (
+                  <SelectItem key={ item.id } value={ item.id }>
+                    { item.name }
                   </SelectItem>
-                ))}
+                )) }
               </SelectContent>
             </Select>
           </div>
           <p>
-            <strong>Event:</strong> {event.name} · {event.venueName}
+            <strong>Event:</strong> { event.name } · { event.venueName }
           </p>
           <AuditReasonBox label="Why are you starting act-on-behalf?" />
           <ConfirmDialog
@@ -89,7 +89,7 @@ function AdminImpersonatePage() {
             description="The banner cannot be dismissed without exiting. First sensitive change requires this audit reason. High-risk actions ask again."
             requireReason
             confirmLabel="Start session"
-            onConfirm={(reason) =>
+            onConfirm={ (reason) =>
               setImpersonation({
                 adminUserId: "user-corral-admin",
                 organizerId,
@@ -103,15 +103,15 @@ function AdminImpersonatePage() {
           title="Sensitive action gates"
           description="Every high-risk workflow repeats ConfirmDialog requireReason."
         >
-          {[
+          { [
             "First sensitive change",
             "Refunds",
             "PII exports",
             "Publish / unpublish",
             "Manual payment override",
           ].map((label) => (
-            <StatusBadge key={label} status="warning" label={label} />
-          ))}
+            <StatusBadge key={ label } status="warning" label={ label } />
+          )) }
           <Alert className="border-danger/30 bg-danger/10">
             <span aria-hidden="true">!</span>
             <AlertTitle>Never silent</AlertTitle>

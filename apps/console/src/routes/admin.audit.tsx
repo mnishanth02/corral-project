@@ -31,10 +31,10 @@ function AdminAuditPage() {
         eyebrow="A-06 · Compliance trail"
         title="Audit Log"
         description="Filterable record of sensitive admin actions: impersonation, exports, refunds, permission/role changes, publish changes, and manual overrides."
-        actions={<Button variant="outline">Export visible audit rows</Button>}
+        actions={ <Button variant="outline">Export visible audit rows</Button> }
       />
       <DemoBoundary
-        demo={demo}
+        demo={ demo }
         emptyTitle="No audit rows match"
         emptyDescription="Clear actor, action, date, or event filters to broaden the compliance trail."
       >
@@ -44,28 +44,28 @@ function AdminAuditPage() {
             value="428"
             status="info"
             statusLabel="Last 30 days"
-            icon={<span aria-hidden="true">log</span>}
+            icon={ <span aria-hidden="true">log</span> }
           />
           <KpiCard
             label="Impersonations"
             value="37"
             status="warning"
             statusLabel="Reason captured"
-            icon={<span aria-hidden="true">audit</span>}
+            icon={ <span aria-hidden="true">audit</span> }
           />
           <KpiCard
             label="PII exports"
             value="12"
             status="warning"
             statusLabel="Private only"
-            icon={<span aria-hidden="true">doc</span>}
+            icon={ <span aria-hidden="true">doc</span> }
           />
           <KpiCard
             label="Role changes"
             value="9"
             status="ok"
             statusLabel="Reviewed"
-            icon={<span aria-hidden="true">role</span>}
+            icon={ <span aria-hidden="true">role</span> }
           />
         </KpiGrid>
         <FilterBar placeholder="Filter actor, action, target, event…">
@@ -78,8 +78,8 @@ function AdminAuditPage() {
         <div className="grid gap-6 xl:grid-cols-[1fr_24rem]">
           <MiniTable
             caption="Audit log table"
-            headers={["Timestamp", "Actor", "Action", "Target", "Reason", "Event / Organizer"]}
-            rows={mockAuditEntries.map((entry) =>
+            headers={ ["Timestamp", "Actor", "Action", "Target", "Reason", "Event / Organizer"] }
+            rows={ mockAuditEntries.map((entry) =>
               cells(
                 new Date(entry.createdAt).toLocaleString("en-IN", {
                   timeZone: "Asia/Kolkata",
@@ -87,20 +87,20 @@ function AdminAuditPage() {
                   timeStyle: "short",
                 }),
                 <span>
-                  <strong className="block">{entry.actorName}</strong>
-                  <span className="text-muted-foreground">{entry.actorRole}</span>
+                  <strong className="block">{ entry.actorName }</strong>
+                  <span className="text-muted-foreground">{ entry.actorRole }</span>
                 </span>,
-                <StatusBadge status={statusKind(entry.action)} label={entry.action} />,
+                <StatusBadge status={ statusKind(entry.action) } label={ entry.action } />,
                 entry.target,
                 entry.reason ?? "Reason not required",
                 <span>
-                  {"eventId" in entry ? entry.eventId : "All events"}
+                  { "eventId" in entry ? entry.eventId : "All events" }
                   <span className="block text-muted-foreground">
-                    {"organizerId" in entry ? entry.organizerId : "Corral"}
+                    { "organizerId" in entry ? entry.organizerId : "Corral" }
                   </span>
                 </span>,
               ),
-            )}
+            ) }
           />
           <DetailCard
             title="Expanded audit detail"

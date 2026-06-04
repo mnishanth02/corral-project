@@ -47,7 +47,7 @@ function AdminCalendarPage() {
         }
       />
       <DemoBoundary
-        demo={demo}
+        demo={ demo }
         emptyTitle="No calendar seeds"
         emptyDescription="Add a CODISSIA, Race Course, Pollachi, or club listing to feed the participant calendar."
       >
@@ -57,7 +57,7 @@ function AdminCalendarPage() {
             value="24"
             status="ok"
             statusLabel="Coimbatore region"
-            icon={<span aria-hidden="true">+</span>}
+            icon={ <span aria-hidden="true">+</span> }
           />
           <KpiCard label="Corral hosted" value="6" status="ok" statusLabel="Registration links" />
           <KpiCard
@@ -78,23 +78,23 @@ function AdminCalendarPage() {
         <div className="grid gap-6 xl:grid-cols-[1fr_24rem]">
           <MiniTable
             caption="Calendar seed table"
-            headers={["Event", "Date", "Venue", "Type", "Public status", "Owner"]}
-            rows={calendarSeeds.map((item) =>
+            headers={ ["Event", "Date", "Venue", "Type", "Public status", "Owner"] }
+            rows={ calendarSeeds.map((item) =>
               cells(
                 <span>
-                  <strong className="block">{item.title}</strong>
+                  <strong className="block">{ item.title }</strong>
                   <span className="text-muted-foreground">5K · 10K · 21K tags</span>
                 </span>,
                 item.date,
                 <span className="inline-flex items-center gap-2">
                   <span aria-hidden="true">pin</span>
-                  {item.venue}
+                  { item.venue }
                 </span>,
                 item.type,
-                <StatusBadge status={statusKind(item.status)} label={item.status} />,
+                <StatusBadge status={ statusKind(item.status) } label={ item.status } />,
                 item.owner,
               ),
-            )}
+            ) }
           />
           <DetailCard
             title="Public verification"
@@ -114,7 +114,7 @@ function AdminCalendarPage() {
               foothills, Pollachi loop.
             </p>
             <ConfirmDialog
-              trigger={<Button variant="outline">Publish seed changes</Button>}
+              trigger={ <Button variant="outline">Publish seed changes</Button> }
               title="Publish calendar seed changes?"
               description="Publishing/unpublishing public listings is sensitive and records an audit reason."
               requireReason

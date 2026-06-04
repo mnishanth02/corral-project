@@ -49,7 +49,7 @@ function AdminSupportPage() {
           <>
             <Button>Create internal ticket</Button>
             <ConfirmDialog
-              trigger={<Button variant="outline">Export ticket report</Button>}
+              trigger={ <Button variant="outline">Export ticket report</Button> }
               title="Export ticket report?"
               description="Ticket reports can expose requester metadata. Add an audit reason."
               requireReason
@@ -67,7 +67,7 @@ function AdminSupportPage() {
         </AlertDescription>
       </Alert>
       <DemoBoundary
-        demo={demo === "validation-error" || demo === "success" ? "default" : demo}
+        demo={ demo === "validation-error" || demo === "success" ? "default" : demo }
         emptyTitle="No support tickets"
         emptyDescription="Support, delivery, and privacy requests will queue here once seeded."
       >
@@ -77,38 +77,38 @@ function AdminSupportPage() {
             value="23"
             status="info"
             statusLabel="Queue active"
-            icon={<span aria-hidden="true">support</span>}
+            icon={ <span aria-hidden="true">support</span> }
           />
           <KpiCard
             label="Due in 48h"
             value="4"
             status="warning"
             statusLabel="SLA risk"
-            icon={<span aria-hidden="true">time</span>}
+            icon={ <span aria-hidden="true">time</span> }
           />
           <KpiCard
             label="Verifying identity"
             value="6"
             status="warning"
             statusLabel="Awaiting proof"
-            icon={<span aria-hidden="true">verify</span>}
+            icon={ <span aria-hidden="true">verify</span> }
           />
           <KpiCard
             label="Resolved this week"
             value="18"
             status="ok"
             statusLabel="Closed"
-            icon={<span aria-hidden="true">ok</span>}
+            icon={ <span aria-hidden="true">ok</span> }
           />
         </KpiGrid>
-        <Tabs value={activeTab} className="gap-4">
+        <Tabs value={ activeTab } className="gap-4">
           <TabsList>
             <TabsTrigger value="open">Open 23</TabsTrigger>
             <TabsTrigger value="verifying">Verifying 6</TabsTrigger>
             <TabsTrigger value="resolved">Resolved 128</TabsTrigger>
             <TabsTrigger value="privacy">Privacy requests 9</TabsTrigger>
           </TabsList>
-          <TabsContent value={activeTab} className="grid gap-4">
+          <TabsContent value={ activeTab } className="grid gap-4">
             <FilterBar placeholder="Search ticket ID, requester, event, request type…">
               <Chip>DPDP access</Chip>
               <Chip>Correction</Chip>
@@ -118,7 +118,7 @@ function AdminSupportPage() {
             <div className="grid gap-6 xl:grid-cols-[1fr_26rem]">
               <MiniTable
                 caption="Support ticket queue"
-                headers={[
+                headers={ [
                   "Ticket",
                   "Requester",
                   "Organizer/Event",
@@ -127,43 +127,43 @@ function AdminSupportPage() {
                   "SLA due",
                   "Status",
                   "Owner",
-                ]}
-                rows={supportTickets.map((item) =>
+                ] }
+                rows={ supportTickets.map((item) =>
                   cells(
                     <a
                       className="font-bold text-primary"
-                      href={`/admin/support?ticket=${item.id}&as=corral-admin`}
+                      href={ `/admin/support?ticket=${item.id}&as=corral-admin` }
                     >
-                      {item.id}
+                      { item.id }
                     </a>,
                     item.requester,
                     item.context,
                     item.type,
                     <StatusBadge
-                      status={statusKind(item.verification)}
-                      label={item.verification}
+                      status={ statusKind(item.verification) }
+                      label={ item.verification }
                     />,
                     item.due,
-                    <StatusBadge status={statusKind(item.status)} label={item.status} />,
+                    <StatusBadge status={ statusKind(item.status) } label={ item.status } />,
                     item.owner,
                   ),
-                )}
+                ) }
               />
               <DetailCard
-                title={`${selected.id} · ${selected.type}`}
+                title={ `${selected.id} · ${selected.type}` }
                 description="Selected ticket detail panel"
               >
-                <StatusBadge status={statusKind(selected.status)} label={selected.status} />
+                <StatusBadge status={ statusKind(selected.status) } label={ selected.status } />
                 <p>
-                  <strong>Requester:</strong> {selected.requester}
+                  <strong>Requester:</strong> { selected.requester }
                 </p>
                 <p>
-                  <strong>Context:</strong> {selected.context}
+                  <strong>Context:</strong> { selected.context }
                 </p>
                 <p>
-                  <strong>SLA:</strong> Due by {selected.due} · DPDP support target active.
+                  <strong>SLA:</strong> Due by { selected.due } · DPDP support target active.
                 </p>
-                {demo === "validation-error" ? (
+                { demo === "validation-error" ? (
                   <Alert className="border-warning/30 bg-warning/10">
                     <span aria-hidden="true">minor</span>
                     <AlertTitle>Guardian proof needed</AlertTitle>
@@ -171,10 +171,10 @@ function AdminSupportPage() {
                       Verification dialog is missing required evidence note for a minor request.
                     </AlertDescription>
                   </Alert>
-                ) : null}
+                ) : null }
                 <AuditReasonBox label="Add audit reason for privacy action" />
                 <ConfirmDialog
-                  trigger={<Button>Export access report</Button>}
+                  trigger={ <Button>Export access report</Button> }
                   title="Add audit reason for privacy action"
                   description="Required before exporting, correcting, erasing, or viewing sensitive participant data."
                   requireReason

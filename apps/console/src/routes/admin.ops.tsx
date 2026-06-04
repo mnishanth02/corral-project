@@ -43,23 +43,23 @@ function DarkMetric({
   return (
     <div className="rounded-2xl border border-[#1e293b] bg-[#0f172a] p-5 shadow-2xl shadow-black/20">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-xs font-black uppercase tracking-[0.24em] text-[#94a3b8]">{label}</p>
-        <span className={color} aria-hidden="true">
-          {icon}
+        <p className="text-xs font-black uppercase tracking-[0.24em] text-[#94a3b8]">{ label }</p>
+        <span className={ color } aria-hidden="true">
+          { icon }
         </span>
       </div>
       <p className="mt-3 font-display text-4xl font-black leading-none text-[#f1f5f9] tabular-nums">
-        {value}
+        { value }
       </p>
-      <p className={`mt-3 inline-flex items-center gap-2 text-sm font-bold ${color}`}>
-        {icon}{" "}
-        {tone === "success"
+      <p className={ `mt-3 inline-flex items-center gap-2 text-sm font-bold ${color}` }>
+        { icon }{ " " }
+        { tone === "success"
           ? "Healthy"
           : tone === "danger"
             ? "Action now"
             : tone === "warning"
               ? "Watch"
-              : "Telemetry"}
+              : "Telemetry" }
       </p>
     </div>
   );
@@ -76,7 +76,7 @@ function AdminOpsPage() {
   return (
     <div
       className="dark -m-8 min-h-screen bg-[#0b1120] p-6 text-[#f1f5f9] xl:p-8"
-      style={{ colorScheme: "dark" }}
+      style={ { colorScheme: "dark" } }
     >
       <div className="grid gap-6">
         <div className="overflow-hidden rounded-[2rem] border border-[#1e293b] bg-[#0f172a] shadow-2xl shadow-black/30">
@@ -98,7 +98,7 @@ function AdminOpsPage() {
                   the zero-critical-failure pilot target.
                 </p>
                 <p className="mt-3 font-mono text-sm text-[#94a3b8]">
-                  Last heartbeat {degraded ? "04:18 ago" : "12s ago"} · Pilot · Production ·
+                  Last heartbeat { degraded ? "04:18 ago" : "12s ago" } · Pilot · Production ·
                   Coimbatore pilots · 14:42:08 IST
                 </p>
               </div>
@@ -126,7 +126,7 @@ function AdminOpsPage() {
           </div>
         </div>
 
-        {degraded ? (
+        { degraded ? (
           <Alert className="border-[#fbbf24]/50 bg-[#fbbf24]/10 text-[#f1f5f9]">
             <span aria-hidden="true">!</span>
             <AlertTitle>Manual backup promise active</AlertTitle>
@@ -136,7 +136,7 @@ function AdminOpsPage() {
               roster snapshot and approved WhatsApp broadcast once queue recovers.
             </AlertDescription>
           </Alert>
-        ) : null}
+        ) : null }
 
         <DemoBoundary
           demo={
@@ -149,31 +149,31 @@ function AdminOpsPage() {
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <DarkMetric
               label="Overall"
-              value={degraded ? "Degraded" : "Healthy"}
-              tone={degraded ? "warning" : "success"}
-              icon={<span aria-hidden="true">health</span>}
+              value={ degraded ? "Degraded" : "Healthy" }
+              tone={ degraded ? "warning" : "success" }
+              icon={ <span aria-hidden="true">health</span> }
             />
             <DarkMetric
               label="Critical incidents"
-              value={demo === "error" ? "2" : "0"}
-              tone={demo === "error" ? "danger" : "success"}
-              icon={<span aria-hidden="true">audit</span>}
+              value={ demo === "error" ? "2" : "0" }
+              tone={ demo === "error" ? "danger" : "success" }
+              icon={ <span aria-hidden="true">audit</span> }
             />
             <DarkMetric
               label="Queue latency"
-              value={demo === "offline" ? "08:24" : "00:38"}
-              tone={demo === "offline" ? "warning" : "success"}
-              icon={<span aria-hidden="true">time</span>}
+              value={ demo === "offline" ? "08:24" : "00:38" }
+              tone={ demo === "offline" ? "warning" : "success" }
+              icon={ <span aria-hidden="true">time</span> }
             />
             <DarkMetric
               label="Webhook retries"
-              value={demo === "webhook-pending" ? "12" : "0"}
-              tone={demo === "webhook-pending" ? "warning" : "info"}
-              icon={<span aria-hidden="true">retry</span>}
+              value={ demo === "webhook-pending" ? "12" : "0" }
+              tone={ demo === "webhook-pending" ? "warning" : "info" }
+              icon={ <span aria-hidden="true">retry</span> }
             />
           </div>
 
-          <Tabs value={activeTab} className="gap-4 text-[#f1f5f9]">
+          <Tabs value={ activeTab } className="gap-4 text-[#f1f5f9]">
             <TabsList className="bg-[#1e293b] text-[#cbd5e1]">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="failed-jobs">Failed jobs</TabsTrigger>
@@ -181,11 +181,11 @@ function AdminOpsPage() {
               <TabsTrigger value="queues">Queues</TabsTrigger>
               <TabsTrigger value="pdf-storage">PDF & Storage</TabsTrigger>
             </TabsList>
-            <TabsContent value={activeTab} className="grid gap-4 xl:grid-cols-[1fr_24rem]">
+            <TabsContent value={ activeTab } className="grid gap-4 xl:grid-cols-[1fr_24rem]">
               <div className="rounded-2xl border border-[#1e293b] bg-[#0f172a]">
                 <MiniTable
                   caption="Operations incidents"
-                  headers={[
+                  headers={ [
                     "Severity",
                     "Status",
                     "Component",
@@ -195,29 +195,29 @@ function AdminOpsPage() {
                     "Queue/job ID",
                     "Attempts",
                     "Owner",
-                  ]}
-                  rows={visibleRows.map((incident) =>
+                  ] }
+                  rows={ visibleRows.map((incident) =>
                     cells(
                       incident.severity,
-                      <StatusBadge status={statusKind(incident.status)} label={incident.status} />,
+                      <StatusBadge status={ statusKind(incident.status) } label={ incident.status } />,
                       incident.component,
                       incident.event,
                       incident.symptom,
                       incident.impact,
                       <code className="rounded bg-[#020617] px-2 py-1 text-[#38bdf8]">
-                        {incident.id}
+                        { incident.id }
                       </code>,
                       incident.attempts,
                       incident.owner,
                     ),
-                  )}
+                  ) }
                 />
               </div>
               <div className="grid gap-4">
                 <div className="rounded-2xl border border-[#1e293b] bg-[#0f172a] p-5">
                   <h3 className="font-display text-2xl font-black uppercase">Runbook checklist</h3>
                   <div className="mt-4 grid gap-3">
-                    {[
+                    { [
                       "Heartbeat checked",
                       "Worker owner paged",
                       "Support ticket linked",
@@ -225,18 +225,18 @@ function AdminOpsPage() {
                       "No secrets or stack traces displayed",
                     ].map((item, index) => (
                       <StatusBadge
-                        key={item}
-                        status={index < 2 && degraded ? "warning" : "ok"}
-                        label={item}
+                        key={ item }
+                        status={ index < 2 && degraded ? "warning" : "ok" }
+                        label={ item }
                       />
-                    ))}
+                    )) }
                   </div>
                 </div>
                 <div className="rounded-2xl border border-[#1e293b] bg-[#0f172a] p-5">
                   <h3 className="font-display text-2xl font-black uppercase">Safe actions</h3>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <ConfirmDialog
-                      trigger={<Button>Retry job</Button>}
+                      trigger={ <Button>Retry job</Button> }
                       title="Retry certificate PDF job?"
                       description="This may generate participant-visible files. Add an audit reason."
                       requireReason
@@ -282,8 +282,8 @@ function AdminOpsPage() {
             />
             <StatusBadge
               className="border-[#ff4d4d]/40 bg-[#ff4d4d]/10 text-[#ff4d4d]"
-              status={demo === "error" ? "error" : "ok"}
-              label={demo === "error" ? "Storage/upload errors" : "Storage uploads healthy"}
+              status={ demo === "error" ? "error" : "ok" }
+              label={ demo === "error" ? "Storage/upload errors" : "Storage uploads healthy" }
             />
           </div>
         </DemoBoundary>

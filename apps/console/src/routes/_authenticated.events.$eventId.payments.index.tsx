@@ -12,5 +12,5 @@ export const Route = createFileRoute("/_authenticated/events/$eventId/payments/"
 function PaymentsRoute() {
   const { eventId } = Route.useParams() as { eventId: string };
   const search = Route.useSearch() as { demo: import("../mocks/types").DemoState };
-  return <PaymentsDashboard eventId={eventId} search={search} />;
+  return <PaymentsDashboard eventId={ eventId } search={ search } />;
 }

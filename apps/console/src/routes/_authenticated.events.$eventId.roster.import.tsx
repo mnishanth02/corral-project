@@ -17,8 +17,8 @@ export const Route = createFileRoute("/_authenticated/events/$eventId/roster/imp
 function ImportScreenRoute() {
   return (
     <ImportScreen
-      event={useActiveEventFromRoute(readEventIdFromLocation())}
-      search={readSimpleRosterSearchFromLocation()}
+      event={ useActiveEventFromRoute(readEventIdFromLocation()) }
+      search={ readSimpleRosterSearchFromLocation() }
     />
   );
 }

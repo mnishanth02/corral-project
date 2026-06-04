@@ -6,6 +6,6 @@ export const Route = createFileRoute("/_authenticated/events/$eventId/certificat
   validateSearch: validateResultsSearch,
   staticData: { breadcrumb: "Certificate status" },
   component: () => (
-    <CertificateStatusScreen eventId={(Route.useParams() as { eventId: string }).eventId} />
+    <CertificateStatusScreen eventId={ (Route.useParams() as { eventId: string }).eventId } />
   ),
 });

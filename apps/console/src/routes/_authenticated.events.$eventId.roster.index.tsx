@@ -16,5 +16,5 @@ export const Route = createFileRoute("/_authenticated/events/$eventId/roster/")(
 
 function RosterIndexRoute() {
   const event = useActiveEventFromRoute(readEventIdFromLocation());
-  return <RosterIndexScreen event={event} search={readRosterTableSearchFromLocation()} />;
+  return <RosterIndexScreen event={ event } search={ readRosterTableSearchFromLocation() } />;
 }

@@ -174,9 +174,9 @@ function AuthenticatedLayout() {
         <AccessDenied
           title="Organizer access denied"
           description="This demo persona has no organizer console capabilities. Switch personas to continue."
-          roleContext={persona.role}
+          roleContext={ persona.role }
           actions={
-            <Button type="button" onClick={() => setSearchParam("as", "org-owner")}>
+            <Button type="button" onClick={ () => setSearchParam("as", "org-owner") }>
               Use organizer owner
             </Button>
           }
@@ -188,10 +188,10 @@ function AuthenticatedLayout() {
   return (
     <MockStoreProvider>
       <ConsoleShellProvider
-        activeEventId={activeEvent.id}
-        setActiveEventId={setActiveEventId}
-        persona={persona}
-        demo={demo}
+        activeEventId={ activeEvent.id }
+        setActiveEventId={ setActiveEventId }
+        persona={ persona }
+        demo={ demo }
       >
         <div className="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[17rem_1fr]">
           <Sidebar className="sticky top-0 hidden h-screen min-h-screen bg-[#0f172a] lg:flex">
@@ -206,29 +206,29 @@ function AuthenticatedLayout() {
               </div>
             </SidebarHeader>
             <SidebarContent>
-              {navSections.map((section) => (
-                <SidebarGroup key={section.label}>
-                  <SidebarGroupLabel>{section.label}</SidebarGroupLabel>
+              { navSections.map((section) => (
+                <SidebarGroup key={ section.label }>
+                  <SidebarGroupLabel>{ section.label }</SidebarGroupLabel>
                   <SidebarMenu>
-                    {section.items.map((item) => {
+                    { section.items.map((item) => {
                       const href = item.href(activeEvent.id);
                       const active =
                         typeof window !== "undefined" && window.location.pathname === href;
                       return (
-                        <SidebarMenuItem key={item.label}>
-                          <SidebarItem href={href} active={active}>
-                            {item.label}
+                        <SidebarMenuItem key={ item.label }>
+                          <SidebarItem href={ href } active={ active }>
+                            { item.label }
                           </SidebarItem>
                         </SidebarMenuItem>
                       );
-                    })}
+                    }) }
                   </SidebarMenu>
                 </SidebarGroup>
-              ))}
+              )) }
             </SidebarContent>
             <SidebarFooter>
-              <p className="text-xs text-sidebar-foreground/70">{persona.user.name}</p>
-              <p className="text-xs text-sidebar-foreground/50">{persona.role}</p>
+              <p className="text-xs text-sidebar-foreground/70">{ persona.user.name }</p>
+              <p className="text-xs text-sidebar-foreground/50">{ persona.role }</p>
             </SidebarFooter>
           </Sidebar>
 
@@ -238,20 +238,20 @@ function AuthenticatedLayout() {
                 <div>
                   <Breadcrumb>
                     <BreadcrumbList>
-                      {breadcrumbs.flatMap((crumb, index) => {
+                      { breadcrumbs.flatMap((crumb, index) => {
                         const item = (
-                          <BreadcrumbItem key={crumb.id}>
-                            <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                          <BreadcrumbItem key={ crumb.id }>
+                            <BreadcrumbPage>{ crumb.label }</BreadcrumbPage>
                           </BreadcrumbItem>
                         );
                         return index > 0
-                          ? [<BreadcrumbSeparator key={`sep-${crumb.id}`} />, item]
+                          ? [<BreadcrumbSeparator key={ `sep-${crumb.id}` } />, item]
                           : [item];
-                      })}
+                      }) }
                     </BreadcrumbList>
                   </Breadcrumb>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    {activeEvent.name} · {activeEvent.venueName}
+                    { activeEvent.name } · { activeEvent.venueName }
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
@@ -259,44 +259,44 @@ function AuthenticatedLayout() {
                     Event context
                     <select
                       className="h-10 min-w-72 rounded-md border border-input bg-background px-3 text-sm font-medium normal-case tracking-normal text-foreground"
-                      value={activeEvent.id}
-                      onChange={(event) => setActiveEventId(event.target.value)}
+                      value={ activeEvent.id }
+                      onChange={ (event) => setActiveEventId(event.target.value) }
                     >
-                      {mockEvents.map((event) => (
-                        <option key={event.id} value={event.id}>
-                          {event.name}
+                      { mockEvents.map((event) => (
+                        <option key={ event.id } value={ event.id }>
+                          { event.name }
                         </option>
-                      ))}
+                      )) }
                     </select>
                   </label>
-                  {import.meta.env.DEV ? (
+                  { import.meta.env.DEV ? (
                     <div className="flex flex-wrap gap-2 rounded-xl border border-dashed border-primary/40 bg-brand-tint px-3 py-2">
                       <select
                         aria-label="Demo persona"
                         className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                        value={persona.id}
-                        onChange={(event) => setSearchParam("as", event.target.value)}
+                        value={ persona.id }
+                        onChange={ (event) => setSearchParam("as", event.target.value) }
                       >
-                        {personaIds.map((id) => (
-                          <option key={id} value={id}>
-                            {id}
+                        { personaIds.map((id) => (
+                          <option key={ id } value={ id }>
+                            { id }
                           </option>
-                        ))}
+                        )) }
                       </select>
                       <select
                         aria-label="Demo state"
                         className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                        value={demo}
-                        onChange={(event) => setSearchParam("demo", event.target.value)}
+                        value={ demo }
+                        onChange={ (event) => setSearchParam("demo", event.target.value) }
                       >
-                        {demoStates.map((state) => (
-                          <option key={state} value={state}>
-                            {state}
+                        { demoStates.map((state) => (
+                          <option key={ state } value={ state }>
+                            { state }
                           </option>
-                        ))}
+                        )) }
                       </select>
                     </div>
-                  ) : null}
+                  ) : null }
                 </div>
               </div>
             </header>

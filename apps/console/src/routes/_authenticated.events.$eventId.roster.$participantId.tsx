@@ -32,7 +32,7 @@ function ParticipantRoute() {
   if (!participant) {
     return (
       <RosterPageShell
-        event={event}
+        event={ event }
         eyebrow="S-01"
         title="Participant not found"
         description="The roster participant ID is invalid or no longer exists."
@@ -51,12 +51,12 @@ function ParticipantRoute() {
 
   return (
     <RosterPageShell
-      event={event}
+      event={ event }
       eyebrow="O-12 detail"
-      title={participant.name}
+      title={ participant.name }
       description="Full-page participant correction view; the same content powers the roster drawer."
     >
-      <ParticipantDetailContent event={event} participant={participant} demo={search.demo} />
+      <ParticipantDetailContent event={ event } participant={ participant } demo={ search.demo } />
     </RosterPageShell>
   );
 }

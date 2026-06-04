@@ -53,7 +53,7 @@ function AdminOrganizersPage() {
         }
       />
       <DemoBoundary
-        demo={demo}
+        demo={ demo }
         emptyTitle="No organizers yet"
         emptyDescription="Create the first Coimbatore customer workspace, assign a support owner, then complete GST/payment setup."
       >
@@ -63,28 +63,28 @@ function AdminOrganizersPage() {
             value="18"
             status="ok"
             statusLabel="7 with live events"
-            icon={<span aria-hidden="true">org</span>}
+            icon={ <span aria-hidden="true">org</span> }
           />
           <KpiCard
             label="GST verified"
             value="12"
             status="ok"
             statusLabel="Verified"
-            icon={<span aria-hidden="true">safe</span>}
+            icon={ <span aria-hidden="true">safe</span> }
           />
           <KpiCard
             label="Need payment setup"
             value="4"
             status="warning"
             statusLabel="Action needed"
-            icon={<span aria-hidden="true">INR</span>}
+            icon={ <span aria-hidden="true">INR</span> }
           />
           <KpiCard
             label="Support overdue"
             value="3"
             status="error"
             statusLabel="Past SLA"
-            icon={<span aria-hidden="true">!</span>}
+            icon={ <span aria-hidden="true">!</span> }
           />
         </KpiGrid>
         <FilterBar placeholder="Search organizer, GSTIN, owner, city…">
@@ -97,7 +97,7 @@ function AdminOrganizersPage() {
         <div className="grid gap-6 xl:grid-cols-[1fr_24rem]">
           <MiniTable
             caption="Organizer customer management table"
-            headers={[
+            headers={ [
               "Organizer",
               "Legal entity",
               "GST / KYC",
@@ -106,24 +106,24 @@ function AdminOrganizersPage() {
               "Health",
               "Payment",
               "Actions",
-            ]}
-            rows={organizerRows.map((row) =>
+            ] }
+            rows={ organizerRows.map((row) =>
               cells(
                 <span>
-                  <strong className="block">{row.organizer.name}</strong>
+                  <strong className="block">{ row.organizer.name }</strong>
                   <span className="text-muted-foreground">
-                    {row.organizer.city} · {row.organizer.eventsCount} events
+                    { row.organizer.city } · { row.organizer.eventsCount } events
                   </span>
                 </span>,
                 row.organizer.legalName,
-                <StatusBadge status={statusKind(row.entity)} label={row.entity} />,
+                <StatusBadge status={ statusKind(row.entity) } label={ row.entity } />,
                 row.owner,
                 row.package,
-                <StatusBadge status={statusKind(row.health)} label={row.health} />,
-                <StatusBadge status={statusKind(row.payment)} label={row.payment} />,
+                <StatusBadge status={ statusKind(row.health) } label={ row.health } />,
+                <StatusBadge status={ statusKind(row.payment) } label={ row.payment } />,
                 <span className="flex gap-2">
                   <Button asChild size="sm">
-                    <a href={`/admin/impersonate?as=corral-admin&organizer=${row.organizer.id}`}>
+                    <a href={ `/admin/impersonate?as=corral-admin&organizer=${row.organizer.id}` }>
                       Act
                     </a>
                   </Button>
@@ -132,18 +132,18 @@ function AdminOrganizersPage() {
                   </Button>
                 </span>,
               ),
-            )}
+            ) }
           />
           <DetailCard
-            title={selected.organizer.name}
+            title={ selected.organizer.name }
             description="Entity & GST detail drawer preview"
           >
             <StatusBadge status="warning" label="GST review pending" />
             <p>
-              <strong>Legal entity:</strong> {selected.organizer.legalName}
+              <strong>Legal entity:</strong> { selected.organizer.legalName }
             </p>
             <p>
-              <strong>GSTIN:</strong> {selected.gst}
+              <strong>GSTIN:</strong> { selected.gst }
             </p>
             <p>
               <strong>Finance contact:</strong> Suresh B. · masked phone ending 5221
@@ -153,7 +153,7 @@ function AdminOrganizersPage() {
             </p>
             <AuditReasonBox label="Why are you changing organizer billing or access details?" />
             <Button asChild>
-              <a href={`/admin/impersonate?as=corral-admin&organizer=${selected.organizer.id}`}>
+              <a href={ `/admin/impersonate?as=corral-admin&organizer=${selected.organizer.id}` }>
                 Start act-on-behalf
               </a>
             </Button>
