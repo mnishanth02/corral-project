@@ -9,38 +9,432 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EventsEventIdIndexRouteImport } from './routes/events.$eventId.index'
+import { Route as MyRegistrationsRegistrationIdRouteImport } from './routes/my.registrations.$registrationId'
+import { Route as EventsEventIdRegisterRouteImport } from './routes/events.$eventId.register'
+import { Route as EventsEventIdRaceDayRouteImport } from './routes/events.$eventId.race-day'
+import { Route as EventsEventIdLeaderboardRouteImport } from './routes/events.$eventId.leaderboard'
+import { Route as EventsEventIdGroupRouteImport } from './routes/events.$eventId.group'
+import { Route as EventsEventIdDetailsRouteImport } from './routes/events.$eventId.details'
+import { Route as MyRegistrationsRegistrationIdIndexRouteImport } from './routes/my.registrations.$registrationId.index'
+import { Route as EventsEventIdGroupIndexRouteImport } from './routes/events.$eventId.group.index'
+import { Route as MyRegistrationsRegistrationIdResultRouteImport } from './routes/my.registrations.$registrationId.result'
+import { Route as MyRegistrationsRegistrationIdKitRouteImport } from './routes/my.registrations.$registrationId.kit'
+import { Route as MyRegistrationsRegistrationIdInsuranceRouteImport } from './routes/my.registrations.$registrationId.insurance'
+import { Route as MyRegistrationsRegistrationIdCertificateRouteImport } from './routes/my.registrations.$registrationId.certificate'
+import { Route as EventsEventIdRegisterWaiverRouteImport } from './routes/events.$eventId.register.waiver'
+import { Route as EventsEventIdRegisterSummaryRouteImport } from './routes/events.$eventId.register.summary'
+import { Route as EventsEventIdRegisterSuccessRouteImport } from './routes/events.$eventId.register.success'
+import { Route as EventsEventIdRegisterProcessingRouteImport } from './routes/events.$eventId.register.processing'
+import { Route as EventsEventIdRegisterPaymentRouteImport } from './routes/events.$eventId.register.payment'
+import { Route as EventsEventIdRegisterInsuranceRouteImport } from './routes/events.$eventId.register.insurance'
+import { Route as EventsEventIdRegisterGuardianRouteImport } from './routes/events.$eventId.register.guardian'
+import { Route as EventsEventIdRegisterFormRouteImport } from './routes/events.$eventId.register.form'
+import { Route as EventsEventIdRegisterFailedRouteImport } from './routes/events.$eventId.register.failed'
+import { Route as EventsEventIdRegisterCategoryRouteImport } from './routes/events.$eventId.register.category'
+import { Route as EventsEventIdPolicyWaiverRouteImport } from './routes/events.$eventId.policy.waiver'
+import { Route as EventsEventIdPolicyRefundRouteImport } from './routes/events.$eventId.policy.refund'
+import { Route as EventsEventIdGroupRosterRouteImport } from './routes/events.$eventId.group.roster'
+import { Route as EventsEventIdGroupPaymentRouteImport } from './routes/events.$eventId.group.payment'
 
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsEventIdIndexRoute = EventsEventIdIndexRouteImport.update({
+  id: '/events/$eventId/',
+  path: '/events/$eventId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyRegistrationsRegistrationIdRoute =
+  MyRegistrationsRegistrationIdRouteImport.update({
+    id: '/my/registrations/$registrationId',
+    path: '/my/registrations/$registrationId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EventsEventIdRegisterRoute = EventsEventIdRegisterRouteImport.update({
+  id: '/events/$eventId/register',
+  path: '/events/$eventId/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsEventIdRaceDayRoute = EventsEventIdRaceDayRouteImport.update({
+  id: '/events/$eventId/race-day',
+  path: '/events/$eventId/race-day',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsEventIdLeaderboardRoute =
+  EventsEventIdLeaderboardRouteImport.update({
+    id: '/events/$eventId/leaderboard',
+    path: '/events/$eventId/leaderboard',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EventsEventIdGroupRoute = EventsEventIdGroupRouteImport.update({
+  id: '/events/$eventId/group',
+  path: '/events/$eventId/group',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsEventIdDetailsRoute = EventsEventIdDetailsRouteImport.update({
+  id: '/events/$eventId/details',
+  path: '/events/$eventId/details',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyRegistrationsRegistrationIdIndexRoute =
+  MyRegistrationsRegistrationIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => MyRegistrationsRegistrationIdRoute,
+  } as any)
+const EventsEventIdGroupIndexRoute = EventsEventIdGroupIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EventsEventIdGroupRoute,
+} as any)
+const MyRegistrationsRegistrationIdResultRoute =
+  MyRegistrationsRegistrationIdResultRouteImport.update({
+    id: '/result',
+    path: '/result',
+    getParentRoute: () => MyRegistrationsRegistrationIdRoute,
+  } as any)
+const MyRegistrationsRegistrationIdKitRoute =
+  MyRegistrationsRegistrationIdKitRouteImport.update({
+    id: '/kit',
+    path: '/kit',
+    getParentRoute: () => MyRegistrationsRegistrationIdRoute,
+  } as any)
+const MyRegistrationsRegistrationIdInsuranceRoute =
+  MyRegistrationsRegistrationIdInsuranceRouteImport.update({
+    id: '/insurance',
+    path: '/insurance',
+    getParentRoute: () => MyRegistrationsRegistrationIdRoute,
+  } as any)
+const MyRegistrationsRegistrationIdCertificateRoute =
+  MyRegistrationsRegistrationIdCertificateRouteImport.update({
+    id: '/certificate',
+    path: '/certificate',
+    getParentRoute: () => MyRegistrationsRegistrationIdRoute,
+  } as any)
+const EventsEventIdRegisterWaiverRoute =
+  EventsEventIdRegisterWaiverRouteImport.update({
+    id: '/waiver',
+    path: '/waiver',
+    getParentRoute: () => EventsEventIdRegisterRoute,
+  } as any)
+const EventsEventIdRegisterSummaryRoute =
+  EventsEventIdRegisterSummaryRouteImport.update({
+    id: '/summary',
+    path: '/summary',
+    getParentRoute: () => EventsEventIdRegisterRoute,
+  } as any)
+const EventsEventIdRegisterSuccessRoute =
+  EventsEventIdRegisterSuccessRouteImport.update({
+    id: '/success',
+    path: '/success',
+    getParentRoute: () => EventsEventIdRegisterRoute,
+  } as any)
+const EventsEventIdRegisterProcessingRoute =
+  EventsEventIdRegisterProcessingRouteImport.update({
+    id: '/processing',
+    path: '/processing',
+    getParentRoute: () => EventsEventIdRegisterRoute,
+  } as any)
+const EventsEventIdRegisterPaymentRoute =
+  EventsEventIdRegisterPaymentRouteImport.update({
+    id: '/payment',
+    path: '/payment',
+    getParentRoute: () => EventsEventIdRegisterRoute,
+  } as any)
+const EventsEventIdRegisterInsuranceRoute =
+  EventsEventIdRegisterInsuranceRouteImport.update({
+    id: '/insurance',
+    path: '/insurance',
+    getParentRoute: () => EventsEventIdRegisterRoute,
+  } as any)
+const EventsEventIdRegisterGuardianRoute =
+  EventsEventIdRegisterGuardianRouteImport.update({
+    id: '/guardian',
+    path: '/guardian',
+    getParentRoute: () => EventsEventIdRegisterRoute,
+  } as any)
+const EventsEventIdRegisterFormRoute =
+  EventsEventIdRegisterFormRouteImport.update({
+    id: '/form',
+    path: '/form',
+    getParentRoute: () => EventsEventIdRegisterRoute,
+  } as any)
+const EventsEventIdRegisterFailedRoute =
+  EventsEventIdRegisterFailedRouteImport.update({
+    id: '/failed',
+    path: '/failed',
+    getParentRoute: () => EventsEventIdRegisterRoute,
+  } as any)
+const EventsEventIdRegisterCategoryRoute =
+  EventsEventIdRegisterCategoryRouteImport.update({
+    id: '/category',
+    path: '/category',
+    getParentRoute: () => EventsEventIdRegisterRoute,
+  } as any)
+const EventsEventIdPolicyWaiverRoute =
+  EventsEventIdPolicyWaiverRouteImport.update({
+    id: '/events/$eventId/policy/waiver',
+    path: '/events/$eventId/policy/waiver',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EventsEventIdPolicyRefundRoute =
+  EventsEventIdPolicyRefundRouteImport.update({
+    id: '/events/$eventId/policy/refund',
+    path: '/events/$eventId/policy/refund',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EventsEventIdGroupRosterRoute =
+  EventsEventIdGroupRosterRouteImport.update({
+    id: '/roster',
+    path: '/roster',
+    getParentRoute: () => EventsEventIdGroupRoute,
+  } as any)
+const EventsEventIdGroupPaymentRoute =
+  EventsEventIdGroupPaymentRouteImport.update({
+    id: '/payment',
+    path: '/payment',
+    getParentRoute: () => EventsEventIdGroupRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/calendar': typeof CalendarRoute
+  '/privacy': typeof PrivacyRoute
+  '/events/$eventId/details': typeof EventsEventIdDetailsRoute
+  '/events/$eventId/group': typeof EventsEventIdGroupRouteWithChildren
+  '/events/$eventId/leaderboard': typeof EventsEventIdLeaderboardRoute
+  '/events/$eventId/race-day': typeof EventsEventIdRaceDayRoute
+  '/events/$eventId/register': typeof EventsEventIdRegisterRouteWithChildren
+  '/my/registrations/$registrationId': typeof MyRegistrationsRegistrationIdRouteWithChildren
+  '/events/$eventId/': typeof EventsEventIdIndexRoute
+  '/events/$eventId/group/payment': typeof EventsEventIdGroupPaymentRoute
+  '/events/$eventId/group/roster': typeof EventsEventIdGroupRosterRoute
+  '/events/$eventId/policy/refund': typeof EventsEventIdPolicyRefundRoute
+  '/events/$eventId/policy/waiver': typeof EventsEventIdPolicyWaiverRoute
+  '/events/$eventId/register/category': typeof EventsEventIdRegisterCategoryRoute
+  '/events/$eventId/register/failed': typeof EventsEventIdRegisterFailedRoute
+  '/events/$eventId/register/form': typeof EventsEventIdRegisterFormRoute
+  '/events/$eventId/register/guardian': typeof EventsEventIdRegisterGuardianRoute
+  '/events/$eventId/register/insurance': typeof EventsEventIdRegisterInsuranceRoute
+  '/events/$eventId/register/payment': typeof EventsEventIdRegisterPaymentRoute
+  '/events/$eventId/register/processing': typeof EventsEventIdRegisterProcessingRoute
+  '/events/$eventId/register/success': typeof EventsEventIdRegisterSuccessRoute
+  '/events/$eventId/register/summary': typeof EventsEventIdRegisterSummaryRoute
+  '/events/$eventId/register/waiver': typeof EventsEventIdRegisterWaiverRoute
+  '/my/registrations/$registrationId/certificate': typeof MyRegistrationsRegistrationIdCertificateRoute
+  '/my/registrations/$registrationId/insurance': typeof MyRegistrationsRegistrationIdInsuranceRoute
+  '/my/registrations/$registrationId/kit': typeof MyRegistrationsRegistrationIdKitRoute
+  '/my/registrations/$registrationId/result': typeof MyRegistrationsRegistrationIdResultRoute
+  '/events/$eventId/group/': typeof EventsEventIdGroupIndexRoute
+  '/my/registrations/$registrationId/': typeof MyRegistrationsRegistrationIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/calendar': typeof CalendarRoute
+  '/privacy': typeof PrivacyRoute
+  '/events/$eventId/details': typeof EventsEventIdDetailsRoute
+  '/events/$eventId/leaderboard': typeof EventsEventIdLeaderboardRoute
+  '/events/$eventId/race-day': typeof EventsEventIdRaceDayRoute
+  '/events/$eventId/register': typeof EventsEventIdRegisterRouteWithChildren
+  '/events/$eventId': typeof EventsEventIdIndexRoute
+  '/events/$eventId/group/payment': typeof EventsEventIdGroupPaymentRoute
+  '/events/$eventId/group/roster': typeof EventsEventIdGroupRosterRoute
+  '/events/$eventId/policy/refund': typeof EventsEventIdPolicyRefundRoute
+  '/events/$eventId/policy/waiver': typeof EventsEventIdPolicyWaiverRoute
+  '/events/$eventId/register/category': typeof EventsEventIdRegisterCategoryRoute
+  '/events/$eventId/register/failed': typeof EventsEventIdRegisterFailedRoute
+  '/events/$eventId/register/form': typeof EventsEventIdRegisterFormRoute
+  '/events/$eventId/register/guardian': typeof EventsEventIdRegisterGuardianRoute
+  '/events/$eventId/register/insurance': typeof EventsEventIdRegisterInsuranceRoute
+  '/events/$eventId/register/payment': typeof EventsEventIdRegisterPaymentRoute
+  '/events/$eventId/register/processing': typeof EventsEventIdRegisterProcessingRoute
+  '/events/$eventId/register/success': typeof EventsEventIdRegisterSuccessRoute
+  '/events/$eventId/register/summary': typeof EventsEventIdRegisterSummaryRoute
+  '/events/$eventId/register/waiver': typeof EventsEventIdRegisterWaiverRoute
+  '/my/registrations/$registrationId/certificate': typeof MyRegistrationsRegistrationIdCertificateRoute
+  '/my/registrations/$registrationId/insurance': typeof MyRegistrationsRegistrationIdInsuranceRoute
+  '/my/registrations/$registrationId/kit': typeof MyRegistrationsRegistrationIdKitRoute
+  '/my/registrations/$registrationId/result': typeof MyRegistrationsRegistrationIdResultRoute
+  '/events/$eventId/group': typeof EventsEventIdGroupIndexRoute
+  '/my/registrations/$registrationId': typeof MyRegistrationsRegistrationIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/calendar': typeof CalendarRoute
+  '/privacy': typeof PrivacyRoute
+  '/events/$eventId/details': typeof EventsEventIdDetailsRoute
+  '/events/$eventId/group': typeof EventsEventIdGroupRouteWithChildren
+  '/events/$eventId/leaderboard': typeof EventsEventIdLeaderboardRoute
+  '/events/$eventId/race-day': typeof EventsEventIdRaceDayRoute
+  '/events/$eventId/register': typeof EventsEventIdRegisterRouteWithChildren
+  '/my/registrations/$registrationId': typeof MyRegistrationsRegistrationIdRouteWithChildren
+  '/events/$eventId/': typeof EventsEventIdIndexRoute
+  '/events/$eventId/group/payment': typeof EventsEventIdGroupPaymentRoute
+  '/events/$eventId/group/roster': typeof EventsEventIdGroupRosterRoute
+  '/events/$eventId/policy/refund': typeof EventsEventIdPolicyRefundRoute
+  '/events/$eventId/policy/waiver': typeof EventsEventIdPolicyWaiverRoute
+  '/events/$eventId/register/category': typeof EventsEventIdRegisterCategoryRoute
+  '/events/$eventId/register/failed': typeof EventsEventIdRegisterFailedRoute
+  '/events/$eventId/register/form': typeof EventsEventIdRegisterFormRoute
+  '/events/$eventId/register/guardian': typeof EventsEventIdRegisterGuardianRoute
+  '/events/$eventId/register/insurance': typeof EventsEventIdRegisterInsuranceRoute
+  '/events/$eventId/register/payment': typeof EventsEventIdRegisterPaymentRoute
+  '/events/$eventId/register/processing': typeof EventsEventIdRegisterProcessingRoute
+  '/events/$eventId/register/success': typeof EventsEventIdRegisterSuccessRoute
+  '/events/$eventId/register/summary': typeof EventsEventIdRegisterSummaryRoute
+  '/events/$eventId/register/waiver': typeof EventsEventIdRegisterWaiverRoute
+  '/my/registrations/$registrationId/certificate': typeof MyRegistrationsRegistrationIdCertificateRoute
+  '/my/registrations/$registrationId/insurance': typeof MyRegistrationsRegistrationIdInsuranceRoute
+  '/my/registrations/$registrationId/kit': typeof MyRegistrationsRegistrationIdKitRoute
+  '/my/registrations/$registrationId/result': typeof MyRegistrationsRegistrationIdResultRoute
+  '/events/$eventId/group/': typeof EventsEventIdGroupIndexRoute
+  '/my/registrations/$registrationId/': typeof MyRegistrationsRegistrationIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/calendar'
+    | '/privacy'
+    | '/events/$eventId/details'
+    | '/events/$eventId/group'
+    | '/events/$eventId/leaderboard'
+    | '/events/$eventId/race-day'
+    | '/events/$eventId/register'
+    | '/my/registrations/$registrationId'
+    | '/events/$eventId/'
+    | '/events/$eventId/group/payment'
+    | '/events/$eventId/group/roster'
+    | '/events/$eventId/policy/refund'
+    | '/events/$eventId/policy/waiver'
+    | '/events/$eventId/register/category'
+    | '/events/$eventId/register/failed'
+    | '/events/$eventId/register/form'
+    | '/events/$eventId/register/guardian'
+    | '/events/$eventId/register/insurance'
+    | '/events/$eventId/register/payment'
+    | '/events/$eventId/register/processing'
+    | '/events/$eventId/register/success'
+    | '/events/$eventId/register/summary'
+    | '/events/$eventId/register/waiver'
+    | '/my/registrations/$registrationId/certificate'
+    | '/my/registrations/$registrationId/insurance'
+    | '/my/registrations/$registrationId/kit'
+    | '/my/registrations/$registrationId/result'
+    | '/events/$eventId/group/'
+    | '/my/registrations/$registrationId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/calendar'
+    | '/privacy'
+    | '/events/$eventId/details'
+    | '/events/$eventId/leaderboard'
+    | '/events/$eventId/race-day'
+    | '/events/$eventId/register'
+    | '/events/$eventId'
+    | '/events/$eventId/group/payment'
+    | '/events/$eventId/group/roster'
+    | '/events/$eventId/policy/refund'
+    | '/events/$eventId/policy/waiver'
+    | '/events/$eventId/register/category'
+    | '/events/$eventId/register/failed'
+    | '/events/$eventId/register/form'
+    | '/events/$eventId/register/guardian'
+    | '/events/$eventId/register/insurance'
+    | '/events/$eventId/register/payment'
+    | '/events/$eventId/register/processing'
+    | '/events/$eventId/register/success'
+    | '/events/$eventId/register/summary'
+    | '/events/$eventId/register/waiver'
+    | '/my/registrations/$registrationId/certificate'
+    | '/my/registrations/$registrationId/insurance'
+    | '/my/registrations/$registrationId/kit'
+    | '/my/registrations/$registrationId/result'
+    | '/events/$eventId/group'
+    | '/my/registrations/$registrationId'
+  id:
+    | '__root__'
+    | '/'
+    | '/calendar'
+    | '/privacy'
+    | '/events/$eventId/details'
+    | '/events/$eventId/group'
+    | '/events/$eventId/leaderboard'
+    | '/events/$eventId/race-day'
+    | '/events/$eventId/register'
+    | '/my/registrations/$registrationId'
+    | '/events/$eventId/'
+    | '/events/$eventId/group/payment'
+    | '/events/$eventId/group/roster'
+    | '/events/$eventId/policy/refund'
+    | '/events/$eventId/policy/waiver'
+    | '/events/$eventId/register/category'
+    | '/events/$eventId/register/failed'
+    | '/events/$eventId/register/form'
+    | '/events/$eventId/register/guardian'
+    | '/events/$eventId/register/insurance'
+    | '/events/$eventId/register/payment'
+    | '/events/$eventId/register/processing'
+    | '/events/$eventId/register/success'
+    | '/events/$eventId/register/summary'
+    | '/events/$eventId/register/waiver'
+    | '/my/registrations/$registrationId/certificate'
+    | '/my/registrations/$registrationId/insurance'
+    | '/my/registrations/$registrationId/kit'
+    | '/my/registrations/$registrationId/result'
+    | '/events/$eventId/group/'
+    | '/my/registrations/$registrationId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CalendarRoute: typeof CalendarRoute
+  PrivacyRoute: typeof PrivacyRoute
+  EventsEventIdDetailsRoute: typeof EventsEventIdDetailsRoute
+  EventsEventIdGroupRoute: typeof EventsEventIdGroupRouteWithChildren
+  EventsEventIdLeaderboardRoute: typeof EventsEventIdLeaderboardRoute
+  EventsEventIdRaceDayRoute: typeof EventsEventIdRaceDayRoute
+  EventsEventIdRegisterRoute: typeof EventsEventIdRegisterRouteWithChildren
+  MyRegistrationsRegistrationIdRoute: typeof MyRegistrationsRegistrationIdRouteWithChildren
+  EventsEventIdIndexRoute: typeof EventsEventIdIndexRoute
+  EventsEventIdPolicyRefundRoute: typeof EventsEventIdPolicyRefundRoute
+  EventsEventIdPolicyWaiverRoute: typeof EventsEventIdPolicyWaiverRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +442,285 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/$eventId/': {
+      id: '/events/$eventId/'
+      path: '/events/$eventId'
+      fullPath: '/events/$eventId/'
+      preLoaderRoute: typeof EventsEventIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my/registrations/$registrationId': {
+      id: '/my/registrations/$registrationId'
+      path: '/my/registrations/$registrationId'
+      fullPath: '/my/registrations/$registrationId'
+      preLoaderRoute: typeof MyRegistrationsRegistrationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$eventId/register': {
+      id: '/events/$eventId/register'
+      path: '/events/$eventId/register'
+      fullPath: '/events/$eventId/register'
+      preLoaderRoute: typeof EventsEventIdRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$eventId/race-day': {
+      id: '/events/$eventId/race-day'
+      path: '/events/$eventId/race-day'
+      fullPath: '/events/$eventId/race-day'
+      preLoaderRoute: typeof EventsEventIdRaceDayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$eventId/leaderboard': {
+      id: '/events/$eventId/leaderboard'
+      path: '/events/$eventId/leaderboard'
+      fullPath: '/events/$eventId/leaderboard'
+      preLoaderRoute: typeof EventsEventIdLeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$eventId/group': {
+      id: '/events/$eventId/group'
+      path: '/events/$eventId/group'
+      fullPath: '/events/$eventId/group'
+      preLoaderRoute: typeof EventsEventIdGroupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$eventId/details': {
+      id: '/events/$eventId/details'
+      path: '/events/$eventId/details'
+      fullPath: '/events/$eventId/details'
+      preLoaderRoute: typeof EventsEventIdDetailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my/registrations/$registrationId/': {
+      id: '/my/registrations/$registrationId/'
+      path: '/'
+      fullPath: '/my/registrations/$registrationId/'
+      preLoaderRoute: typeof MyRegistrationsRegistrationIdIndexRouteImport
+      parentRoute: typeof MyRegistrationsRegistrationIdRoute
+    }
+    '/events/$eventId/group/': {
+      id: '/events/$eventId/group/'
+      path: '/'
+      fullPath: '/events/$eventId/group/'
+      preLoaderRoute: typeof EventsEventIdGroupIndexRouteImport
+      parentRoute: typeof EventsEventIdGroupRoute
+    }
+    '/my/registrations/$registrationId/result': {
+      id: '/my/registrations/$registrationId/result'
+      path: '/result'
+      fullPath: '/my/registrations/$registrationId/result'
+      preLoaderRoute: typeof MyRegistrationsRegistrationIdResultRouteImport
+      parentRoute: typeof MyRegistrationsRegistrationIdRoute
+    }
+    '/my/registrations/$registrationId/kit': {
+      id: '/my/registrations/$registrationId/kit'
+      path: '/kit'
+      fullPath: '/my/registrations/$registrationId/kit'
+      preLoaderRoute: typeof MyRegistrationsRegistrationIdKitRouteImport
+      parentRoute: typeof MyRegistrationsRegistrationIdRoute
+    }
+    '/my/registrations/$registrationId/insurance': {
+      id: '/my/registrations/$registrationId/insurance'
+      path: '/insurance'
+      fullPath: '/my/registrations/$registrationId/insurance'
+      preLoaderRoute: typeof MyRegistrationsRegistrationIdInsuranceRouteImport
+      parentRoute: typeof MyRegistrationsRegistrationIdRoute
+    }
+    '/my/registrations/$registrationId/certificate': {
+      id: '/my/registrations/$registrationId/certificate'
+      path: '/certificate'
+      fullPath: '/my/registrations/$registrationId/certificate'
+      preLoaderRoute: typeof MyRegistrationsRegistrationIdCertificateRouteImport
+      parentRoute: typeof MyRegistrationsRegistrationIdRoute
+    }
+    '/events/$eventId/register/waiver': {
+      id: '/events/$eventId/register/waiver'
+      path: '/waiver'
+      fullPath: '/events/$eventId/register/waiver'
+      preLoaderRoute: typeof EventsEventIdRegisterWaiverRouteImport
+      parentRoute: typeof EventsEventIdRegisterRoute
+    }
+    '/events/$eventId/register/summary': {
+      id: '/events/$eventId/register/summary'
+      path: '/summary'
+      fullPath: '/events/$eventId/register/summary'
+      preLoaderRoute: typeof EventsEventIdRegisterSummaryRouteImport
+      parentRoute: typeof EventsEventIdRegisterRoute
+    }
+    '/events/$eventId/register/success': {
+      id: '/events/$eventId/register/success'
+      path: '/success'
+      fullPath: '/events/$eventId/register/success'
+      preLoaderRoute: typeof EventsEventIdRegisterSuccessRouteImport
+      parentRoute: typeof EventsEventIdRegisterRoute
+    }
+    '/events/$eventId/register/processing': {
+      id: '/events/$eventId/register/processing'
+      path: '/processing'
+      fullPath: '/events/$eventId/register/processing'
+      preLoaderRoute: typeof EventsEventIdRegisterProcessingRouteImport
+      parentRoute: typeof EventsEventIdRegisterRoute
+    }
+    '/events/$eventId/register/payment': {
+      id: '/events/$eventId/register/payment'
+      path: '/payment'
+      fullPath: '/events/$eventId/register/payment'
+      preLoaderRoute: typeof EventsEventIdRegisterPaymentRouteImport
+      parentRoute: typeof EventsEventIdRegisterRoute
+    }
+    '/events/$eventId/register/insurance': {
+      id: '/events/$eventId/register/insurance'
+      path: '/insurance'
+      fullPath: '/events/$eventId/register/insurance'
+      preLoaderRoute: typeof EventsEventIdRegisterInsuranceRouteImport
+      parentRoute: typeof EventsEventIdRegisterRoute
+    }
+    '/events/$eventId/register/guardian': {
+      id: '/events/$eventId/register/guardian'
+      path: '/guardian'
+      fullPath: '/events/$eventId/register/guardian'
+      preLoaderRoute: typeof EventsEventIdRegisterGuardianRouteImport
+      parentRoute: typeof EventsEventIdRegisterRoute
+    }
+    '/events/$eventId/register/form': {
+      id: '/events/$eventId/register/form'
+      path: '/form'
+      fullPath: '/events/$eventId/register/form'
+      preLoaderRoute: typeof EventsEventIdRegisterFormRouteImport
+      parentRoute: typeof EventsEventIdRegisterRoute
+    }
+    '/events/$eventId/register/failed': {
+      id: '/events/$eventId/register/failed'
+      path: '/failed'
+      fullPath: '/events/$eventId/register/failed'
+      preLoaderRoute: typeof EventsEventIdRegisterFailedRouteImport
+      parentRoute: typeof EventsEventIdRegisterRoute
+    }
+    '/events/$eventId/register/category': {
+      id: '/events/$eventId/register/category'
+      path: '/category'
+      fullPath: '/events/$eventId/register/category'
+      preLoaderRoute: typeof EventsEventIdRegisterCategoryRouteImport
+      parentRoute: typeof EventsEventIdRegisterRoute
+    }
+    '/events/$eventId/policy/waiver': {
+      id: '/events/$eventId/policy/waiver'
+      path: '/events/$eventId/policy/waiver'
+      fullPath: '/events/$eventId/policy/waiver'
+      preLoaderRoute: typeof EventsEventIdPolicyWaiverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$eventId/policy/refund': {
+      id: '/events/$eventId/policy/refund'
+      path: '/events/$eventId/policy/refund'
+      fullPath: '/events/$eventId/policy/refund'
+      preLoaderRoute: typeof EventsEventIdPolicyRefundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$eventId/group/roster': {
+      id: '/events/$eventId/group/roster'
+      path: '/roster'
+      fullPath: '/events/$eventId/group/roster'
+      preLoaderRoute: typeof EventsEventIdGroupRosterRouteImport
+      parentRoute: typeof EventsEventIdGroupRoute
+    }
+    '/events/$eventId/group/payment': {
+      id: '/events/$eventId/group/payment'
+      path: '/payment'
+      fullPath: '/events/$eventId/group/payment'
+      preLoaderRoute: typeof EventsEventIdGroupPaymentRouteImport
+      parentRoute: typeof EventsEventIdGroupRoute
+    }
   }
 }
 
+interface EventsEventIdGroupRouteChildren {
+  EventsEventIdGroupPaymentRoute: typeof EventsEventIdGroupPaymentRoute
+  EventsEventIdGroupRosterRoute: typeof EventsEventIdGroupRosterRoute
+  EventsEventIdGroupIndexRoute: typeof EventsEventIdGroupIndexRoute
+}
+
+const EventsEventIdGroupRouteChildren: EventsEventIdGroupRouteChildren = {
+  EventsEventIdGroupPaymentRoute: EventsEventIdGroupPaymentRoute,
+  EventsEventIdGroupRosterRoute: EventsEventIdGroupRosterRoute,
+  EventsEventIdGroupIndexRoute: EventsEventIdGroupIndexRoute,
+}
+
+const EventsEventIdGroupRouteWithChildren =
+  EventsEventIdGroupRoute._addFileChildren(EventsEventIdGroupRouteChildren)
+
+interface EventsEventIdRegisterRouteChildren {
+  EventsEventIdRegisterCategoryRoute: typeof EventsEventIdRegisterCategoryRoute
+  EventsEventIdRegisterFailedRoute: typeof EventsEventIdRegisterFailedRoute
+  EventsEventIdRegisterFormRoute: typeof EventsEventIdRegisterFormRoute
+  EventsEventIdRegisterGuardianRoute: typeof EventsEventIdRegisterGuardianRoute
+  EventsEventIdRegisterInsuranceRoute: typeof EventsEventIdRegisterInsuranceRoute
+  EventsEventIdRegisterPaymentRoute: typeof EventsEventIdRegisterPaymentRoute
+  EventsEventIdRegisterProcessingRoute: typeof EventsEventIdRegisterProcessingRoute
+  EventsEventIdRegisterSuccessRoute: typeof EventsEventIdRegisterSuccessRoute
+  EventsEventIdRegisterSummaryRoute: typeof EventsEventIdRegisterSummaryRoute
+  EventsEventIdRegisterWaiverRoute: typeof EventsEventIdRegisterWaiverRoute
+}
+
+const EventsEventIdRegisterRouteChildren: EventsEventIdRegisterRouteChildren = {
+  EventsEventIdRegisterCategoryRoute: EventsEventIdRegisterCategoryRoute,
+  EventsEventIdRegisterFailedRoute: EventsEventIdRegisterFailedRoute,
+  EventsEventIdRegisterFormRoute: EventsEventIdRegisterFormRoute,
+  EventsEventIdRegisterGuardianRoute: EventsEventIdRegisterGuardianRoute,
+  EventsEventIdRegisterInsuranceRoute: EventsEventIdRegisterInsuranceRoute,
+  EventsEventIdRegisterPaymentRoute: EventsEventIdRegisterPaymentRoute,
+  EventsEventIdRegisterProcessingRoute: EventsEventIdRegisterProcessingRoute,
+  EventsEventIdRegisterSuccessRoute: EventsEventIdRegisterSuccessRoute,
+  EventsEventIdRegisterSummaryRoute: EventsEventIdRegisterSummaryRoute,
+  EventsEventIdRegisterWaiverRoute: EventsEventIdRegisterWaiverRoute,
+}
+
+const EventsEventIdRegisterRouteWithChildren =
+  EventsEventIdRegisterRoute._addFileChildren(
+    EventsEventIdRegisterRouteChildren,
+  )
+
+interface MyRegistrationsRegistrationIdRouteChildren {
+  MyRegistrationsRegistrationIdCertificateRoute: typeof MyRegistrationsRegistrationIdCertificateRoute
+  MyRegistrationsRegistrationIdInsuranceRoute: typeof MyRegistrationsRegistrationIdInsuranceRoute
+  MyRegistrationsRegistrationIdKitRoute: typeof MyRegistrationsRegistrationIdKitRoute
+  MyRegistrationsRegistrationIdResultRoute: typeof MyRegistrationsRegistrationIdResultRoute
+  MyRegistrationsRegistrationIdIndexRoute: typeof MyRegistrationsRegistrationIdIndexRoute
+}
+
+const MyRegistrationsRegistrationIdRouteChildren: MyRegistrationsRegistrationIdRouteChildren =
+  {
+    MyRegistrationsRegistrationIdCertificateRoute:
+      MyRegistrationsRegistrationIdCertificateRoute,
+    MyRegistrationsRegistrationIdInsuranceRoute:
+      MyRegistrationsRegistrationIdInsuranceRoute,
+    MyRegistrationsRegistrationIdKitRoute:
+      MyRegistrationsRegistrationIdKitRoute,
+    MyRegistrationsRegistrationIdResultRoute:
+      MyRegistrationsRegistrationIdResultRoute,
+    MyRegistrationsRegistrationIdIndexRoute:
+      MyRegistrationsRegistrationIdIndexRoute,
+  }
+
+const MyRegistrationsRegistrationIdRouteWithChildren =
+  MyRegistrationsRegistrationIdRoute._addFileChildren(
+    MyRegistrationsRegistrationIdRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CalendarRoute: CalendarRoute,
+  PrivacyRoute: PrivacyRoute,
+  EventsEventIdDetailsRoute: EventsEventIdDetailsRoute,
+  EventsEventIdGroupRoute: EventsEventIdGroupRouteWithChildren,
+  EventsEventIdLeaderboardRoute: EventsEventIdLeaderboardRoute,
+  EventsEventIdRaceDayRoute: EventsEventIdRaceDayRoute,
+  EventsEventIdRegisterRoute: EventsEventIdRegisterRouteWithChildren,
+  MyRegistrationsRegistrationIdRoute:
+    MyRegistrationsRegistrationIdRouteWithChildren,
+  EventsEventIdIndexRoute: EventsEventIdIndexRoute,
+  EventsEventIdPolicyRefundRoute: EventsEventIdPolicyRefundRoute,
+  EventsEventIdPolicyWaiverRoute: EventsEventIdPolicyWaiverRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

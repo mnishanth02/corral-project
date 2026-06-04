@@ -1,139 +1,111 @@
-import type { HealthResponse } from "@corral/schema";
 import { Button } from "@corral/ui/components/button";
-import { StatusBadge } from "@corral/ui/components/status-badge";
-import { useQuery } from "@tanstack/react-query";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@corral/ui/components/card";
+import { useMemo } from "react";
 
-import { apiClient } from "../lib/api";
+import { useStickyCta } from "../components/sticky-cta";
+import { featuredEvent } from "../mocks/events";
+import { formatDate, formatINR } from "../mocks/utils";
 
-type StatusKind = "ok" | "error" | "warning";
+function activePriceLabel() {
+  const activeTier = featuredEvent.categories
+    .flatMap((category) => category.feeTiers)
+    .find((tier) => tier.active);
 
-function useHealth() {
-  return useQuery({
-    queryKey: ["health"],
-    queryFn: async () => {
-      const res = await apiClient.check();
-      if (res.status !== 200 && res.status !== 503) {
-        throw new Error("unexpected");
-      }
-      return res.body;
-    },
-    refetchInterval: 10000,
-  });
-}
-
-function formatUptime(seconds?: number) {
-  if (seconds === undefined) {
-    return "Waiting for telemetry";
-  }
-
-  if (seconds < 60) {
-    return `${Math.round(seconds)}s online`;
-  }
-
-  const minutes = Math.floor(seconds / 60);
-  return `${minutes}m online`;
-}
-
-function apiStatus(
-  data: HealthResponse | undefined,
-  isLoading: boolean,
-  isError: boolean,
-): StatusKind {
-  if (isLoading) {
-    return "warning";
-  }
-
-  return data && !isError ? "ok" : "error";
-}
-
-function apiLabel(data: HealthResponse | undefined, isLoading: boolean, isError: boolean) {
-  if (isLoading) {
-    return "API: Checking";
-  }
-
-  return data && !isError ? "API: OK" : "API: Down";
-}
-
-export function SystemStatusCard() {
-  const { data, isLoading, isError } = useHealth();
-
-  return (
-    <section
-      aria-labelledby="system-status-heading"
-      className="rounded-[2rem] border border-border/80 bg-card/95 p-6 text-card-foreground shadow-2xl shadow-slate-950/10 backdrop-blur md:p-8"
-    >
-      <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.35em] text-primary">
-            Live telemetry
-          </p>
-          <h2 id="system-status-heading" className="mt-2 font-display text-3xl font-bold uppercase">
-            System status
-          </h2>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-            Corral checks the API, database, and Redis cache every 10 seconds so race teams can spot
-            service drift before it reaches participants.
-          </p>
-        </div>
-        <div className="rounded-2xl border border-border bg-background px-4 py-3 text-sm text-muted-foreground">
-          <span className="block font-mono text-xs uppercase tracking-[0.22em]">Version</span>
-          <strong className="text-foreground">{data?.version ?? "pending"}</strong>
-        </div>
-      </div>
-
-      <div className="mt-7 flex flex-wrap gap-3">
-        <StatusBadge
-          status={apiStatus(data, isLoading, isError)}
-          label={apiLabel(data, isLoading, isError)}
-        />
-        <StatusBadge status={data?.db ? "ok" : "error"} label={data?.db ? "DB: OK" : "DB: Down"} />
-        <StatusBadge
-          status={data?.redis ? "ok" : "error"}
-          label={data?.redis ? "Redis: OK" : "Redis: Down"}
-        />
-      </div>
-
-      <dl className="mt-8 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl bg-secondary p-4">
-          <dt className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Overall</dt>
-          <dd className="mt-2 text-lg font-semibold capitalize">{data?.status ?? "checking"}</dd>
-        </div>
-        <div className="rounded-2xl bg-secondary p-4">
-          <dt className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Uptime</dt>
-          <dd className="mt-2 text-lg font-semibold">{formatUptime(data?.uptime)}</dd>
-        </div>
-        <div className="rounded-2xl bg-secondary p-4">
-          <dt className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Timestamp</dt>
-          <dd className="mt-2 truncate font-mono text-sm">{data?.timestamp ?? "—"}</dd>
-        </div>
-      </dl>
-    </section>
-  );
+  return activeTier ? formatINR(activeTier.amount) : "Fees opening soon";
 }
 
 export function IndexPage() {
+  const primaryCta = useMemo(
+    () => (
+      <Button asChild className="h-12 w-full rounded-2xl text-base shadow-lg shadow-orange-500/25">
+        <a href={`/events/${featuredEvent.slug}`}>Register for {featuredEvent.title}</a>
+      </Button>
+    ),
+    [],
+  );
+
+  useStickyCta(primaryCta);
+
   return (
-    <main className="min-h-screen overflow-hidden bg-background text-foreground">
-      <div className="absolute inset-x-0 top-0 -z-10 h-96 bg-[radial-gradient(circle_at_top_left,var(--brand-tint),transparent_36rem),linear-gradient(135deg,rgba(255,90,0,0.16),transparent_28rem)]" />
-      <section className="mx-auto grid min-h-screen w-full max-w-7xl items-center gap-10 px-6 py-12 lg:grid-cols-[1.05fr_0.95fr] lg:px-10">
-        <div className="relative">
-          <div className="mb-8 inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.32em] text-primary">
-            Corral participant portal
-          </div>
-          <h1 className="font-display text-6xl font-black uppercase leading-[0.9] tracking-tight text-brand-navy md:text-8xl">
-            Every start line, calmly in sync.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-            A public race experience for signups, wave updates, and day-of confidence — grounded in
-            Corral's orange signal system and always-readable service telemetry.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button>Find my race</Button>
-            <Button variant="outline">View wave guide</Button>
+    <section className="space-y-5 py-3">
+      <div className="overflow-hidden rounded-[2rem] border border-orange-100 bg-white shadow-2xl shadow-slate-950/10">
+        <div className="relative min-h-[25rem] p-6">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(255,90,0,0.24),transparent_14rem),linear-gradient(150deg,#fff7ed,#ffffff_48%,#e0f2fe)]" />
+          <div className="absolute right-[-4rem] bottom-[-5rem] size-52 rounded-full border-[2rem] border-orange-500/10" />
+          <div className="relative flex h-full flex-col justify-between gap-10">
+            <div>
+              <p className="inline-flex rounded-full border border-orange-200 bg-white/80 px-3 py-1 font-bold text-[0.68rem] uppercase tracking-[0.24em] text-brand-orange-strong">
+                Participant app shell
+              </p>
+              <h1 className="mt-5 font-display font-black text-5xl leading-[0.9] tracking-[-0.06em] text-brand-navy">
+                Race day starts here.
+              </h1>
+              <p className="mt-4 text-base leading-7 text-muted-foreground">
+                Browse Coimbatore events, register without a backend, and keep every ticket, kit,
+                result, and certificate in one mobile-first Corral journey.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Button asChild variant="outline" className="h-11 rounded-2xl bg-white/80">
+                <a href="/calendar">Calendar</a>
+              </Button>
+              <Button asChild className="h-11 rounded-2xl">
+                <a href={`/events/${featuredEvent.slug}`}>Demo event</a>
+              </Button>
+            </div>
           </div>
         </div>
-        <SystemStatusCard />
-      </section>
-    </main>
+      </div>
+
+      <Card className="gap-4 rounded-[2rem] border-orange-100 shadow-lg shadow-slate-950/5">
+        <CardHeader>
+          <CardTitle className="font-display text-2xl tracking-[-0.04em] text-brand-navy">
+            {featuredEvent.title}
+          </CardTitle>
+          <CardDescription>
+            {formatDate(featuredEvent.startsAt)} · {featuredEvent.venue.name}, {featuredEvent.city}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm leading-6 text-muted-foreground">{featuredEvent.summary}</p>
+          <dl className="grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-2xl bg-secondary p-3">
+              <dt className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
+                From
+              </dt>
+              <dd className="mt-1 font-bold text-brand-navy">{activePriceLabel()}</dd>
+            </div>
+            <div className="rounded-2xl bg-secondary p-3">
+              <dt className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
+                Runs
+              </dt>
+              <dd className="mt-1 font-bold text-brand-navy">5K–21K</dd>
+            </div>
+            <div className="rounded-2xl bg-secondary p-3">
+              <dt className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
+                City
+              </dt>
+              <dd className="mt-1 font-bold text-brand-navy">Coimbatore</dd>
+            </div>
+          </dl>
+        </CardContent>
+      </Card>
+
+      <div className="rounded-[2rem] border border-dashed border-orange-200 bg-orange-50/70 p-5">
+        <p className="font-bold text-sm uppercase tracking-[0.2em] text-brand-orange-strong">
+          For screen agents
+        </p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          This shell now owns the top navigation, demo state switcher, error/404 surfaces, and the
+          shared sticky CTA slot. Individual P-routes can focus on their own mock-driven screens.
+        </p>
+      </div>
+    </section>
   );
 }

@@ -39,6 +39,24 @@ backend integration is part of this screen-build pass.
 
 ---
 
+## Build status (frontend-only pass)
+
+> **All 82 screens are built** (🟦) — states + navigation implemented in `apps/web` / `apps/console`
+> with typed mock fixtures; both apps pass typecheck + lint and render clean in a live browser sweep.
+> Per-screen routes, demo URLs, and notes live in `docs/design-build/build-progress.md` (authoritative
+> build tracker). Status legend below: 🟦 built · ✅ formally browser/DevTools reviewed · ⬜ not built.
+> Last updated: 2026-06-04.
+
+| Surface | Total | Built (🟦) |
+|---|---:|---:|
+| A. Participant | 26 | 26 |
+| B. Organizer | 37 | 37 |
+| C. Admin Console | 8 | 8 |
+| D. Shared / System | 11 | 11 |
+| **Total** | **82** | **82** |
+
+---
+
 ## A. Participant — Mobile Web (public)
 
 > Mobile-first. Participants should not create passwords for MVP; access is via registration + emailed
@@ -46,13 +64,13 @@ backend integration is part of this screen-build pass.
 
 ### A1. Discovery & Event
 
-| ID | Screen | Priority | Purpose |
-|---|---|---|---|
-| P-01 | Coimbatore Running Calendar | P2 | Curated list of upcoming events (discovery) |
-| P-02 | Event Landing Page | P0 | Sell the event + primary "Register" CTA |
-| P-03 | Event Details | P0 | Full description, schedule, race instructions, contact |
-| P-04 | Refund / Cancellation Policy | P1 | Full legal/policy page |
-| P-05 | Waiver / Medical Declaration (full text) | P0 | Full waiver/medical declaration page |
+| ID | Screen | Priority | Purpose | Status |
+|---|---|---|---|:--:|
+| P-01 | Coimbatore Running Calendar | P2 | Curated list of upcoming events (discovery) | 🟦 |
+| P-02 | Event Landing Page | P0 | Sell the event + primary "Register" CTA | 🟦 |
+| P-03 | Event Details | P0 | Full description, schedule, race instructions, contact | 🟦 |
+| P-04 | Refund / Cancellation Policy | P1 | Full legal/policy page | 🟦 |
+| P-05 | Waiver / Medical Declaration (full text) | P0 | Full waiver/medical declaration page | 🟦 |
 
 **P-02 Event Landing Page** — components: hero banner + logo, event name/date, venue with map link,
 distance/category chips with fees + capacity/sold-out status, early-bird countdown, sponsor strip,
@@ -62,19 +80,19 @@ Data: event meta, fee tiers, dates, sponsors.
 
 ### A2. Registration & Checkout
 
-| ID | Screen | Priority | Purpose |
-|---|---|---|---|
-| P-06 | Category / Distance Selection | P0 | Choose distance + see applicable fee tier |
-| P-07 | Registration Form | P0 | Standard participant fields |
-| P-08 | Medical Declaration + Waiver Acceptance | P0 | Required checkboxes + consent |
-| P-09 | Minor / Guardian Consent | P1 | Guardian details + verifiable parental consent (DPDP) |
-| P-10 | Coupon Code Entry | P1 | Apply sponsor/club code (inline/modal) |
-| P-10A | Insurance Add-on Opt-in | P1 | Optional event accident insurance before checkout |
-| P-11 | Order Summary / Fee Breakdown | P0 | Itemized fee, discounts/add-ons, organizer-absorbed fee note, total |
-| P-12 | Payment (Razorpay handoff) | P0 | UPI / cards / netbanking |
-| P-13 | Payment Processing / Pending | P0 | Async wait state |
-| P-14 | Payment Success → Confirmation | P0 | Confirmation + next steps + e-ticket link |
-| P-15 | Payment Failure / Retry | P0 | Error reason + retry / change method |
+| ID | Screen | Priority | Purpose | Status |
+|---|---|---|---|:--:|
+| P-06 | Category / Distance Selection | P0 | Choose distance + see applicable fee tier | 🟦 |
+| P-07 | Registration Form | P0 | Standard participant fields | 🟦 |
+| P-08 | Medical Declaration + Waiver Acceptance | P0 | Required checkboxes + consent | 🟦 |
+| P-09 | Minor / Guardian Consent | P1 | Guardian details + verifiable parental consent (DPDP) | 🟦 |
+| P-10 | Coupon Code Entry | P1 | Apply sponsor/club code (inline/modal) | 🟦 *(inline in P-11)* |
+| P-10A | Insurance Add-on Opt-in | P1 | Optional event accident insurance before checkout | 🟦 |
+| P-11 | Order Summary / Fee Breakdown | P0 | Itemized fee, discounts/add-ons, organizer-absorbed fee note, total | 🟦 |
+| P-12 | Payment (Razorpay handoff) | P0 | UPI / cards / netbanking | 🟦 |
+| P-13 | Payment Processing / Pending | P0 | Async wait state | 🟦 |
+| P-14 | Payment Success → Confirmation | P0 | Confirmation + next steps + e-ticket link | 🟦 |
+| P-15 | Payment Failure / Retry | P0 | Error reason + retry / change method | 🟦 |
 
 **P-07 Registration Form** — fields: name, gender, DOB (drives age-group), mobile, email, emergency
 contact (name + phone), distance/category, T-shirt size, club/team (optional). Validation inline.
@@ -97,26 +115,26 @@ duplicate payment, and paid-but-confirmation-not-sent. Always offer a safe retry
 
 ### A3. Bulk / Group Registration (coordinator)
 
-| ID | Screen | Priority | Purpose |
-|---|---|---|---|
-| P-16 | Group Registration Entry | P1 | CSV paste or repeat-add multiple runners |
-| P-17 | Group Roster Review | P1 | Validate all entries before paying |
-| P-18 | Group Payment + GST Invoice | P1 | One payment, one GST invoice, coordinator details |
+| ID | Screen | Priority | Purpose | Status |
+|---|---|---|---|:--:|
+| P-16 | Group Registration Entry | P1 | CSV paste or repeat-add multiple runners | 🟦 |
+| P-17 | Group Roster Review | P1 | Validate all entries before paying | 🟦 |
+| P-18 | Group Payment + GST Invoice | P1 | One payment, one GST invoice, coordinator details | 🟦 |
 
 **P-16/17** — components: add-row repeater + CSV paste box, per-row validation, running total,
 per-runner T-shirt/category, coordinator contact + GST details. States: row errors, duplicate detection.
 
 ### A4. Participant Post-Registration Hub
 
-| ID | Screen | Priority | Purpose |
-|---|---|---|---|
-| P-19 | My Registration / E-Ticket | P0 | QR e-ticket + registration status |
-| P-20 | BIB & Kit Collection | P0 | BIB number (once assigned) + collection details |
-| P-21 | Race-Day Instructions | P0 | Schedule, venue, what-to-bring, route |
-| P-22 | My Result | P0 | Finish time, overall/category/age-group rank, status |
-| P-23 | Full Leaderboard | P0 | Tabbed overall / category / age-group views, search |
-| P-24 | Certificate View + Download | P0 | PDF download + shareable link + certificate ID |
-| P-25 | Insurance Policy / Add-on Status | P1 | View coverage, policy status, and support path |
+| ID | Screen | Priority | Purpose | Status |
+|---|---|---|---|:--:|
+| P-19 | My Registration / E-Ticket | P0 | QR e-ticket + registration status | 🟦 |
+| P-20 | BIB & Kit Collection | P0 | BIB number (once assigned) + collection details | 🟦 |
+| P-21 | Race-Day Instructions | P0 | Schedule, venue, what-to-bring, route | 🟦 |
+| P-22 | My Result | P0 | Finish time, overall/category/age-group rank, status | 🟦 |
+| P-23 | Full Leaderboard | P0 | Tabbed overall / category / age-group views, search | 🟦 |
+| P-24 | Certificate View + Download | P0 | PDF download + shareable link + certificate ID | 🟦 |
+| P-25 | Insurance Policy / Add-on Status | P1 | View coverage, policy status, and support path | 🟦 |
 
 **P-19 E-Ticket** — components: QR code, participant name/category, event meta, status badge
 (confirmed/pending), links to BIB, instructions, results, certificate. Access via emailed magic link,
@@ -133,12 +151,12 @@ status (finished/DNF/DNS/DQ), optional age-graded, CTA to certificate + leaderbo
 
 ### B1. Onboarding & Account
 
-| ID | Screen | Priority | Purpose |
-|---|---|---|---|
-| O-01 | Login / Sign-in | P0 | Organizer authentication |
-| O-02 | Organizer Onboarding | P0 | Org/club profile, GST vs non-GST entity type |
-| O-03 | Payment Onboarding (Razorpay Route) | P0 | Linked-account KYC + status tracking |
-| O-03A | Team Members & Roles | P1 | Invite staff, assign event roles, enforce RBAC |
+| ID | Screen | Priority | Purpose | Status |
+|---|---|---|---|:--:|
+| O-01 | Login / Sign-in | P0 | Organizer authentication | 🟦 |
+| O-02 | Organizer Onboarding | P0 | Org/club profile, GST vs non-GST entity type | 🟦 |
+| O-03 | Payment Onboarding (Razorpay Route) | P0 | Linked-account KYC + status tracking | 🟦 |
+| O-03A | Team Members & Roles | P1 | Invite staff, assign event roles, enforce RBAC | 🟦 |
 
 **O-03 Payment Onboarding** — states: not started, KYC submitted, pending verification, rejected,
 active, settlement blocked. Surface this early because paid registration cannot safely open without it.
@@ -152,16 +170,16 @@ manual payment overrides, bulk deletes, and role changes) require an audit reaso
 
 ### B2. Event Management
 
-| ID | Screen | Priority | Purpose |
-|---|---|---|---|
-| O-04 | Events List / Dashboard | P0 | All events with status + quick actions |
-| O-05 | Event Setup — Basics | P0 | Name, date/time, venue, map link |
-| O-06 | Event Setup — Distances & Fees | P0 | Categories, fees, early-bird tiers, open/close dates |
-| O-07 | Event Setup — Registration Form Builder | P0 | Fields config + waiver/medical text |
-| O-08 | Event Setup — Branding | P1 | Logo, banner, sponsor strip |
-| O-09 | Event Setup — Policies | P0 | Refund/cancellation, waiver, contact, instructions |
-| O-10 | Coupon Codes | P1 | Create %/flat codes, usage caps, validity |
-| O-10A | Event Publish Readiness Checklist | P0 | Block go-live until critical setup is complete |
+| ID | Screen | Priority | Purpose | Status |
+|---|---|---|---|:--:|
+| O-04 | Events List / Dashboard | P0 | All events with status + quick actions | 🟦 |
+| O-05 | Event Setup — Basics | P0 | Name, date/time, venue, map link | 🟦 |
+| O-06 | Event Setup — Distances & Fees | P0 | Categories, fees, early-bird tiers, open/close dates | 🟦 |
+| O-07 | Event Setup — Registration Form Builder | P0 | Fields config + waiver/medical text | 🟦 |
+| O-08 | Event Setup — Branding | P1 | Logo, banner, sponsor strip | 🟦 |
+| O-09 | Event Setup — Policies | P0 | Refund/cancellation, waiver, contact, instructions | 🟦 |
+| O-10 | Coupon Codes | P1 | Create %/flat codes, usage caps, validity | 🟦 |
+| O-10A | Event Publish Readiness Checklist | P0 | Block go-live until critical setup is complete | 🟦 |
 
 **O-04 Events Dashboard** — components: event cards/table (status: draft/open/closed/completed),
 registration count, revenue snapshot, "Create event" CTA, per-event quick links.
@@ -179,14 +197,14 @@ instructions polish, optional insurance setup, and optional coupon setup.
 
 ### B3. Roster & Participants
 
-| ID | Screen | Priority | Purpose |
-|---|---|---|---|
-| O-11 | Roster (participant table) | P0 | **Key surface** — search/filter/sort all registrants |
-| O-12 | Participant Detail / Edit | P0 | View + manual correction of a registrant |
-| O-13 | CSV Import-Update | P1 | Upload + column-map + validate roster updates |
-| O-14 | CSV / Timing-Vendor Export | P0 | Export roster (BIB, chip, name, category) |
-| O-15 | Spot / Cash / Offline Registration | P1 | Add walk-in/expo registrant (payment mode = cash/comp) |
-| O-16 | T-Shirt Size Summary | P1 | Aggregate counts to prevent over/under-ordering |
+| ID | Screen | Priority | Purpose | Status |
+|---|---|---|---|:--:|
+| O-11 | Roster (participant table) | P0 | **Key surface** — search/filter/sort all registrants | 🟦 |
+| O-12 | Participant Detail / Edit | P0 | View + manual correction of a registrant | 🟦 |
+| O-13 | CSV Import-Update | P1 | Upload + column-map + validate roster updates | 🟦 |
+| O-14 | CSV / Timing-Vendor Export | P0 | Export roster (BIB, chip, name, category) | 🟦 |
+| O-15 | Spot / Cash / Offline Registration | P1 | Add walk-in/expo registrant (payment mode = cash/comp) | 🟦 |
+| O-16 | T-Shirt Size Summary | P1 | Aggregate counts to prevent over/under-ordering | 🟦 |
 
 **O-11 Roster** — columns: name, category, payment status + mode (incl. cash/comp), contact,
 emergency contact, BIB, T-shirt size. Components: global search, filter chips (category/payment/BIB),
@@ -195,20 +213,20 @@ inline quick actions only for low-risk fields. States: empty, filtered-empty, la
 
 ### B4. BIB Management
 
-| ID | Screen | Priority | Purpose |
-|---|---|---|---|
-| O-17 | BIB Assignment | P1 | Manual entry + CSV upload of BIB numbers |
-| O-18 | BIB Duplicate / Validation | P1 | Surface duplicate-BIB warnings |
-| O-19 | BIB ↔ Chip Mapping | P1 | Exportable/correctable mapping |
+| ID | Screen | Priority | Purpose | Status |
+|---|---|---|---|:--:|
+| O-17 | BIB Assignment | P1 | Manual entry + CSV upload of BIB numbers | 🟦 |
+| O-18 | BIB Duplicate / Validation | P1 | Surface duplicate-BIB warnings | 🟦 |
+| O-19 | BIB ↔ Chip Mapping | P1 | Exportable/correctable mapping | 🟦 |
 
 ### B5. Communications (WhatsApp-first)
 
-| ID | Screen | Priority | Purpose |
-|---|---|---|---|
-| O-20 | Comms Dashboard | P0 | Template library + recent sends overview |
-| O-21 | Send / Broadcast Message | P0 | Audience select + template + preview + send |
-| O-22 | Template Editor | P1 | Create/edit reusable trigger-based templates |
-| O-23 | Delivery Status Tracking | P0 | Per-message delivered/read across WA/SMS/email |
+| ID | Screen | Priority | Purpose | Status |
+|---|---|---|---|:--:|
+| O-20 | Comms Dashboard | P0 | Template library + recent sends overview | 🟦 |
+| O-21 | Send / Broadcast Message | P0 | Audience select + template + preview + send | 🟦 |
+| O-22 | Template Editor | P1 | Create/edit reusable trigger-based templates | 🟦 |
+| O-23 | Delivery Status Tracking | P0 | Per-message delivered/read across WA/SMS/email | 🟦 |
 
 **O-21 Send/Broadcast** — components: audience builder (all / category / payment-status / BIB-pending),
 channel (WhatsApp primary, SMS/email fallback), template picker, variable preview, send/schedule.
@@ -216,15 +234,15 @@ States: template not approved, missing consent, partial-delivery, fallback-trigg
 
 ### B6. Results & Certificates
 
-| ID | Screen | Priority | Purpose |
-|---|---|---|---|
-| O-24 | Results Upload (CSV) | P0 | Upload timing-vendor CSV |
-| O-25 | Column Mapping | P0 | Map vendor columns → canonical fields |
-| O-26 | Validation / Error Review | P0 | Flag unmatched BIBs / bad rows |
-| O-27 | Results Preview | P0 | Review computed rankings before publish |
-| O-28 | Publish / Unpublish + Correct | P0 | Go-live control + manual fixes |
-| O-29 | Certificate Template Setup | P0 | Fields, branding, layout for cert |
-| O-30 | Certificate Generation Status | P0 | Batch render progress + errors |
+| ID | Screen | Priority | Purpose | Status |
+|---|---|---|---|:--:|
+| O-24 | Results Upload (CSV) | P0 | Upload timing-vendor CSV | 🟦 |
+| O-25 | Column Mapping | P0 | Map vendor columns → canonical fields | 🟦 |
+| O-26 | Validation / Error Review | P0 | Flag unmatched BIBs / bad rows | 🟦 |
+| O-27 | Results Preview | P0 | Review computed rankings before publish | 🟦 |
+| O-28 | Publish / Unpublish + Correct | P0 | Go-live control + manual fixes | 🟦 |
+| O-29 | Certificate Template Setup | P0 | Fields, branding, layout for cert | 🟦 |
+| O-30 | Certificate Generation Status | P0 | Batch render progress + errors | 🟦 |
 
 **O-25 Column Mapping** — map to canonical: BIB, name, gender/category, distance, start time,
 finish time, net/gun time, rank, status (finished/DNF/DNS/DQ). Components: source→target dropdowns,
@@ -239,11 +257,11 @@ layout customization is intentionally deferred until after the first pilot.
 
 ### B7. Payments & Finance
 
-| ID | Screen | Priority | Purpose |
-|---|---|---|---|
-| O-31 | Payments / Settlement Dashboard | P0 | Success/failure, settlement timing (T+2/T+3) |
-| O-32 | GST Invoice / Report Export | P1 | Exportable GST + payment report |
-| O-33 | Refunds | P1 | Initiate/track refunds within RBI PA-PG limits |
+| ID | Screen | Priority | Purpose | Status |
+|---|---|---|---|:--:|
+| O-31 | Payments / Settlement Dashboard | P0 | Success/failure, settlement timing (T+2/T+3) | 🟦 |
+| O-32 | GST Invoice / Report Export | P1 | Exportable GST + payment report | 🟦 |
+| O-33 | Refunds | P1 | Initiate/track refunds within RBI PA-PG limits | 🟦 |
 
 **O-31 Payments / Settlement Dashboard** — distinguish checkout intent, gateway success, verified
 webhook confirmation, registration confirmation sent, refund status, and settlement/reconciliation status.
@@ -253,10 +271,10 @@ Use consistent labels: `Payment Started`, `Payment Pending`, `Paid — Awaiting 
 
 ### B8. Trust Tools
 
-| ID | Screen | Priority | Purpose |
-|---|---|---|---|
-| O-34 | Permissions Checklist | P1 | TN/Coimbatore-templated checklist + reminders |
-| O-35 | Medical / Emergency Roster | P1 | Printable/exportable medical-team sheet |
+| ID | Screen | Priority | Purpose | Status |
+|---|---|---|---|:--:|
+| O-34 | Permissions Checklist | P1 | TN/Coimbatore-templated checklist + reminders | 🟦 |
+| O-35 | Medical / Emergency Roster | P1 | Printable/exportable medical-team sheet | 🟦 |
 
 **O-34 Permissions Checklist** — items: police/traffic NOC, Coimbatore City Municipal Corporation
 permission, ambulance/**108** + first-aid, fire/safety NOC, **IPRS/PPL music license**, participant
@@ -273,16 +291,16 @@ and minimal medical detail only. Aligns with SOS/medical tokens in design-system
 
 > Mirrors **all** organizer capabilities (B1–B8) for any event, plus:
 
-| ID | Screen | Priority | Purpose |
-|---|---|---|---|
-| A-01 | Admin Home / Multi-Event Overview | P0 | Cross-event operational view |
-| A-02 | Organizer / Customer Management | P1 | Manage organizers + entity/GST status |
-| A-03 | Act-on-behalf (impersonation) | P0 | Configure forms, fix data, resend confirms for any event |
-| A-04 | Calendar Seeding / Management | P2 | Curate the public Coimbatore calendar |
-| A-05 | Global Delivery-Status Monitor | P1 | WhatsApp/SMS/email delivery across all events |
-| A-06 | Audit Log | P0 | Record of sensitive actions |
-| A-07 | Support / Ticket View | P1 | Track support and privacy/data requests per organizer/event |
-| A-08 | Operations Monitor / Job Health | P1 | Failed jobs, webhook exceptions, queues, PDF/comms health |
+| ID | Screen | Priority | Purpose | Status |
+|---|---|---|---|:--:|
+| A-01 | Admin Home / Multi-Event Overview | P0 | Cross-event operational view | 🟦 |
+| A-02 | Organizer / Customer Management | P1 | Manage organizers + entity/GST status | 🟦 |
+| A-03 | Act-on-behalf (impersonation) | P0 | Configure forms, fix data, resend confirms for any event | 🟦 |
+| A-04 | Calendar Seeding / Management | P2 | Curate the public Coimbatore calendar | 🟦 |
+| A-05 | Global Delivery-Status Monitor | P1 | WhatsApp/SMS/email delivery across all events | 🟦 |
+| A-06 | Audit Log | P0 | Record of sensitive actions | 🟦 |
+| A-07 | Support / Ticket View | P1 | Track support and privacy/data requests per organizer/event | 🟦 |
+| A-08 | Operations Monitor / Job Health | P1 | Failed jobs, webhook exceptions, queues, PDF/comms health | 🟦 |
 
 **A-03 Act-on-behalf** — use a persistent high-contrast impersonation banner across the whole session with
 organizer/event context, staff user identity, elapsed time, and a prominent "Exit act-on-behalf" action.
@@ -300,19 +318,19 @@ type, due date, status, and resolution notes.
 
 ## D. Shared / System / States
 
-| ID | Screen | Priority | Purpose |
-|---|---|---|---|
-| S-01 | 404 / Not Found | P1 | Missing route/event |
-| S-02 | Error / Something Went Wrong | P1 | Generic failure boundary |
-| S-03 | Empty States | P0 | No events / no registrations / no results (per surface) |
-| S-04 | Loading / Skeleton | P0 | Async loading pattern |
-| S-05 | Confirmation / Success Modal | P0 | Reusable confirm/destructive-action pattern |
-| S-06 | Session Expired / Auth Error | P1 | Re-auth prompt |
-| S-07 | Consent / Privacy Notice (DPDP) | P0 | Data-collection disclosure + consent |
-| S-08 | Access Denied / Role Boundary | P0 | RBAC or event-scope mismatch, with safe next action |
-| S-09 | Import / Upload Validation Pattern | P0 | CSV/file parse errors, column issues, row-level fixes |
-| S-10 | Offline / Degraded / Manual Backup | P1 | Low-connectivity or vendor outage fallback state |
-| S-11 | Webhook / Reconciliation Pending | P1 | Payment/comms callback pending, retrying, or needs review |
+| ID | Screen | Priority | Purpose | Status |
+|---|---|---|---|:--:|
+| S-01 | 404 / Not Found | P1 | Missing route/event | 🟦 |
+| S-02 | Error / Something Went Wrong | P1 | Generic failure boundary | 🟦 |
+| S-03 | Empty States | P0 | No events / no registrations / no results (per surface) | 🟦 |
+| S-04 | Loading / Skeleton | P0 | Async loading pattern | 🟦 |
+| S-05 | Confirmation / Success Modal | P0 | Reusable confirm/destructive-action pattern | 🟦 |
+| S-06 | Session Expired / Auth Error | P1 | Re-auth prompt | 🟦 |
+| S-07 | Consent / Privacy Notice (DPDP) | P0 | Data-collection disclosure + consent | 🟦 |
+| S-08 | Access Denied / Role Boundary | P0 | RBAC or event-scope mismatch, with safe next action | 🟦 |
+| S-09 | Import / Upload Validation Pattern | P0 | CSV/file parse errors, column issues, row-level fixes | 🟦 |
+| S-10 | Offline / Degraded / Manual Backup | P1 | Low-connectivity or vendor outage fallback state | 🟦 |
+| S-11 | Webhook / Reconciliation Pending | P1 | Payment/comms callback pending, retrying, or needs review | 🟦 |
 
 **S-10 Manual Backup Promise** — degraded states should tell users what is still safe to do, what is delayed,
 and who owns follow-up. For Razorpay/WhatsApp/CSV/PDF delays, show a non-blocking status, retry/refresh where
@@ -378,10 +396,10 @@ safe, support contact, and an admin/manual processing path with audit notes.
 
 ## Screen count summary
 
-| Surface | Screens |
-|---|---:|
-| A. Participant | 26 |
-| B. Organizer | 37 |
-| C. Admin Console | 8 (+ mirrors of B) |
-| D. Shared / System | 11 |
-| **Total (unique)** | **82** |
+| Surface | Screens | Built |
+|---|---:|---:|
+| A. Participant | 26 | 26 |
+| B. Organizer | 37 | 37 |
+| C. Admin Console | 8 (+ mirrors of B) | 8 |
+| D. Shared / System | 11 | 11 |
+| **Total (unique)** | **82** | **82 (100%)** |

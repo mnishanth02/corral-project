@@ -9,19 +9,82 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SessionExpiredRouteImport } from './routes/session-expired'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated.index'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminSupportRouteImport } from './routes/admin.support'
+import { Route as AdminOrganizersRouteImport } from './routes/admin.organizers'
+import { Route as AdminOpsRouteImport } from './routes/admin.ops'
+import { Route as AdminImpersonateRouteImport } from './routes/admin.impersonate'
+import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
+import { Route as AdminCalendarRouteImport } from './routes/admin.calendar'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated.onboarding'
+import { Route as AuthenticatedSettingsTeamRouteImport } from './routes/_authenticated.settings.team'
+import { Route as AuthenticatedOnboardingPaymentRouteImport } from './routes/_authenticated.onboarding_.payment'
+import { Route as AuthenticatedEventsEventIdSetupRouteImport } from './routes/_authenticated.events.$eventId.setup'
+import { Route as AuthenticatedEventsEventIdRosterRouteImport } from './routes/_authenticated.events.$eventId.roster'
+import { Route as AuthenticatedEventsEventIdResultsRouteImport } from './routes/_authenticated.events.$eventId.results'
+import { Route as AuthenticatedEventsEventIdPermissionsRouteImport } from './routes/_authenticated.events.$eventId.permissions'
+import { Route as AuthenticatedEventsEventIdCouponsRouteImport } from './routes/_authenticated.events.$eventId.coupons'
+import { Route as AuthenticatedEventsEventIdRosterIndexRouteImport } from './routes/_authenticated.events.$eventId.roster.index'
+import { Route as AuthenticatedEventsEventIdPaymentsIndexRouteImport } from './routes/_authenticated.events.$eventId.payments.index'
+import { Route as AuthenticatedEventsEventIdCommsIndexRouteImport } from './routes/_authenticated.events.$eventId.comms.index'
+import { Route as AuthenticatedEventsEventIdBibsIndexRouteImport } from './routes/_authenticated.events.$eventId.bibs.index'
+import { Route as AuthenticatedEventsEventIdSetupPublishRouteImport } from './routes/_authenticated.events.$eventId.setup.publish'
+import { Route as AuthenticatedEventsEventIdSetupPoliciesRouteImport } from './routes/_authenticated.events.$eventId.setup.policies'
+import { Route as AuthenticatedEventsEventIdSetupFormRouteImport } from './routes/_authenticated.events.$eventId.setup.form'
+import { Route as AuthenticatedEventsEventIdSetupFeesRouteImport } from './routes/_authenticated.events.$eventId.setup.fees'
+import { Route as AuthenticatedEventsEventIdSetupBrandingRouteImport } from './routes/_authenticated.events.$eventId.setup.branding'
+import { Route as AuthenticatedEventsEventIdSetupBasicsRouteImport } from './routes/_authenticated.events.$eventId.setup.basics'
+import { Route as AuthenticatedEventsEventIdRosterTshirtsRouteImport } from './routes/_authenticated.events.$eventId.roster.tshirts'
+import { Route as AuthenticatedEventsEventIdRosterSpotRouteImport } from './routes/_authenticated.events.$eventId.roster.spot'
+import { Route as AuthenticatedEventsEventIdRosterMedicalRouteImport } from './routes/_authenticated.events.$eventId.roster.medical'
+import { Route as AuthenticatedEventsEventIdRosterImportRouteImport } from './routes/_authenticated.events.$eventId.roster.import'
+import { Route as AuthenticatedEventsEventIdRosterExportRouteImport } from './routes/_authenticated.events.$eventId.roster.export'
+import { Route as AuthenticatedEventsEventIdRosterParticipantIdRouteImport } from './routes/_authenticated.events.$eventId.roster.$participantId'
+import { Route as AuthenticatedEventsEventIdResultsValidateRouteImport } from './routes/_authenticated.events.$eventId.results.validate'
+import { Route as AuthenticatedEventsEventIdResultsUploadRouteImport } from './routes/_authenticated.events.$eventId.results.upload'
+import { Route as AuthenticatedEventsEventIdResultsPublishRouteImport } from './routes/_authenticated.events.$eventId.results.publish'
+import { Route as AuthenticatedEventsEventIdResultsPreviewRouteImport } from './routes/_authenticated.events.$eventId.results.preview'
+import { Route as AuthenticatedEventsEventIdResultsMappingRouteImport } from './routes/_authenticated.events.$eventId.results.mapping'
+import { Route as AuthenticatedEventsEventIdPaymentsRefundsRouteImport } from './routes/_authenticated.events.$eventId.payments.refunds'
+import { Route as AuthenticatedEventsEventIdPaymentsExportsRouteImport } from './routes/_authenticated.events.$eventId.payments.exports'
+import { Route as AuthenticatedEventsEventIdCommsTemplatesRouteImport } from './routes/_authenticated.events.$eventId.comms.templates'
+import { Route as AuthenticatedEventsEventIdCommsSendRouteImport } from './routes/_authenticated.events.$eventId.comms.send'
+import { Route as AuthenticatedEventsEventIdCommsDeliveryRouteImport } from './routes/_authenticated.events.$eventId.comms.delivery'
+import { Route as AuthenticatedEventsEventIdCertificatesTemplateRouteImport } from './routes/_authenticated.events.$eventId.certificates.template'
+import { Route as AuthenticatedEventsEventIdCertificatesStatusRouteImport } from './routes/_authenticated.events.$eventId.certificates.status'
+import { Route as AuthenticatedEventsEventIdBibsValidateRouteImport } from './routes/_authenticated.events.$eventId.bibs.validate'
+import { Route as AuthenticatedEventsEventIdBibsChipsRouteImport } from './routes/_authenticated.events.$eventId.bibs.chips'
 
+const SessionExpiredRoute = SessionExpiredRouteImport.update({
+  id: '/session-expired',
+  path: '/session-expired',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
@@ -29,54 +92,621 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
-  id: '/admin/users',
-  path: '/admin/users',
-  getParentRoute: () => rootRouteImport,
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
 } as any)
+const AdminSupportRoute = AdminSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrganizersRoute = AdminOrganizersRouteImport.update({
+  id: '/organizers',
+  path: '/organizers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOpsRoute = AdminOpsRouteImport.update({
+  id: '/ops',
+  path: '/ops',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminImpersonateRoute = AdminImpersonateRouteImport.update({
+  id: '/impersonate',
+  path: '/impersonate',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDeliveryRoute = AdminDeliveryRouteImport.update({
+  id: '/delivery',
+  path: '/delivery',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCalendarRoute = AdminCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSettingsTeamRoute =
+  AuthenticatedSettingsTeamRouteImport.update({
+    id: '/settings/team',
+    path: '/settings/team',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOnboardingPaymentRoute =
+  AuthenticatedOnboardingPaymentRouteImport.update({
+    id: '/onboarding_/payment',
+    path: '/onboarding/payment',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdSetupRoute =
+  AuthenticatedEventsEventIdSetupRouteImport.update({
+    id: '/events/$eventId/setup',
+    path: '/events/$eventId/setup',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdRosterRoute =
+  AuthenticatedEventsEventIdRosterRouteImport.update({
+    id: '/events/$eventId/roster',
+    path: '/events/$eventId/roster',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdResultsRoute =
+  AuthenticatedEventsEventIdResultsRouteImport.update({
+    id: '/events/$eventId/results',
+    path: '/events/$eventId/results',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdPermissionsRoute =
+  AuthenticatedEventsEventIdPermissionsRouteImport.update({
+    id: '/events/$eventId/permissions',
+    path: '/events/$eventId/permissions',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdCouponsRoute =
+  AuthenticatedEventsEventIdCouponsRouteImport.update({
+    id: '/events/$eventId/coupons',
+    path: '/events/$eventId/coupons',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdRosterIndexRoute =
+  AuthenticatedEventsEventIdRosterIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedEventsEventIdRosterRoute,
+  } as any)
+const AuthenticatedEventsEventIdPaymentsIndexRoute =
+  AuthenticatedEventsEventIdPaymentsIndexRouteImport.update({
+    id: '/events/$eventId/payments/',
+    path: '/events/$eventId/payments/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdCommsIndexRoute =
+  AuthenticatedEventsEventIdCommsIndexRouteImport.update({
+    id: '/events/$eventId/comms/',
+    path: '/events/$eventId/comms/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdBibsIndexRoute =
+  AuthenticatedEventsEventIdBibsIndexRouteImport.update({
+    id: '/events/$eventId/bibs/',
+    path: '/events/$eventId/bibs/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdSetupPublishRoute =
+  AuthenticatedEventsEventIdSetupPublishRouteImport.update({
+    id: '/publish',
+    path: '/publish',
+    getParentRoute: () => AuthenticatedEventsEventIdSetupRoute,
+  } as any)
+const AuthenticatedEventsEventIdSetupPoliciesRoute =
+  AuthenticatedEventsEventIdSetupPoliciesRouteImport.update({
+    id: '/policies',
+    path: '/policies',
+    getParentRoute: () => AuthenticatedEventsEventIdSetupRoute,
+  } as any)
+const AuthenticatedEventsEventIdSetupFormRoute =
+  AuthenticatedEventsEventIdSetupFormRouteImport.update({
+    id: '/form',
+    path: '/form',
+    getParentRoute: () => AuthenticatedEventsEventIdSetupRoute,
+  } as any)
+const AuthenticatedEventsEventIdSetupFeesRoute =
+  AuthenticatedEventsEventIdSetupFeesRouteImport.update({
+    id: '/fees',
+    path: '/fees',
+    getParentRoute: () => AuthenticatedEventsEventIdSetupRoute,
+  } as any)
+const AuthenticatedEventsEventIdSetupBrandingRoute =
+  AuthenticatedEventsEventIdSetupBrandingRouteImport.update({
+    id: '/branding',
+    path: '/branding',
+    getParentRoute: () => AuthenticatedEventsEventIdSetupRoute,
+  } as any)
+const AuthenticatedEventsEventIdSetupBasicsRoute =
+  AuthenticatedEventsEventIdSetupBasicsRouteImport.update({
+    id: '/basics',
+    path: '/basics',
+    getParentRoute: () => AuthenticatedEventsEventIdSetupRoute,
+  } as any)
+const AuthenticatedEventsEventIdRosterTshirtsRoute =
+  AuthenticatedEventsEventIdRosterTshirtsRouteImport.update({
+    id: '/tshirts',
+    path: '/tshirts',
+    getParentRoute: () => AuthenticatedEventsEventIdRosterRoute,
+  } as any)
+const AuthenticatedEventsEventIdRosterSpotRoute =
+  AuthenticatedEventsEventIdRosterSpotRouteImport.update({
+    id: '/spot',
+    path: '/spot',
+    getParentRoute: () => AuthenticatedEventsEventIdRosterRoute,
+  } as any)
+const AuthenticatedEventsEventIdRosterMedicalRoute =
+  AuthenticatedEventsEventIdRosterMedicalRouteImport.update({
+    id: '/medical',
+    path: '/medical',
+    getParentRoute: () => AuthenticatedEventsEventIdRosterRoute,
+  } as any)
+const AuthenticatedEventsEventIdRosterImportRoute =
+  AuthenticatedEventsEventIdRosterImportRouteImport.update({
+    id: '/import',
+    path: '/import',
+    getParentRoute: () => AuthenticatedEventsEventIdRosterRoute,
+  } as any)
+const AuthenticatedEventsEventIdRosterExportRoute =
+  AuthenticatedEventsEventIdRosterExportRouteImport.update({
+    id: '/export',
+    path: '/export',
+    getParentRoute: () => AuthenticatedEventsEventIdRosterRoute,
+  } as any)
+const AuthenticatedEventsEventIdRosterParticipantIdRoute =
+  AuthenticatedEventsEventIdRosterParticipantIdRouteImport.update({
+    id: '/$participantId',
+    path: '/$participantId',
+    getParentRoute: () => AuthenticatedEventsEventIdRosterRoute,
+  } as any)
+const AuthenticatedEventsEventIdResultsValidateRoute =
+  AuthenticatedEventsEventIdResultsValidateRouteImport.update({
+    id: '/validate',
+    path: '/validate',
+    getParentRoute: () => AuthenticatedEventsEventIdResultsRoute,
+  } as any)
+const AuthenticatedEventsEventIdResultsUploadRoute =
+  AuthenticatedEventsEventIdResultsUploadRouteImport.update({
+    id: '/upload',
+    path: '/upload',
+    getParentRoute: () => AuthenticatedEventsEventIdResultsRoute,
+  } as any)
+const AuthenticatedEventsEventIdResultsPublishRoute =
+  AuthenticatedEventsEventIdResultsPublishRouteImport.update({
+    id: '/publish',
+    path: '/publish',
+    getParentRoute: () => AuthenticatedEventsEventIdResultsRoute,
+  } as any)
+const AuthenticatedEventsEventIdResultsPreviewRoute =
+  AuthenticatedEventsEventIdResultsPreviewRouteImport.update({
+    id: '/preview',
+    path: '/preview',
+    getParentRoute: () => AuthenticatedEventsEventIdResultsRoute,
+  } as any)
+const AuthenticatedEventsEventIdResultsMappingRoute =
+  AuthenticatedEventsEventIdResultsMappingRouteImport.update({
+    id: '/mapping',
+    path: '/mapping',
+    getParentRoute: () => AuthenticatedEventsEventIdResultsRoute,
+  } as any)
+const AuthenticatedEventsEventIdPaymentsRefundsRoute =
+  AuthenticatedEventsEventIdPaymentsRefundsRouteImport.update({
+    id: '/events/$eventId/payments/refunds',
+    path: '/events/$eventId/payments/refunds',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdPaymentsExportsRoute =
+  AuthenticatedEventsEventIdPaymentsExportsRouteImport.update({
+    id: '/events/$eventId/payments/exports',
+    path: '/events/$eventId/payments/exports',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdCommsTemplatesRoute =
+  AuthenticatedEventsEventIdCommsTemplatesRouteImport.update({
+    id: '/events/$eventId/comms/templates',
+    path: '/events/$eventId/comms/templates',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdCommsSendRoute =
+  AuthenticatedEventsEventIdCommsSendRouteImport.update({
+    id: '/events/$eventId/comms/send',
+    path: '/events/$eventId/comms/send',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdCommsDeliveryRoute =
+  AuthenticatedEventsEventIdCommsDeliveryRouteImport.update({
+    id: '/events/$eventId/comms/delivery',
+    path: '/events/$eventId/comms/delivery',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdCertificatesTemplateRoute =
+  AuthenticatedEventsEventIdCertificatesTemplateRouteImport.update({
+    id: '/events/$eventId/certificates/template',
+    path: '/events/$eventId/certificates/template',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdCertificatesStatusRoute =
+  AuthenticatedEventsEventIdCertificatesStatusRouteImport.update({
+    id: '/events/$eventId/certificates/status',
+    path: '/events/$eventId/certificates/status',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdBibsValidateRoute =
+  AuthenticatedEventsEventIdBibsValidateRouteImport.update({
+    id: '/events/$eventId/bibs/validate',
+    path: '/events/$eventId/bibs/validate',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEventsEventIdBibsChipsRoute =
+  AuthenticatedEventsEventIdBibsChipsRouteImport.update({
+    id: '/events/$eventId/bibs/chips',
+    path: '/events/$eventId/bibs/chips',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/session-expired': typeof SessionExpiredRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/calendar': typeof AdminCalendarRoute
+  '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/impersonate': typeof AdminImpersonateRoute
+  '/admin/ops': typeof AdminOpsRoute
+  '/admin/organizers': typeof AdminOrganizersRoute
+  '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/': typeof AdminIndexRoute
+  '/onboarding/payment': typeof AuthenticatedOnboardingPaymentRoute
+  '/settings/team': typeof AuthenticatedSettingsTeamRoute
+  '/events/$eventId/coupons': typeof AuthenticatedEventsEventIdCouponsRoute
+  '/events/$eventId/permissions': typeof AuthenticatedEventsEventIdPermissionsRoute
+  '/events/$eventId/results': typeof AuthenticatedEventsEventIdResultsRouteWithChildren
+  '/events/$eventId/roster': typeof AuthenticatedEventsEventIdRosterRouteWithChildren
+  '/events/$eventId/setup': typeof AuthenticatedEventsEventIdSetupRouteWithChildren
+  '/events/$eventId/bibs/chips': typeof AuthenticatedEventsEventIdBibsChipsRoute
+  '/events/$eventId/bibs/validate': typeof AuthenticatedEventsEventIdBibsValidateRoute
+  '/events/$eventId/certificates/status': typeof AuthenticatedEventsEventIdCertificatesStatusRoute
+  '/events/$eventId/certificates/template': typeof AuthenticatedEventsEventIdCertificatesTemplateRoute
+  '/events/$eventId/comms/delivery': typeof AuthenticatedEventsEventIdCommsDeliveryRoute
+  '/events/$eventId/comms/send': typeof AuthenticatedEventsEventIdCommsSendRoute
+  '/events/$eventId/comms/templates': typeof AuthenticatedEventsEventIdCommsTemplatesRoute
+  '/events/$eventId/payments/exports': typeof AuthenticatedEventsEventIdPaymentsExportsRoute
+  '/events/$eventId/payments/refunds': typeof AuthenticatedEventsEventIdPaymentsRefundsRoute
+  '/events/$eventId/results/mapping': typeof AuthenticatedEventsEventIdResultsMappingRoute
+  '/events/$eventId/results/preview': typeof AuthenticatedEventsEventIdResultsPreviewRoute
+  '/events/$eventId/results/publish': typeof AuthenticatedEventsEventIdResultsPublishRoute
+  '/events/$eventId/results/upload': typeof AuthenticatedEventsEventIdResultsUploadRoute
+  '/events/$eventId/results/validate': typeof AuthenticatedEventsEventIdResultsValidateRoute
+  '/events/$eventId/roster/$participantId': typeof AuthenticatedEventsEventIdRosterParticipantIdRoute
+  '/events/$eventId/roster/export': typeof AuthenticatedEventsEventIdRosterExportRoute
+  '/events/$eventId/roster/import': typeof AuthenticatedEventsEventIdRosterImportRoute
+  '/events/$eventId/roster/medical': typeof AuthenticatedEventsEventIdRosterMedicalRoute
+  '/events/$eventId/roster/spot': typeof AuthenticatedEventsEventIdRosterSpotRoute
+  '/events/$eventId/roster/tshirts': typeof AuthenticatedEventsEventIdRosterTshirtsRoute
+  '/events/$eventId/setup/basics': typeof AuthenticatedEventsEventIdSetupBasicsRoute
+  '/events/$eventId/setup/branding': typeof AuthenticatedEventsEventIdSetupBrandingRoute
+  '/events/$eventId/setup/fees': typeof AuthenticatedEventsEventIdSetupFeesRoute
+  '/events/$eventId/setup/form': typeof AuthenticatedEventsEventIdSetupFormRoute
+  '/events/$eventId/setup/policies': typeof AuthenticatedEventsEventIdSetupPoliciesRoute
+  '/events/$eventId/setup/publish': typeof AuthenticatedEventsEventIdSetupPublishRoute
+  '/events/$eventId/bibs/': typeof AuthenticatedEventsEventIdBibsIndexRoute
+  '/events/$eventId/comms/': typeof AuthenticatedEventsEventIdCommsIndexRoute
+  '/events/$eventId/payments/': typeof AuthenticatedEventsEventIdPaymentsIndexRoute
+  '/events/$eventId/roster/': typeof AuthenticatedEventsEventIdRosterIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/session-expired': typeof SessionExpiredRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/calendar': typeof AdminCalendarRoute
+  '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/impersonate': typeof AdminImpersonateRoute
+  '/admin/ops': typeof AdminOpsRoute
+  '/admin/organizers': typeof AdminOrganizersRoute
+  '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
   '/': typeof AuthenticatedIndexRoute
+  '/admin': typeof AdminIndexRoute
+  '/onboarding/payment': typeof AuthenticatedOnboardingPaymentRoute
+  '/settings/team': typeof AuthenticatedSettingsTeamRoute
+  '/events/$eventId/coupons': typeof AuthenticatedEventsEventIdCouponsRoute
+  '/events/$eventId/permissions': typeof AuthenticatedEventsEventIdPermissionsRoute
+  '/events/$eventId/results': typeof AuthenticatedEventsEventIdResultsRouteWithChildren
+  '/events/$eventId/setup': typeof AuthenticatedEventsEventIdSetupRouteWithChildren
+  '/events/$eventId/bibs/chips': typeof AuthenticatedEventsEventIdBibsChipsRoute
+  '/events/$eventId/bibs/validate': typeof AuthenticatedEventsEventIdBibsValidateRoute
+  '/events/$eventId/certificates/status': typeof AuthenticatedEventsEventIdCertificatesStatusRoute
+  '/events/$eventId/certificates/template': typeof AuthenticatedEventsEventIdCertificatesTemplateRoute
+  '/events/$eventId/comms/delivery': typeof AuthenticatedEventsEventIdCommsDeliveryRoute
+  '/events/$eventId/comms/send': typeof AuthenticatedEventsEventIdCommsSendRoute
+  '/events/$eventId/comms/templates': typeof AuthenticatedEventsEventIdCommsTemplatesRoute
+  '/events/$eventId/payments/exports': typeof AuthenticatedEventsEventIdPaymentsExportsRoute
+  '/events/$eventId/payments/refunds': typeof AuthenticatedEventsEventIdPaymentsRefundsRoute
+  '/events/$eventId/results/mapping': typeof AuthenticatedEventsEventIdResultsMappingRoute
+  '/events/$eventId/results/preview': typeof AuthenticatedEventsEventIdResultsPreviewRoute
+  '/events/$eventId/results/publish': typeof AuthenticatedEventsEventIdResultsPublishRoute
+  '/events/$eventId/results/upload': typeof AuthenticatedEventsEventIdResultsUploadRoute
+  '/events/$eventId/results/validate': typeof AuthenticatedEventsEventIdResultsValidateRoute
+  '/events/$eventId/roster/$participantId': typeof AuthenticatedEventsEventIdRosterParticipantIdRoute
+  '/events/$eventId/roster/export': typeof AuthenticatedEventsEventIdRosterExportRoute
+  '/events/$eventId/roster/import': typeof AuthenticatedEventsEventIdRosterImportRoute
+  '/events/$eventId/roster/medical': typeof AuthenticatedEventsEventIdRosterMedicalRoute
+  '/events/$eventId/roster/spot': typeof AuthenticatedEventsEventIdRosterSpotRoute
+  '/events/$eventId/roster/tshirts': typeof AuthenticatedEventsEventIdRosterTshirtsRoute
+  '/events/$eventId/setup/basics': typeof AuthenticatedEventsEventIdSetupBasicsRoute
+  '/events/$eventId/setup/branding': typeof AuthenticatedEventsEventIdSetupBrandingRoute
+  '/events/$eventId/setup/fees': typeof AuthenticatedEventsEventIdSetupFeesRoute
+  '/events/$eventId/setup/form': typeof AuthenticatedEventsEventIdSetupFormRoute
+  '/events/$eventId/setup/policies': typeof AuthenticatedEventsEventIdSetupPoliciesRoute
+  '/events/$eventId/setup/publish': typeof AuthenticatedEventsEventIdSetupPublishRoute
+  '/events/$eventId/bibs': typeof AuthenticatedEventsEventIdBibsIndexRoute
+  '/events/$eventId/comms': typeof AuthenticatedEventsEventIdCommsIndexRoute
+  '/events/$eventId/payments': typeof AuthenticatedEventsEventIdPaymentsIndexRoute
+  '/events/$eventId/roster': typeof AuthenticatedEventsEventIdRosterIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/session-expired': typeof SessionExpiredRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/calendar': typeof AdminCalendarRoute
+  '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/impersonate': typeof AdminImpersonateRoute
+  '/admin/ops': typeof AdminOpsRoute
+  '/admin/organizers': typeof AdminOrganizersRoute
+  '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/admin/': typeof AdminIndexRoute
+  '/_authenticated/onboarding_/payment': typeof AuthenticatedOnboardingPaymentRoute
+  '/_authenticated/settings/team': typeof AuthenticatedSettingsTeamRoute
+  '/_authenticated/events/$eventId/coupons': typeof AuthenticatedEventsEventIdCouponsRoute
+  '/_authenticated/events/$eventId/permissions': typeof AuthenticatedEventsEventIdPermissionsRoute
+  '/_authenticated/events/$eventId/results': typeof AuthenticatedEventsEventIdResultsRouteWithChildren
+  '/_authenticated/events/$eventId/roster': typeof AuthenticatedEventsEventIdRosterRouteWithChildren
+  '/_authenticated/events/$eventId/setup': typeof AuthenticatedEventsEventIdSetupRouteWithChildren
+  '/_authenticated/events/$eventId/bibs/chips': typeof AuthenticatedEventsEventIdBibsChipsRoute
+  '/_authenticated/events/$eventId/bibs/validate': typeof AuthenticatedEventsEventIdBibsValidateRoute
+  '/_authenticated/events/$eventId/certificates/status': typeof AuthenticatedEventsEventIdCertificatesStatusRoute
+  '/_authenticated/events/$eventId/certificates/template': typeof AuthenticatedEventsEventIdCertificatesTemplateRoute
+  '/_authenticated/events/$eventId/comms/delivery': typeof AuthenticatedEventsEventIdCommsDeliveryRoute
+  '/_authenticated/events/$eventId/comms/send': typeof AuthenticatedEventsEventIdCommsSendRoute
+  '/_authenticated/events/$eventId/comms/templates': typeof AuthenticatedEventsEventIdCommsTemplatesRoute
+  '/_authenticated/events/$eventId/payments/exports': typeof AuthenticatedEventsEventIdPaymentsExportsRoute
+  '/_authenticated/events/$eventId/payments/refunds': typeof AuthenticatedEventsEventIdPaymentsRefundsRoute
+  '/_authenticated/events/$eventId/results/mapping': typeof AuthenticatedEventsEventIdResultsMappingRoute
+  '/_authenticated/events/$eventId/results/preview': typeof AuthenticatedEventsEventIdResultsPreviewRoute
+  '/_authenticated/events/$eventId/results/publish': typeof AuthenticatedEventsEventIdResultsPublishRoute
+  '/_authenticated/events/$eventId/results/upload': typeof AuthenticatedEventsEventIdResultsUploadRoute
+  '/_authenticated/events/$eventId/results/validate': typeof AuthenticatedEventsEventIdResultsValidateRoute
+  '/_authenticated/events/$eventId/roster/$participantId': typeof AuthenticatedEventsEventIdRosterParticipantIdRoute
+  '/_authenticated/events/$eventId/roster/export': typeof AuthenticatedEventsEventIdRosterExportRoute
+  '/_authenticated/events/$eventId/roster/import': typeof AuthenticatedEventsEventIdRosterImportRoute
+  '/_authenticated/events/$eventId/roster/medical': typeof AuthenticatedEventsEventIdRosterMedicalRoute
+  '/_authenticated/events/$eventId/roster/spot': typeof AuthenticatedEventsEventIdRosterSpotRoute
+  '/_authenticated/events/$eventId/roster/tshirts': typeof AuthenticatedEventsEventIdRosterTshirtsRoute
+  '/_authenticated/events/$eventId/setup/basics': typeof AuthenticatedEventsEventIdSetupBasicsRoute
+  '/_authenticated/events/$eventId/setup/branding': typeof AuthenticatedEventsEventIdSetupBrandingRoute
+  '/_authenticated/events/$eventId/setup/fees': typeof AuthenticatedEventsEventIdSetupFeesRoute
+  '/_authenticated/events/$eventId/setup/form': typeof AuthenticatedEventsEventIdSetupFormRoute
+  '/_authenticated/events/$eventId/setup/policies': typeof AuthenticatedEventsEventIdSetupPoliciesRoute
+  '/_authenticated/events/$eventId/setup/publish': typeof AuthenticatedEventsEventIdSetupPublishRoute
+  '/_authenticated/events/$eventId/bibs/': typeof AuthenticatedEventsEventIdBibsIndexRoute
+  '/_authenticated/events/$eventId/comms/': typeof AuthenticatedEventsEventIdCommsIndexRoute
+  '/_authenticated/events/$eventId/payments/': typeof AuthenticatedEventsEventIdPaymentsIndexRoute
+  '/_authenticated/events/$eventId/roster/': typeof AuthenticatedEventsEventIdRosterIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/admin/users'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/session-expired'
+    | '/onboarding'
+    | '/admin/audit'
+    | '/admin/calendar'
+    | '/admin/delivery'
+    | '/admin/impersonate'
+    | '/admin/ops'
+    | '/admin/organizers'
+    | '/admin/support'
+    | '/admin/users'
+    | '/admin/'
+    | '/onboarding/payment'
+    | '/settings/team'
+    | '/events/$eventId/coupons'
+    | '/events/$eventId/permissions'
+    | '/events/$eventId/results'
+    | '/events/$eventId/roster'
+    | '/events/$eventId/setup'
+    | '/events/$eventId/bibs/chips'
+    | '/events/$eventId/bibs/validate'
+    | '/events/$eventId/certificates/status'
+    | '/events/$eventId/certificates/template'
+    | '/events/$eventId/comms/delivery'
+    | '/events/$eventId/comms/send'
+    | '/events/$eventId/comms/templates'
+    | '/events/$eventId/payments/exports'
+    | '/events/$eventId/payments/refunds'
+    | '/events/$eventId/results/mapping'
+    | '/events/$eventId/results/preview'
+    | '/events/$eventId/results/publish'
+    | '/events/$eventId/results/upload'
+    | '/events/$eventId/results/validate'
+    | '/events/$eventId/roster/$participantId'
+    | '/events/$eventId/roster/export'
+    | '/events/$eventId/roster/import'
+    | '/events/$eventId/roster/medical'
+    | '/events/$eventId/roster/spot'
+    | '/events/$eventId/roster/tshirts'
+    | '/events/$eventId/setup/basics'
+    | '/events/$eventId/setup/branding'
+    | '/events/$eventId/setup/fees'
+    | '/events/$eventId/setup/form'
+    | '/events/$eventId/setup/policies'
+    | '/events/$eventId/setup/publish'
+    | '/events/$eventId/bibs/'
+    | '/events/$eventId/comms/'
+    | '/events/$eventId/payments/'
+    | '/events/$eventId/roster/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/admin/users' | '/'
+  to:
+    | '/login'
+    | '/session-expired'
+    | '/onboarding'
+    | '/admin/audit'
+    | '/admin/calendar'
+    | '/admin/delivery'
+    | '/admin/impersonate'
+    | '/admin/ops'
+    | '/admin/organizers'
+    | '/admin/support'
+    | '/admin/users'
+    | '/'
+    | '/admin'
+    | '/onboarding/payment'
+    | '/settings/team'
+    | '/events/$eventId/coupons'
+    | '/events/$eventId/permissions'
+    | '/events/$eventId/results'
+    | '/events/$eventId/setup'
+    | '/events/$eventId/bibs/chips'
+    | '/events/$eventId/bibs/validate'
+    | '/events/$eventId/certificates/status'
+    | '/events/$eventId/certificates/template'
+    | '/events/$eventId/comms/delivery'
+    | '/events/$eventId/comms/send'
+    | '/events/$eventId/comms/templates'
+    | '/events/$eventId/payments/exports'
+    | '/events/$eventId/payments/refunds'
+    | '/events/$eventId/results/mapping'
+    | '/events/$eventId/results/preview'
+    | '/events/$eventId/results/publish'
+    | '/events/$eventId/results/upload'
+    | '/events/$eventId/results/validate'
+    | '/events/$eventId/roster/$participantId'
+    | '/events/$eventId/roster/export'
+    | '/events/$eventId/roster/import'
+    | '/events/$eventId/roster/medical'
+    | '/events/$eventId/roster/spot'
+    | '/events/$eventId/roster/tshirts'
+    | '/events/$eventId/setup/basics'
+    | '/events/$eventId/setup/branding'
+    | '/events/$eventId/setup/fees'
+    | '/events/$eventId/setup/form'
+    | '/events/$eventId/setup/policies'
+    | '/events/$eventId/setup/publish'
+    | '/events/$eventId/bibs'
+    | '/events/$eventId/comms'
+    | '/events/$eventId/payments'
+    | '/events/$eventId/roster'
   id:
     | '__root__'
     | '/_authenticated'
+    | '/admin'
     | '/login'
+    | '/session-expired'
+    | '/_authenticated/onboarding'
+    | '/admin/audit'
+    | '/admin/calendar'
+    | '/admin/delivery'
+    | '/admin/impersonate'
+    | '/admin/ops'
+    | '/admin/organizers'
+    | '/admin/support'
     | '/admin/users'
     | '/_authenticated/'
+    | '/admin/'
+    | '/_authenticated/onboarding_/payment'
+    | '/_authenticated/settings/team'
+    | '/_authenticated/events/$eventId/coupons'
+    | '/_authenticated/events/$eventId/permissions'
+    | '/_authenticated/events/$eventId/results'
+    | '/_authenticated/events/$eventId/roster'
+    | '/_authenticated/events/$eventId/setup'
+    | '/_authenticated/events/$eventId/bibs/chips'
+    | '/_authenticated/events/$eventId/bibs/validate'
+    | '/_authenticated/events/$eventId/certificates/status'
+    | '/_authenticated/events/$eventId/certificates/template'
+    | '/_authenticated/events/$eventId/comms/delivery'
+    | '/_authenticated/events/$eventId/comms/send'
+    | '/_authenticated/events/$eventId/comms/templates'
+    | '/_authenticated/events/$eventId/payments/exports'
+    | '/_authenticated/events/$eventId/payments/refunds'
+    | '/_authenticated/events/$eventId/results/mapping'
+    | '/_authenticated/events/$eventId/results/preview'
+    | '/_authenticated/events/$eventId/results/publish'
+    | '/_authenticated/events/$eventId/results/upload'
+    | '/_authenticated/events/$eventId/results/validate'
+    | '/_authenticated/events/$eventId/roster/$participantId'
+    | '/_authenticated/events/$eventId/roster/export'
+    | '/_authenticated/events/$eventId/roster/import'
+    | '/_authenticated/events/$eventId/roster/medical'
+    | '/_authenticated/events/$eventId/roster/spot'
+    | '/_authenticated/events/$eventId/roster/tshirts'
+    | '/_authenticated/events/$eventId/setup/basics'
+    | '/_authenticated/events/$eventId/setup/branding'
+    | '/_authenticated/events/$eventId/setup/fees'
+    | '/_authenticated/events/$eventId/setup/form'
+    | '/_authenticated/events/$eventId/setup/policies'
+    | '/_authenticated/events/$eventId/setup/publish'
+    | '/_authenticated/events/$eventId/bibs/'
+    | '/_authenticated/events/$eventId/comms/'
+    | '/_authenticated/events/$eventId/payments/'
+    | '/_authenticated/events/$eventId/roster/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRoute
-  AdminUsersRoute: typeof AdminUsersRoute
+  SessionExpiredRoute: typeof SessionExpiredRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/session-expired': {
+      id: '/session-expired'
+      path: '/session-expired'
+      fullPath: '/session-expired'
+      preLoaderRoute: typeof SessionExpiredRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -85,6 +715,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/_authenticated/': {
       id: '/_authenticated/'
@@ -95,30 +732,519 @@ declare module '@tanstack/react-router' {
     }
     '/admin/users': {
       id: '/admin/users'
-      path: '/admin/users'
+      path: '/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AdminUsersRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/support': {
+      id: '/admin/support'
+      path: '/support'
+      fullPath: '/admin/support'
+      preLoaderRoute: typeof AdminSupportRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/organizers': {
+      id: '/admin/organizers'
+      path: '/organizers'
+      fullPath: '/admin/organizers'
+      preLoaderRoute: typeof AdminOrganizersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/ops': {
+      id: '/admin/ops'
+      path: '/ops'
+      fullPath: '/admin/ops'
+      preLoaderRoute: typeof AdminOpsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/impersonate': {
+      id: '/admin/impersonate'
+      path: '/impersonate'
+      fullPath: '/admin/impersonate'
+      preLoaderRoute: typeof AdminImpersonateRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/delivery': {
+      id: '/admin/delivery'
+      path: '/delivery'
+      fullPath: '/admin/delivery'
+      preLoaderRoute: typeof AdminDeliveryRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/calendar': {
+      id: '/admin/calendar'
+      path: '/calendar'
+      fullPath: '/admin/calendar'
+      preLoaderRoute: typeof AdminCalendarRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/settings/team': {
+      id: '/_authenticated/settings/team'
+      path: '/settings/team'
+      fullPath: '/settings/team'
+      preLoaderRoute: typeof AuthenticatedSettingsTeamRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/onboarding_/payment': {
+      id: '/_authenticated/onboarding_/payment'
+      path: '/onboarding/payment'
+      fullPath: '/onboarding/payment'
+      preLoaderRoute: typeof AuthenticatedOnboardingPaymentRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/setup': {
+      id: '/_authenticated/events/$eventId/setup'
+      path: '/events/$eventId/setup'
+      fullPath: '/events/$eventId/setup'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdSetupRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/roster': {
+      id: '/_authenticated/events/$eventId/roster'
+      path: '/events/$eventId/roster'
+      fullPath: '/events/$eventId/roster'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdRosterRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/results': {
+      id: '/_authenticated/events/$eventId/results'
+      path: '/events/$eventId/results'
+      fullPath: '/events/$eventId/results'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdResultsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/permissions': {
+      id: '/_authenticated/events/$eventId/permissions'
+      path: '/events/$eventId/permissions'
+      fullPath: '/events/$eventId/permissions'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdPermissionsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/coupons': {
+      id: '/_authenticated/events/$eventId/coupons'
+      path: '/events/$eventId/coupons'
+      fullPath: '/events/$eventId/coupons'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdCouponsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/roster/': {
+      id: '/_authenticated/events/$eventId/roster/'
+      path: '/'
+      fullPath: '/events/$eventId/roster/'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdRosterIndexRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdRosterRoute
+    }
+    '/_authenticated/events/$eventId/payments/': {
+      id: '/_authenticated/events/$eventId/payments/'
+      path: '/events/$eventId/payments'
+      fullPath: '/events/$eventId/payments/'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdPaymentsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/comms/': {
+      id: '/_authenticated/events/$eventId/comms/'
+      path: '/events/$eventId/comms'
+      fullPath: '/events/$eventId/comms/'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdCommsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/bibs/': {
+      id: '/_authenticated/events/$eventId/bibs/'
+      path: '/events/$eventId/bibs'
+      fullPath: '/events/$eventId/bibs/'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdBibsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/setup/publish': {
+      id: '/_authenticated/events/$eventId/setup/publish'
+      path: '/publish'
+      fullPath: '/events/$eventId/setup/publish'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdSetupPublishRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdSetupRoute
+    }
+    '/_authenticated/events/$eventId/setup/policies': {
+      id: '/_authenticated/events/$eventId/setup/policies'
+      path: '/policies'
+      fullPath: '/events/$eventId/setup/policies'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdSetupPoliciesRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdSetupRoute
+    }
+    '/_authenticated/events/$eventId/setup/form': {
+      id: '/_authenticated/events/$eventId/setup/form'
+      path: '/form'
+      fullPath: '/events/$eventId/setup/form'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdSetupFormRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdSetupRoute
+    }
+    '/_authenticated/events/$eventId/setup/fees': {
+      id: '/_authenticated/events/$eventId/setup/fees'
+      path: '/fees'
+      fullPath: '/events/$eventId/setup/fees'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdSetupFeesRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdSetupRoute
+    }
+    '/_authenticated/events/$eventId/setup/branding': {
+      id: '/_authenticated/events/$eventId/setup/branding'
+      path: '/branding'
+      fullPath: '/events/$eventId/setup/branding'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdSetupBrandingRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdSetupRoute
+    }
+    '/_authenticated/events/$eventId/setup/basics': {
+      id: '/_authenticated/events/$eventId/setup/basics'
+      path: '/basics'
+      fullPath: '/events/$eventId/setup/basics'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdSetupBasicsRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdSetupRoute
+    }
+    '/_authenticated/events/$eventId/roster/tshirts': {
+      id: '/_authenticated/events/$eventId/roster/tshirts'
+      path: '/tshirts'
+      fullPath: '/events/$eventId/roster/tshirts'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdRosterTshirtsRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdRosterRoute
+    }
+    '/_authenticated/events/$eventId/roster/spot': {
+      id: '/_authenticated/events/$eventId/roster/spot'
+      path: '/spot'
+      fullPath: '/events/$eventId/roster/spot'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdRosterSpotRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdRosterRoute
+    }
+    '/_authenticated/events/$eventId/roster/medical': {
+      id: '/_authenticated/events/$eventId/roster/medical'
+      path: '/medical'
+      fullPath: '/events/$eventId/roster/medical'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdRosterMedicalRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdRosterRoute
+    }
+    '/_authenticated/events/$eventId/roster/import': {
+      id: '/_authenticated/events/$eventId/roster/import'
+      path: '/import'
+      fullPath: '/events/$eventId/roster/import'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdRosterImportRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdRosterRoute
+    }
+    '/_authenticated/events/$eventId/roster/export': {
+      id: '/_authenticated/events/$eventId/roster/export'
+      path: '/export'
+      fullPath: '/events/$eventId/roster/export'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdRosterExportRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdRosterRoute
+    }
+    '/_authenticated/events/$eventId/roster/$participantId': {
+      id: '/_authenticated/events/$eventId/roster/$participantId'
+      path: '/$participantId'
+      fullPath: '/events/$eventId/roster/$participantId'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdRosterParticipantIdRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdRosterRoute
+    }
+    '/_authenticated/events/$eventId/results/validate': {
+      id: '/_authenticated/events/$eventId/results/validate'
+      path: '/validate'
+      fullPath: '/events/$eventId/results/validate'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdResultsValidateRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdResultsRoute
+    }
+    '/_authenticated/events/$eventId/results/upload': {
+      id: '/_authenticated/events/$eventId/results/upload'
+      path: '/upload'
+      fullPath: '/events/$eventId/results/upload'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdResultsUploadRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdResultsRoute
+    }
+    '/_authenticated/events/$eventId/results/publish': {
+      id: '/_authenticated/events/$eventId/results/publish'
+      path: '/publish'
+      fullPath: '/events/$eventId/results/publish'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdResultsPublishRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdResultsRoute
+    }
+    '/_authenticated/events/$eventId/results/preview': {
+      id: '/_authenticated/events/$eventId/results/preview'
+      path: '/preview'
+      fullPath: '/events/$eventId/results/preview'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdResultsPreviewRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdResultsRoute
+    }
+    '/_authenticated/events/$eventId/results/mapping': {
+      id: '/_authenticated/events/$eventId/results/mapping'
+      path: '/mapping'
+      fullPath: '/events/$eventId/results/mapping'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdResultsMappingRouteImport
+      parentRoute: typeof AuthenticatedEventsEventIdResultsRoute
+    }
+    '/_authenticated/events/$eventId/payments/refunds': {
+      id: '/_authenticated/events/$eventId/payments/refunds'
+      path: '/events/$eventId/payments/refunds'
+      fullPath: '/events/$eventId/payments/refunds'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdPaymentsRefundsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/payments/exports': {
+      id: '/_authenticated/events/$eventId/payments/exports'
+      path: '/events/$eventId/payments/exports'
+      fullPath: '/events/$eventId/payments/exports'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdPaymentsExportsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/comms/templates': {
+      id: '/_authenticated/events/$eventId/comms/templates'
+      path: '/events/$eventId/comms/templates'
+      fullPath: '/events/$eventId/comms/templates'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdCommsTemplatesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/comms/send': {
+      id: '/_authenticated/events/$eventId/comms/send'
+      path: '/events/$eventId/comms/send'
+      fullPath: '/events/$eventId/comms/send'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdCommsSendRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/comms/delivery': {
+      id: '/_authenticated/events/$eventId/comms/delivery'
+      path: '/events/$eventId/comms/delivery'
+      fullPath: '/events/$eventId/comms/delivery'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdCommsDeliveryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/certificates/template': {
+      id: '/_authenticated/events/$eventId/certificates/template'
+      path: '/events/$eventId/certificates/template'
+      fullPath: '/events/$eventId/certificates/template'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdCertificatesTemplateRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/certificates/status': {
+      id: '/_authenticated/events/$eventId/certificates/status'
+      path: '/events/$eventId/certificates/status'
+      fullPath: '/events/$eventId/certificates/status'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdCertificatesStatusRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/bibs/validate': {
+      id: '/_authenticated/events/$eventId/bibs/validate'
+      path: '/events/$eventId/bibs/validate'
+      fullPath: '/events/$eventId/bibs/validate'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdBibsValidateRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/events/$eventId/bibs/chips': {
+      id: '/_authenticated/events/$eventId/bibs/chips'
+      path: '/events/$eventId/bibs/chips'
+      fullPath: '/events/$eventId/bibs/chips'
+      preLoaderRoute: typeof AuthenticatedEventsEventIdBibsChipsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
   }
 }
 
+interface AuthenticatedEventsEventIdResultsRouteChildren {
+  AuthenticatedEventsEventIdResultsMappingRoute: typeof AuthenticatedEventsEventIdResultsMappingRoute
+  AuthenticatedEventsEventIdResultsPreviewRoute: typeof AuthenticatedEventsEventIdResultsPreviewRoute
+  AuthenticatedEventsEventIdResultsPublishRoute: typeof AuthenticatedEventsEventIdResultsPublishRoute
+  AuthenticatedEventsEventIdResultsUploadRoute: typeof AuthenticatedEventsEventIdResultsUploadRoute
+  AuthenticatedEventsEventIdResultsValidateRoute: typeof AuthenticatedEventsEventIdResultsValidateRoute
+}
+
+const AuthenticatedEventsEventIdResultsRouteChildren: AuthenticatedEventsEventIdResultsRouteChildren =
+  {
+    AuthenticatedEventsEventIdResultsMappingRoute:
+      AuthenticatedEventsEventIdResultsMappingRoute,
+    AuthenticatedEventsEventIdResultsPreviewRoute:
+      AuthenticatedEventsEventIdResultsPreviewRoute,
+    AuthenticatedEventsEventIdResultsPublishRoute:
+      AuthenticatedEventsEventIdResultsPublishRoute,
+    AuthenticatedEventsEventIdResultsUploadRoute:
+      AuthenticatedEventsEventIdResultsUploadRoute,
+    AuthenticatedEventsEventIdResultsValidateRoute:
+      AuthenticatedEventsEventIdResultsValidateRoute,
+  }
+
+const AuthenticatedEventsEventIdResultsRouteWithChildren =
+  AuthenticatedEventsEventIdResultsRoute._addFileChildren(
+    AuthenticatedEventsEventIdResultsRouteChildren,
+  )
+
+interface AuthenticatedEventsEventIdRosterRouteChildren {
+  AuthenticatedEventsEventIdRosterParticipantIdRoute: typeof AuthenticatedEventsEventIdRosterParticipantIdRoute
+  AuthenticatedEventsEventIdRosterExportRoute: typeof AuthenticatedEventsEventIdRosterExportRoute
+  AuthenticatedEventsEventIdRosterImportRoute: typeof AuthenticatedEventsEventIdRosterImportRoute
+  AuthenticatedEventsEventIdRosterMedicalRoute: typeof AuthenticatedEventsEventIdRosterMedicalRoute
+  AuthenticatedEventsEventIdRosterSpotRoute: typeof AuthenticatedEventsEventIdRosterSpotRoute
+  AuthenticatedEventsEventIdRosterTshirtsRoute: typeof AuthenticatedEventsEventIdRosterTshirtsRoute
+  AuthenticatedEventsEventIdRosterIndexRoute: typeof AuthenticatedEventsEventIdRosterIndexRoute
+}
+
+const AuthenticatedEventsEventIdRosterRouteChildren: AuthenticatedEventsEventIdRosterRouteChildren =
+  {
+    AuthenticatedEventsEventIdRosterParticipantIdRoute:
+      AuthenticatedEventsEventIdRosterParticipantIdRoute,
+    AuthenticatedEventsEventIdRosterExportRoute:
+      AuthenticatedEventsEventIdRosterExportRoute,
+    AuthenticatedEventsEventIdRosterImportRoute:
+      AuthenticatedEventsEventIdRosterImportRoute,
+    AuthenticatedEventsEventIdRosterMedicalRoute:
+      AuthenticatedEventsEventIdRosterMedicalRoute,
+    AuthenticatedEventsEventIdRosterSpotRoute:
+      AuthenticatedEventsEventIdRosterSpotRoute,
+    AuthenticatedEventsEventIdRosterTshirtsRoute:
+      AuthenticatedEventsEventIdRosterTshirtsRoute,
+    AuthenticatedEventsEventIdRosterIndexRoute:
+      AuthenticatedEventsEventIdRosterIndexRoute,
+  }
+
+const AuthenticatedEventsEventIdRosterRouteWithChildren =
+  AuthenticatedEventsEventIdRosterRoute._addFileChildren(
+    AuthenticatedEventsEventIdRosterRouteChildren,
+  )
+
+interface AuthenticatedEventsEventIdSetupRouteChildren {
+  AuthenticatedEventsEventIdSetupBasicsRoute: typeof AuthenticatedEventsEventIdSetupBasicsRoute
+  AuthenticatedEventsEventIdSetupBrandingRoute: typeof AuthenticatedEventsEventIdSetupBrandingRoute
+  AuthenticatedEventsEventIdSetupFeesRoute: typeof AuthenticatedEventsEventIdSetupFeesRoute
+  AuthenticatedEventsEventIdSetupFormRoute: typeof AuthenticatedEventsEventIdSetupFormRoute
+  AuthenticatedEventsEventIdSetupPoliciesRoute: typeof AuthenticatedEventsEventIdSetupPoliciesRoute
+  AuthenticatedEventsEventIdSetupPublishRoute: typeof AuthenticatedEventsEventIdSetupPublishRoute
+}
+
+const AuthenticatedEventsEventIdSetupRouteChildren: AuthenticatedEventsEventIdSetupRouteChildren =
+  {
+    AuthenticatedEventsEventIdSetupBasicsRoute:
+      AuthenticatedEventsEventIdSetupBasicsRoute,
+    AuthenticatedEventsEventIdSetupBrandingRoute:
+      AuthenticatedEventsEventIdSetupBrandingRoute,
+    AuthenticatedEventsEventIdSetupFeesRoute:
+      AuthenticatedEventsEventIdSetupFeesRoute,
+    AuthenticatedEventsEventIdSetupFormRoute:
+      AuthenticatedEventsEventIdSetupFormRoute,
+    AuthenticatedEventsEventIdSetupPoliciesRoute:
+      AuthenticatedEventsEventIdSetupPoliciesRoute,
+    AuthenticatedEventsEventIdSetupPublishRoute:
+      AuthenticatedEventsEventIdSetupPublishRoute,
+  }
+
+const AuthenticatedEventsEventIdSetupRouteWithChildren =
+  AuthenticatedEventsEventIdSetupRoute._addFileChildren(
+    AuthenticatedEventsEventIdSetupRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedOnboardingPaymentRoute: typeof AuthenticatedOnboardingPaymentRoute
+  AuthenticatedSettingsTeamRoute: typeof AuthenticatedSettingsTeamRoute
+  AuthenticatedEventsEventIdCouponsRoute: typeof AuthenticatedEventsEventIdCouponsRoute
+  AuthenticatedEventsEventIdPermissionsRoute: typeof AuthenticatedEventsEventIdPermissionsRoute
+  AuthenticatedEventsEventIdResultsRoute: typeof AuthenticatedEventsEventIdResultsRouteWithChildren
+  AuthenticatedEventsEventIdRosterRoute: typeof AuthenticatedEventsEventIdRosterRouteWithChildren
+  AuthenticatedEventsEventIdSetupRoute: typeof AuthenticatedEventsEventIdSetupRouteWithChildren
+  AuthenticatedEventsEventIdBibsChipsRoute: typeof AuthenticatedEventsEventIdBibsChipsRoute
+  AuthenticatedEventsEventIdBibsValidateRoute: typeof AuthenticatedEventsEventIdBibsValidateRoute
+  AuthenticatedEventsEventIdCertificatesStatusRoute: typeof AuthenticatedEventsEventIdCertificatesStatusRoute
+  AuthenticatedEventsEventIdCertificatesTemplateRoute: typeof AuthenticatedEventsEventIdCertificatesTemplateRoute
+  AuthenticatedEventsEventIdCommsDeliveryRoute: typeof AuthenticatedEventsEventIdCommsDeliveryRoute
+  AuthenticatedEventsEventIdCommsSendRoute: typeof AuthenticatedEventsEventIdCommsSendRoute
+  AuthenticatedEventsEventIdCommsTemplatesRoute: typeof AuthenticatedEventsEventIdCommsTemplatesRoute
+  AuthenticatedEventsEventIdPaymentsExportsRoute: typeof AuthenticatedEventsEventIdPaymentsExportsRoute
+  AuthenticatedEventsEventIdPaymentsRefundsRoute: typeof AuthenticatedEventsEventIdPaymentsRefundsRoute
+  AuthenticatedEventsEventIdBibsIndexRoute: typeof AuthenticatedEventsEventIdBibsIndexRoute
+  AuthenticatedEventsEventIdCommsIndexRoute: typeof AuthenticatedEventsEventIdCommsIndexRoute
+  AuthenticatedEventsEventIdPaymentsIndexRoute: typeof AuthenticatedEventsEventIdPaymentsIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedOnboardingPaymentRoute: AuthenticatedOnboardingPaymentRoute,
+  AuthenticatedSettingsTeamRoute: AuthenticatedSettingsTeamRoute,
+  AuthenticatedEventsEventIdCouponsRoute:
+    AuthenticatedEventsEventIdCouponsRoute,
+  AuthenticatedEventsEventIdPermissionsRoute:
+    AuthenticatedEventsEventIdPermissionsRoute,
+  AuthenticatedEventsEventIdResultsRoute:
+    AuthenticatedEventsEventIdResultsRouteWithChildren,
+  AuthenticatedEventsEventIdRosterRoute:
+    AuthenticatedEventsEventIdRosterRouteWithChildren,
+  AuthenticatedEventsEventIdSetupRoute:
+    AuthenticatedEventsEventIdSetupRouteWithChildren,
+  AuthenticatedEventsEventIdBibsChipsRoute:
+    AuthenticatedEventsEventIdBibsChipsRoute,
+  AuthenticatedEventsEventIdBibsValidateRoute:
+    AuthenticatedEventsEventIdBibsValidateRoute,
+  AuthenticatedEventsEventIdCertificatesStatusRoute:
+    AuthenticatedEventsEventIdCertificatesStatusRoute,
+  AuthenticatedEventsEventIdCertificatesTemplateRoute:
+    AuthenticatedEventsEventIdCertificatesTemplateRoute,
+  AuthenticatedEventsEventIdCommsDeliveryRoute:
+    AuthenticatedEventsEventIdCommsDeliveryRoute,
+  AuthenticatedEventsEventIdCommsSendRoute:
+    AuthenticatedEventsEventIdCommsSendRoute,
+  AuthenticatedEventsEventIdCommsTemplatesRoute:
+    AuthenticatedEventsEventIdCommsTemplatesRoute,
+  AuthenticatedEventsEventIdPaymentsExportsRoute:
+    AuthenticatedEventsEventIdPaymentsExportsRoute,
+  AuthenticatedEventsEventIdPaymentsRefundsRoute:
+    AuthenticatedEventsEventIdPaymentsRefundsRoute,
+  AuthenticatedEventsEventIdBibsIndexRoute:
+    AuthenticatedEventsEventIdBibsIndexRoute,
+  AuthenticatedEventsEventIdCommsIndexRoute:
+    AuthenticatedEventsEventIdCommsIndexRoute,
+  AuthenticatedEventsEventIdPaymentsIndexRoute:
+    AuthenticatedEventsEventIdPaymentsIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface AdminRouteChildren {
+  AdminAuditRoute: typeof AdminAuditRoute
+  AdminCalendarRoute: typeof AdminCalendarRoute
+  AdminDeliveryRoute: typeof AdminDeliveryRoute
+  AdminImpersonateRoute: typeof AdminImpersonateRoute
+  AdminOpsRoute: typeof AdminOpsRoute
+  AdminOrganizersRoute: typeof AdminOrganizersRoute
+  AdminSupportRoute: typeof AdminSupportRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAuditRoute: AdminAuditRoute,
+  AdminCalendarRoute: AdminCalendarRoute,
+  AdminDeliveryRoute: AdminDeliveryRoute,
+  AdminImpersonateRoute: AdminImpersonateRoute,
+  AdminOpsRoute: AdminOpsRoute,
+  AdminOrganizersRoute: AdminOrganizersRoute,
+  AdminSupportRoute: AdminSupportRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
-  AdminUsersRoute: AdminUsersRoute,
+  SessionExpiredRoute: SessionExpiredRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,0 +1,93 @@
+import type { Bib, ChipMapping } from "./types";
+
+export const mockBibs = [
+  {
+    id: "bib-1042",
+    eventId: "coimbatore-marathon-2026",
+    bibNumber: "1042",
+    distance: "21K",
+    participantId: "participant-ananya-krishnan",
+    participantName: "Ananya Krishnan",
+    status: "assigned",
+  },
+  {
+    id: "bib-1043",
+    eventId: "coimbatore-marathon-2026",
+    bibNumber: "1043",
+    distance: "21K",
+    participantId: "participant-mohammed-faisal",
+    participantName: "Mohammed Faisal",
+    status: "assigned",
+  },
+  {
+    id: "bib-1044",
+    eventId: "coimbatore-marathon-2026",
+    bibNumber: "1044",
+    distance: "21K",
+    status: "available",
+  },
+  {
+    id: "bib-2188",
+    eventId: "coimbatore-marathon-2026",
+    bibNumber: "2188",
+    distance: "10K",
+    participantId: "participant-karthik-narayanan",
+    participantName: "Karthik Narayanan",
+    status: "assigned",
+  },
+  {
+    id: "bib-2188-duplicate",
+    eventId: "coimbatore-marathon-2026",
+    bibNumber: "2188",
+    distance: "10K",
+    status: "duplicate",
+  },
+  {
+    id: "bib-3104",
+    eventId: "coimbatore-marathon-2026",
+    bibNumber: "3104",
+    distance: "5K",
+    participantId: "participant-divya-senthil",
+    participantName: "Divya Senthil",
+    status: "assigned",
+  },
+] as const satisfies Bib[];
+
+export const mockChipMappings = [
+  {
+    id: "chip-1042",
+    eventId: "coimbatore-marathon-2026",
+    bibNumber: "1042",
+    chipCode: "CBE21K-0001042",
+    participantId: "participant-ananya-krishnan",
+    status: "mapped",
+    updatedAt: "2026-07-10T14:22:00+05:30",
+  },
+  {
+    id: "chip-1043",
+    eventId: "coimbatore-marathon-2026",
+    bibNumber: "1043",
+    chipCode: "CBE21K-0001043",
+    participantId: "participant-mohammed-faisal",
+    status: "missing-chip",
+    updatedAt: "2026-07-10T14:24:00+05:30",
+  },
+  {
+    id: "chip-2188",
+    eventId: "coimbatore-marathon-2026",
+    bibNumber: "2188",
+    chipCode: "CBE10K-0002188",
+    participantId: "participant-karthik-narayanan",
+    status: "duplicate-chip",
+    updatedAt: "2026-07-10T14:28:00+05:30",
+  },
+  {
+    id: "chip-3104",
+    eventId: "coimbatore-marathon-2026",
+    bibNumber: "3104",
+    chipCode: "CBE5K-0003104",
+    participantId: "participant-divya-senthil",
+    status: "needs-review",
+    updatedAt: "2026-07-10T14:30:00+05:30",
+  },
+] as const satisfies ChipMapping[];

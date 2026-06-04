@@ -1,14 +1,17 @@
-import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, Info, MinusCircle, XCircle } from "lucide-react";
 import type * as React from "react";
 
 import { cn } from "../lib/utils";
 
-export type StatusKind = "ok" | "error" | "warning";
+export type StatusKind = "ok" | "error" | "warning" | "info" | "pending" | "neutral";
 
 const ICONS: Record<StatusKind, React.ComponentType<{ className?: string }>> = {
   ok: CheckCircle2,
   error: XCircle,
   warning: AlertTriangle,
+  info: Info,
+  pending: Clock,
+  neutral: MinusCircle,
 };
 
 /**
@@ -35,6 +38,9 @@ export function StatusBadge({
         status === "ok" && "border-success/30 bg-success/10 text-success-text",
         status === "warning" && "border-warning/30 bg-warning/10 text-warning-text",
         status === "error" && "border-danger/30 bg-danger/10 text-danger-text",
+        status === "info" && "border-info/30 bg-info/10 text-info-text",
+        status === "pending" && "border-warning/30 bg-warning/10 text-warning-text",
+        status === "neutral" && "border-muted bg-muted/70 text-muted-foreground",
         className,
       )}
     >

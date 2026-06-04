@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { IndexPage } from "./-page";
+import { EventsDashboardScreen, validateConsoleSearch } from "./-event-setup-screens";
 
 export const Route = createFileRoute("/_authenticated/")({
-  component: IndexPage,
+  validateSearch: validateConsoleSearch,
+  staticData: { breadcrumb: "Events" },
+  component: EventsDashboardScreen,
 });

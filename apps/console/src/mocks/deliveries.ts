@@ -1,0 +1,48 @@
+import type { Delivery } from "./types";
+
+export const mockDeliveries = [
+  {
+    id: "delivery-wa-1001",
+    messageId: "msg-confirmation-wave-1",
+    eventId: "coimbatore-marathon-2026",
+    recipientName: "Ananya Krishnan",
+    recipientPhone: "+91 98765 21042",
+    channel: "WhatsApp",
+    status: "read",
+    providerReference: "wamid.demo.1042",
+    lastUpdatedAt: "2026-02-10T20:02:00+05:30",
+  },
+  {
+    id: "delivery-wa-1002",
+    messageId: "msg-confirmation-wave-1",
+    eventId: "coimbatore-marathon-2026",
+    recipientName: "Karthik Narayanan",
+    recipientPhone: "+91 97900 66771",
+    channel: "WhatsApp",
+    status: "delivered",
+    providerReference: "wamid.demo.2188",
+    lastUpdatedAt: "2026-02-10T20:04:00+05:30",
+  },
+  {
+    id: "delivery-wa-1003",
+    messageId: "msg-confirmation-wave-1",
+    eventId: "coimbatore-marathon-2026",
+    recipientName: "Divya Senthil",
+    recipientPhone: "+91 94431 80808",
+    channel: "WhatsApp",
+    status: "webhook-pending",
+    providerReference: "wamid.demo.3104",
+    lastUpdatedAt: "2026-02-10T20:05:00+05:30",
+  },
+  {
+    id: "delivery-email-5001",
+    messageId: "msg-results-live",
+    eventId: "pollachi-trail-run-2025",
+    recipientName: "Lakshmi Pradeep",
+    recipientPhone: "+91 99444 12121",
+    channel: "Email",
+    status: "failed",
+    lastUpdatedAt: "2025-12-14T14:12:00+05:30",
+    errorMessage: "Mailbox full; retry queued for support follow-up",
+  },
+] as const satisfies Delivery[];
