@@ -1,9 +1,14 @@
 # Corral — Wireframe Screen Specification
 
 > Design companion to [plan.md](plan.md) and [implementation-plan.md](implementation-plan.md).
-> This document is the **source of truth for screen design** (wireframes in Figma / any tool).
+> This document is the **source of truth for screen inventory**.
 > It enumerates every screen, its purpose, key components, states, and data shown — organized by
 > surface and flow, with a build priority that maps to the Phase-1 trust loop.
+
+Route paths and the build workflow now live in `docs/design-build/navigation-and-routes.md` and
+`docs/design-build-guide.md`. Screens are built directly in the React apps with in-repo typed mock
+fixtures only: `apps/web` for participant screens and `apps/console` for organizer/admin screens. No
+backend integration is part of this screen-build pass.
 
 ---
 
@@ -315,7 +320,7 @@ safe, support contact, and an admin/manual processing path with audit notes.
 
 ---
 
-## E. Design priority order (suggested wireframing sequence)
+## E. Design priority order (suggested in-app build sequence)
 
 | Wave | Screens | Rationale |
 |---|---|---|
@@ -367,7 +372,7 @@ safe, support contact, and an admin/manual processing path with audit notes.
 - Added missing screens/patterns for **insurance opt-in**, **team roles/RBAC**, **event publish readiness**,
   **operations/job health**, **access denied**, **CSV upload validation**, **degraded/manual backup**, and
   **webhook/reconciliation pending**.
-- Clarified that P2 means lower wireframing priority, not automatic removal from the MVP scope.
+- Clarified that P2 means lower build priority, not automatic removal from the MVP scope.
 
 ---
 

@@ -52,6 +52,10 @@ A slice is `Done` only when all of the following are true:
 
 ## 2. Current product state
 
+### Direction change — 2026-06-03
+
+Screen work has pivoted to direct in-app React frontend builds: no backend integration, in-repo typed mock fixtures only. Build participant screens in `apps/web` and organizer/admin screens in `apps/console`. Navigation is finalized in `docs/design-build/navigation-and-routes.md`; screen progress is tracked in the Build Tracker in `docs/design-build-guide.md` Part 5. Screens are not yet built unless a tracker row says so.
+
 ### Current recommended next action
 
 1. **Diagnose local `auth:seed-admin` failure** seen in the latest terminal context before relying on
