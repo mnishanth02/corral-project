@@ -17,8 +17,8 @@ export const Route = createFileRoute("/_authenticated/events/$eventId/roster/tsh
 function TshirtScreenRoute() {
   return (
     <TshirtScreen
-      event={ useActiveEventFromRoute(readEventIdFromLocation()) }
-      search={ readSimpleRosterSearchFromLocation() }
+      event={useActiveEventFromRoute(readEventIdFromLocation())}
+      search={readSimpleRosterSearchFromLocation()}
     />
   );
 }

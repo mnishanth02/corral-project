@@ -45,18 +45,18 @@ function BibAssignmentRoute() {
 
   return (
     <BibPageShell
-      eventId={ eventId }
+      eventId={eventId}
       currentStep="assignment"
-      eyebrow={ `${getEventName(eventId)} · BIB management` }
+      eyebrow={`${getEventName(eventId)} · BIB management`}
       title="BIB Assignment"
       description="Manual or CSV assignment for the Coimbatore race desk. Validate every BIB before printing or timing-vendor export."
-      demo={ demo }
+      demo={demo}
       actions={
         <>
           <Button variant="outline">Download template</Button>
-          <CsvUploadSheet disabled={ disabled } />
-          <Button asChild variant={ hasWarnings ? "default" : "outline" }>
-            <Link to={ "/events/$eventId/bibs/validate" } params={ { eventId } } search={ { demo } }>
+          <CsvUploadSheet disabled={disabled} />
+          <Button asChild variant={hasWarnings ? "default" : "outline"}>
+            <Link to={"/events/$eventId/bibs/validate"} params={{ eventId }} search={{ demo }}>
               Open duplicate validation
             </Link>
           </Button>
@@ -65,7 +65,7 @@ function BibAssignmentRoute() {
     >
       <div className="space-y-6">
         <StatGrid
-          stats={ [
+          stats={[
             {
               label: "Assigned",
               value: demo === "success" ? "642" : "614",
@@ -90,10 +90,10 @@ function BibAssignmentRoute() {
               helper: "bib_assignment_codissia.csv",
               status: "info",
             },
-          ] }
+          ]}
         />
 
-        { disabled ? (
+        {disabled ? (
           <Alert className="border-warning/40 bg-warning/5">
             <span aria-hidden="true">⚠</span>
             <AlertTitle>Read-only BIB controls</AlertTitle>
@@ -102,9 +102,9 @@ function BibAssignmentRoute() {
               manual changes.
             </AlertDescription>
           </Alert>
-        ) : null }
+        ) : null}
 
-        { demo === "success" ? (
+        {demo === "success" ? (
           <Alert className="border-success/40 bg-success/5">
             <span aria-hidden="true">✓</span>
             <AlertTitle>486 BIBs assigned</AlertTitle>
@@ -113,9 +113,9 @@ function BibAssignmentRoute() {
               mapping.
             </AlertDescription>
           </Alert>
-        ) : null }
+        ) : null}
 
-        { hasWarnings ? (
+        {hasWarnings ? (
           <Alert className="border-danger/40 bg-danger/5 text-danger-text">
             <span aria-hidden="true">⚠</span>
             <AlertTitle>Duplicate or overwrite warnings require review</AlertTitle>
@@ -124,20 +124,20 @@ function BibAssignmentRoute() {
               explicit validation step next.
             </AlertDescription>
           </Alert>
-        ) : null }
+        ) : null}
 
-        { loading ? (
+        {loading ? (
           <LoadingState label="BIB assignment" />
         ) : (
           <div className="space-y-4">
             <FilterBar
               label="BIB assignments"
-              filters={ ["All", "Assigned", "Unassigned", "Duplicate", "5K", "10K", "21K"] }
+              filters={["All", "Assigned", "Unassigned", "Duplicate", "5K", "10K", "21K"]}
             />
-            <AssignmentTable rows={ rows } disabled={ disabled } />
+            <AssignmentTable rows={rows} disabled={disabled} />
             <MiniPagination />
           </div>
-        ) }
+        )}
 
         <div className="grid gap-6 xl:grid-cols-[1fr_24rem]">
           <AuditReasonCard
@@ -151,16 +151,16 @@ function BibAssignmentRoute() {
             </CardHeader>
             <CardContent className="space-y-3">
               <StatusBadge
-                status={ hasWarnings ? "error" : "ok" }
-                label={ hasWarnings ? "Validation required" : "Ready to validate" }
+                status={hasWarnings ? "error" : "ok"}
+                label={hasWarnings ? "Validation required" : "Ready to validate"}
               />
               <Button asChild className="w-full">
-                <Link to={ "/events/$eventId/bibs/validate" } params={ { eventId } } search={ { demo } }>
+                <Link to={"/events/$eventId/bibs/validate"} params={{ eventId }} search={{ demo }}>
                   Open duplicate validation
                 </Link>
               </Button>
               <Button asChild variant="outline" className="w-full">
-                <Link to={ "/events/$eventId/bibs/chips" } params={ { eventId } } search={ { demo } }>
+                <Link to={"/events/$eventId/bibs/chips"} params={{ eventId }} search={{ demo }}>
                   Preview chip mapping
                 </Link>
               </Button>
@@ -169,12 +169,12 @@ function BibAssignmentRoute() {
         </div>
 
         <DemoUrls
-          urls={ [
+          urls={[
             `/events/${eventIdForDisplay}/bibs?demo=default`,
             `/events/${eventIdForDisplay}/bibs?demo=loading`,
             `/events/${eventIdForDisplay}/bibs?demo=success`,
             `/events/${eventIdForDisplay}/bibs?demo=validation-error`,
-          ] }
+          ]}
         />
       </div>
     </BibPageShell>

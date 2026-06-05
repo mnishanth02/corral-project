@@ -17,8 +17,8 @@ export const Route = createFileRoute("/_authenticated/events/$eventId/roster/med
 function MedicalScreenRoute() {
   return (
     <MedicalScreen
-      event={ useActiveEventFromRoute(readEventIdFromLocation()) }
-      search={ readSimpleRosterSearchFromLocation() }
+      event={useActiveEventFromRoute(readEventIdFromLocation())}
+      search={readSimpleRosterSearchFromLocation()}
     />
   );
 }

@@ -12,5 +12,5 @@ export const Route = createFileRoute("/_authenticated/events/$eventId/permission
 function PermissionsRoute() {
   const { eventId } = Route.useParams() as { eventId: string };
   const search = Route.useSearch() as { demo: import("../mocks/types").DemoState };
-  return <PermissionsScreen eventId={ eventId } search={ search } />;
+  return <PermissionsScreen eventId={eventId} search={search} />;
 }

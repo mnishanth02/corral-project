@@ -6,6 +6,6 @@ export const Route = createFileRoute("/_authenticated/events/$eventId/results/va
   validateSearch: validateResultsSearch,
   staticData: { breadcrumb: "Validate" },
   component: () => (
-    <ResultsValidateScreen eventId={ (Route.useParams() as { eventId: string }).eventId } />
+    <ResultsValidateScreen eventId={(Route.useParams() as { eventId: string }).eventId} />
   ),
 });

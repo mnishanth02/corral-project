@@ -17,8 +17,8 @@ export const Route = createFileRoute("/_authenticated/events/$eventId/roster/spo
 function SpotRegistrationScreenRoute() {
   return (
     <SpotRegistrationScreen
-      event={ useActiveEventFromRoute(readEventIdFromLocation()) }
-      search={ readSimpleRosterSearchFromLocation() }
+      event={useActiveEventFromRoute(readEventIdFromLocation())}
+      search={readSimpleRosterSearchFromLocation()}
     />
   );
 }
