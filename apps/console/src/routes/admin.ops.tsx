@@ -261,7 +261,7 @@ function AdminOpsPage() {
                       variant="outline"
                       className="border-[#334155] bg-[#0b1120] text-[#f1f5f9]"
                     >
-                      <a href="/admin/delivery?demo=webhook-pending&as=corral-admin">Open A-05</a>
+                      <a href="/admin/delivery?demo=webhook-pending">Open A-05</a>
                     </Button>
                   </div>
                 </div>

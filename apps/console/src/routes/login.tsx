@@ -20,17 +20,16 @@ import { Input } from "@corral/ui/components/input";
 import { Skeleton } from "@corral/ui/components/skeleton";
 import { Spinner } from "@corral/ui/components/spinner";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import type { FormEvent } from "react";
-import { useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
-import { getSafeRedirectPath } from "../lib/auth";
-import { personaStorageKey } from "../mocks";
+import { authClient, getSafeRedirectPath } from "../lib/auth";
 
 type LoginDemo = "default" | "loading" | "validation-error" | "auth-error";
 
 type LoginSearch = {
   redirect?: string;
   demo: LoginDemo;
+  verified?: string;
 };
 
 type LoginMode = "idle" | "email" | "google";
@@ -40,6 +39,7 @@ const loginDemos = ["default", "loading", "validation-error", "auth-error"] as c
 export const Route = createFileRoute("/login")({
   validateSearch: (search): LoginSearch => ({
     redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+    verified: typeof search.verified === "string" ? search.verified : undefined,
     demo:
       typeof search.demo === "string" && loginDemos.includes(search.demo as LoginDemo)
         ? (search.demo as LoginDemo)
@@ -51,8 +51,9 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const emailId = useId();
   const passwordId = useId();
+  const formRef = useRef<HTMLFormElement>(null);
   const errorRef = useRef<HTMLDivElement>(null);
-  const { redirect, demo } = Route.useSearch();
+  const { redirect, demo, verified } = Route.useSearch();
   const redirectPath = getSafeRedirectPath(redirect);
   const [mode, setMode] = useState<LoginMode>(demo === "loading" ? "email" : "idle");
   const [error, setError] = useState<string | null>(
@@ -65,43 +66,85 @@ function LoginPage() {
 
   const isSubmitting = mode !== "idle";
 
-  async function finishMockSignIn(nextMode: LoginMode) {
-    setMode(nextMode);
-    setError(null);
-    window.localStorage.setItem(personaStorageKey, "org-owner");
-    await new Promise((resolve) => window.setTimeout(resolve, 250));
-    window.location.assign(redirectPath);
-  }
+  const focusError = useCallback(() => {
+    window.requestAnimationFrame(() => errorRef.current?.focus());
+  }, []);
 
-  async function handleEmailSignIn(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const email = String(formData.get("email") ?? "").trim();
-    const password = String(formData.get("password") ?? "");
+  const submitEmailSignIn = useCallback(
+    async (form: HTMLFormElement) => {
+      const formData = new FormData(form);
+      const email = String(formData.get("email") ?? "").trim();
+      const password = String(formData.get("password") ?? "");
 
-    if (!email || !password || demo === "validation-error") {
-      setError("Enter an email and password to continue.");
-      window.requestAnimationFrame(() => errorRef.current?.focus());
+      if (!email || !password || demo === "validation-error") {
+        setError("Enter an email and password to continue.");
+        focusError();
+        return;
+      }
+
+      if (demo === "auth-error") {
+        setError("Incorrect email or password.");
+        focusError();
+        return;
+      }
+
+      setMode("email");
+      setError(null);
+
+      const result = await authClient.signIn.email({
+        email,
+        password,
+      });
+
+      if (result.error) {
+        setMode("idle");
+        setError(getLoginErrorMessage(result.error));
+        focusError();
+        return;
+      }
+
+      window.location.assign(redirectPath);
+    },
+    [demo, focusError, redirectPath],
+  );
+
+  useEffect(() => {
+    const currentForm = formRef.current;
+
+    if (!currentForm) {
       return;
     }
 
-    if (demo === "auth-error") {
-      setError("Incorrect email or password.");
-      window.requestAnimationFrame(() => errorRef.current?.focus());
-      return;
+    const form = currentForm;
+
+    function handleSubmit(event: SubmitEvent) {
+      event.preventDefault();
+      void submitEmailSignIn(form);
     }
 
-    await finishMockSignIn("email");
-  }
+    currentForm.addEventListener("submit", handleSubmit);
+    return () => currentForm.removeEventListener("submit", handleSubmit);
+  }, [submitEmailSignIn]);
 
   async function handleGoogleSignIn() {
     if (demo === "auth-error") {
       setError("Google sign-in is unavailable for this demo state.");
-      window.requestAnimationFrame(() => errorRef.current?.focus());
+      focusError();
       return;
     }
 
-    await finishMockSignIn("google");
+    setMode("google");
+    setError(null);
+
+    const callbackURL =
+      typeof window === "undefined" ? redirectPath : `${window.location.origin}${redirectPath}`;
+    const result = await authClient.signIn.social({ provider: "google", callbackURL });
+
+    if (result.error) {
+      setMode("idle");
+      setError(getLoginErrorMessage(result.error));
+      focusError();
+    }
   }
 
   if (demo === "loading") {
@@ -152,17 +195,25 @@ function LoginPage() {
             <CardHeader>
               <CardTitle className="font-display text-3xl uppercase">Welcome back</CardTitle>
               <CardDescription>
-                Email/password and Google sign-in are mocked locally. No backend or provider network
-                call is made.
+                Use your Corral account. New organizers can self-register and verify email before
+                creating an organizer profile.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleEmailSignIn} noValidate>
+              <form ref={formRef} noValidate>
                 <FieldGroup>
                   {error ? (
                     <Alert ref={errorRef} tabIndex={-1} variant="destructive" aria-live="polite">
                       <AlertTitle>Sign-in failed</AlertTitle>
                       <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  ) : null}
+                  {verified ? (
+                    <Alert className="border-success/30 bg-success/10 text-success-text">
+                      <AlertTitle>Email verified</AlertTitle>
+                      <AlertDescription>
+                        Sign in to continue to organizer onboarding.
+                      </AlertDescription>
                     </Alert>
                   ) : null}
 
@@ -192,7 +243,7 @@ function LoginPage() {
                       required
                     />
                     <FieldDescription>
-                      Accounts are created by Corral admins. Participants stay passwordless.
+                      Participants stay passwordless; this console is for organizer teams.
                     </FieldDescription>
                   </Field>
 
@@ -216,29 +267,41 @@ function LoginPage() {
                     Continue with Google
                   </Button>
 
-                  <div className="flex flex-wrap justify-between gap-2 text-sm">
+                  <p className="text-center text-sm text-muted-foreground">
+                    New organizer?{" "}
                     <Link
-                      to="/login"
-                      search={{ demo: "validation-error" }}
-                      className="text-brand-orange-strong underline underline-offset-4"
+                      to="/signup"
+                      className="font-semibold text-brand-orange-strong underline underline-offset-4"
                     >
-                      Validation demo
+                      Create an account
                     </Link>
-                    <Link
-                      to="/login"
-                      search={{ demo: "auth-error" }}
-                      className="text-brand-orange-strong underline underline-offset-4"
-                    >
-                      Auth error demo
-                    </Link>
-                    <Link
-                      to="/onboarding"
-                      search={{ demo: "default" }}
-                      className="text-brand-orange-strong underline underline-offset-4"
-                    >
-                      Open onboarding
-                    </Link>
-                  </div>
+                  </p>
+
+                  {import.meta.env.DEV ? (
+                    <div className="flex flex-wrap justify-between gap-2 text-sm">
+                      <Link
+                        to="/login"
+                        search={{ demo: "validation-error" }}
+                        className="text-brand-orange-strong underline underline-offset-4"
+                      >
+                        Validation demo
+                      </Link>
+                      <Link
+                        to="/login"
+                        search={{ demo: "auth-error" }}
+                        className="text-brand-orange-strong underline underline-offset-4"
+                      >
+                        Auth error demo
+                      </Link>
+                      <Link
+                        to="/onboarding"
+                        search={{ demo: "default" }}
+                        className="text-brand-orange-strong underline underline-offset-4"
+                      >
+                        Open onboarding
+                      </Link>
+                    </div>
+                  ) : null}
                 </FieldGroup>
               </form>
             </CardContent>
@@ -247,4 +310,28 @@ function LoginPage() {
       </div>
     </main>
   );
+}
+
+function getLoginErrorMessage(error: { code?: string; message?: string }) {
+  if (
+    error.code === "INVALID_EMAIL_OR_PASSWORD" ||
+    error.code === "INVALID_CREDENTIALS" ||
+    error.message?.toLowerCase().includes("password")
+  ) {
+    return "Incorrect email or password.";
+  }
+
+  if (error.code === "USER_BANNED") {
+    return "This account is disabled. Contact a Corral admin.";
+  }
+
+  if (
+    error.code === "EMAIL_NOT_VERIFIED" ||
+    error.message?.toLowerCase().includes("verify") ||
+    error.message?.toLowerCase().includes("verified")
+  ) {
+    return "Verify your email before signing in. Check your inbox for the Corral verification link.";
+  }
+
+  return error.message || "Sign-in failed. Try again.";
 }

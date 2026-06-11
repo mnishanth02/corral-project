@@ -117,7 +117,7 @@ function AdminAuditPage() {
               <strong>After:</strong> Acting for Kovai Road Runners · Coimbatore Marathon 2026.
             </p>
             <Button asChild variant="outline">
-              <a href="/admin/impersonate?as=corral-admin">Review act-on-behalf</a>
+              <a href="/admin/impersonate">Review act-on-behalf</a>
             </Button>
           </DetailCard>
         </div>

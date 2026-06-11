@@ -1,3 +1,4 @@
+import type { CreateOrganizerOnboardingRequest, OrganizerSummary } from "@corral/schema";
 import { Alert, AlertDescription, AlertTitle } from "@corral/ui/components/alert";
 import { Badge } from "@corral/ui/components/badge";
 import { Button } from "@corral/ui/components/button";
@@ -12,22 +13,25 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@corral/ui/comp
 import { Input } from "@corral/ui/components/input";
 import { RadioGroup, RadioGroupItem } from "@corral/ui/components/radio-group";
 import { Skeleton } from "@corral/ui/components/skeleton";
+import { Spinner } from "@corral/ui/components/spinner";
 import { StatusBadge } from "@corral/ui/components/status-badge";
 import { Textarea } from "@corral/ui/components/textarea";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import type { FormEvent } from "react";
-import { useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
-import { useConsoleShell } from "../components/console-shell-context";
-import { mockOrganizers } from "../mocks/organizers";
+import { consoleApiClient } from "../lib/api";
 import type { DemoState } from "../mocks/types";
-import { formatDate, mockMutate, parseDemoState } from "../mocks/utils";
+import { parseDemoState } from "../mocks/utils";
 
 type OnboardingSearch = { demo: DemoState };
+type EntityType = CreateOrganizerOnboardingRequest["entityType"];
+type FieldErrors = Partial<
+  Record<"name" | "legalName" | "gstin" | "phone" | "city" | "state" | "supportContact", string>
+>;
 
-type EntityType = "gst" | "non-gst";
-
-type FieldErrors = Partial<Record<"name" | "legalName" | "gstin" | "supportContact", string>>;
+const gstinPattern = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
+const phonePattern = /^\+?[0-9][0-9\s-]{7,18}$/;
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   validateSearch: (search): OnboardingSearch => ({ demo: parseDemoState(search.demo) }),
@@ -39,87 +43,143 @@ function ErrorText({ children, id }: { children?: string; id: string }) {
   if (!children) return null;
   return (
     <p id={id} aria-live="polite" className="text-danger-text text-sm font-medium">
-      ⚠ {children}
+      {children}
     </p>
   );
 }
 
 function OnboardingPage() {
-  const { activeEventId, persona } = useConsoleShell();
   const { demo } = Route.useSearch();
-  const organizer = mockOrganizers[0];
   const nameId = useId();
   const legalNameId = useId();
   const gstinId = useId();
+  const phoneId = useId();
+  const cityId = useId();
+  const stateId = useId();
   const supportId = useId();
   const financeId = useId();
   const errorRef = useRef<HTMLDivElement>(null);
   const [entityType, setEntityType] = useState<EntityType>(demo === "empty" ? "non-gst" : "gst");
-  const [status, setStatus] = useState<string | null>(
-    demo === "success" ? "Organizer profile saved." : null,
-  );
+  const [organizer, setOrganizer] = useState<OrganizerSummary | null>(null);
+  const [canCreateOrganizer, setCanCreateOrganizer] = useState(false);
+  const [isLoading, setIsLoading] = useState(demo !== "loading");
+  const [isSaving, setIsSaving] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
   const [errors, setErrors] = useState<FieldErrors>(
     demo === "validation-error" ? { gstin: "GSTIN is required for GST-registered entities." } : {},
   );
 
-  const isAdminCreated = persona.id === "corral-admin-impersonating" || demo === "success";
-  const isValidationDemo = demo === "validation-error";
+  useEffect(() => {
+    if (demo === "loading") {
+      return;
+    }
 
-  const defaultValues = useMemo(
-    () => ({
-      name: demo === "empty" ? "" : organizer.name,
-      legalName: demo === "empty" ? "" : organizer.legalName,
-      gstin:
-        entityType === "gst" ? (demo === "validation-error" ? "" : (organizer.gstin ?? "")) : "",
-      supportContact: demo === "empty" ? "" : organizer.supportContact,
-      financeContact: demo === "empty" ? "" : "finance@kovairoadclub.in",
-    }),
-    [demo, entityType],
-  );
+    let cancelled = false;
+    setIsLoading(true);
+
+    void consoleApiClient
+      .onboardingStatus({ headers: {} })
+      .then((response) => {
+        if (cancelled) return;
+        if (response.status !== 200) {
+          throw new Error(response.body.message);
+        }
+        setOrganizer(response.body.organizer);
+        setCanCreateOrganizer(response.body.canCreateOrganizer);
+      })
+      .catch((loadError: unknown) => {
+        if (cancelled) return;
+        setStatus(loadError instanceof Error ? loadError.message : "Could not load onboarding.");
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [demo]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const nextErrors: FieldErrors = {};
-    const payload = {
+    const payload: CreateOrganizerOnboardingRequest = {
       name: String(form.get("name") ?? "").trim(),
       legalName: String(form.get("legalName") ?? "").trim(),
-      gstin: String(form.get("gstin") ?? "").trim(),
-      supportContact: String(form.get("supportContact") ?? "").trim(),
-      financeContact: String(form.get("financeContact") ?? "").trim(),
       entityType,
+      gstin:
+        String(form.get("gstin") ?? "")
+          .trim()
+          .toUpperCase() || undefined,
+      phone: String(form.get("phone") ?? "").trim(),
+      city: String(form.get("city") ?? "").trim(),
+      state: String(form.get("state") ?? "").trim(),
+      supportContact: String(form.get("supportContact") ?? "").trim(),
+      billingAddress: String(form.get("billingAddress") ?? "").trim() || undefined,
+      financeContact: String(form.get("financeContact") ?? "").trim() || undefined,
     };
+    const nextErrors: FieldErrors = {};
 
     if (!payload.name) nextErrors.name = "Organization name is required.";
-    if (!payload.legalName)
-      nextErrors.legalName = "Legal name is required for invoices and contracts.";
-    if (entityType === "gst" && !payload.gstin)
+    if (!payload.legalName) nextErrors.legalName = "Legal name is required.";
+    if (entityType === "gst" && !payload.gstin) {
       nextErrors.gstin = "GSTIN is required for GST-registered entities.";
-    if (!payload.supportContact) nextErrors.supportContact = "Support email or phone is required.";
+    } else if (entityType === "gst" && payload.gstin && !gstinPattern.test(payload.gstin)) {
+      nextErrors.gstin = "Enter a valid 15-character GSTIN.";
+    }
+    if (!payload.phone) {
+      nextErrors.phone = "Phone is required.";
+    } else if (!phonePattern.test(payload.phone)) {
+      nextErrors.phone = "Enter a valid phone number.";
+    }
+    if (!payload.city) nextErrors.city = "City is required.";
+    if (!payload.state) nextErrors.state = "State is required.";
+    if (!payload.supportContact) {
+      nextErrors.supportContact = "Support email or phone is required.";
+    } else if (!isEmail(payload.supportContact) && !phonePattern.test(payload.supportContact)) {
+      nextErrors.supportContact = "Enter a valid support email or phone number.";
+    }
 
-    if (Object.keys(nextErrors).length > 0 || isValidationDemo) {
+    if (Object.keys(nextErrors).length > 0 || demo === "validation-error") {
       setErrors({
         ...nextErrors,
-        ...(isValidationDemo ? { gstin: "GSTIN is required for GST-registered entities." } : {}),
+        ...(demo === "validation-error"
+          ? { gstin: "GSTIN is required for GST-registered entities." }
+          : {}),
       });
       setStatus(null);
       window.requestAnimationFrame(() => errorRef.current?.focus());
       return;
     }
 
-    const result = await mockMutate(payload, { demo });
-    if (!result.ok) {
-      setErrors({ name: result.message });
-      setStatus(null);
+    setIsSaving(true);
+    setErrors({});
+    setStatus(null);
+
+    const response = await consoleApiClient.createOrganizerOnboarding({
+      headers: {},
+      body: payload,
+    });
+
+    setIsSaving(false);
+
+    if (response.status !== 201) {
+      setStatus(response.body.message);
+      window.requestAnimationFrame(() => errorRef.current?.focus());
       return;
     }
 
-    setErrors({});
-    setStatus("Organizer profile saved. Payment onboarding is ready.");
+    setOrganizer(response.body.organizer);
+    setCanCreateOrganizer(false);
+    setStatus("Organizer profile submitted for Corral review.");
   }
 
-  if (demo === "loading") {
+  if (demo === "loading" || isLoading) {
     return <OnboardingSkeleton />;
+  }
+
+  if (organizer) {
+    return <ExistingOrganizer organizer={organizer} notice={status} />;
   }
 
   return (
@@ -131,52 +191,57 @@ function OnboardingPage() {
             <Badge variant={entityType === "gst" ? "success" : "secondary"}>
               {entityType === "gst" ? "GST entity" : "Non-GST club/trust"}
             </Badge>
-            {isAdminCreated ? <Badge variant="warning">Admin-created draft</Badge> : null}
+            <Badge variant="warning">Email verified</Badge>
           </div>
-          <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-brand-orange-strong">
-                Organizer onboarding
-              </p>
-              <h1 className="mt-2 font-display text-5xl font-black uppercase leading-none tracking-tight">
-                Set up your organizer profile
-              </h1>
-              <p className="mt-4 max-w-3xl text-muted-foreground">
-                Capture the Coimbatore club/entity profile, GST branch, support owner, and finance
-                contact before paid registrations open.
-              </p>
-            </div>
-            <Button asChild variant="outline">
-              <Link to="/" search={{ demo: "default" }}>
-                Skip to dashboard
-              </Link>
-            </Button>
+          <div className="mt-5">
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-brand-orange-strong">
+              Organizer onboarding
+            </p>
+            <h1 className="mt-2 font-display text-5xl font-black uppercase leading-none tracking-tight">
+              Submit your organizer profile
+            </h1>
+            <p className="mt-4 max-w-3xl text-muted-foreground">
+              Create the legal organizer record and owner membership. Corral admins review this
+              profile before publishing and payment collection are enabled.
+            </p>
           </div>
         </div>
 
+        {!canCreateOrganizer ? (
+          <Alert className="border-warning/30 bg-warning/10 text-warning-text">
+            <AlertTitle>Onboarding is not available</AlertTitle>
+            <AlertDescription>
+              Verify your email first, or contact Corral support if this account already belongs to
+              an organizer.
+            </AlertDescription>
+          </Alert>
+        ) : null}
+
         <form onSubmit={handleSubmit} noValidate className="grid gap-6">
-          {(Object.keys(errors).length > 0 || demo === "validation-error") && (
-            <Alert ref={errorRef} tabIndex={-1} variant="destructive" aria-live="polite">
-              <AlertTitle>Profile needs attention</AlertTitle>
+          {(Object.keys(errors).length > 0 || status) && (
+            <Alert
+              ref={errorRef}
+              tabIndex={-1}
+              variant={Object.keys(errors).length > 0 ? "destructive" : "default"}
+              aria-live="polite"
+            >
+              <AlertTitle>
+                {Object.keys(errors).length > 0 ? "Profile needs attention" : "Onboarding update"}
+              </AlertTitle>
               <AlertDescription>
-                Fix the highlighted fields. GSTIN is mandatory when you choose GST-registered
-                entity.
+                {Object.keys(errors).length > 0
+                  ? "Fix the highlighted fields before submitting."
+                  : status}
               </AlertDescription>
             </Alert>
           )}
-          {status ? (
-            <Alert className="border-success/30 bg-success/10 text-success-text" aria-live="polite">
-              <AlertTitle>Saved locally</AlertTitle>
-              <AlertDescription>{status}</AlertDescription>
-            </Alert>
-          ) : null}
 
           <div className="grid gap-6 xl:grid-cols-2">
             <Card className="rounded-[1.5rem]">
               <CardHeader>
                 <CardTitle className="font-display text-3xl uppercase">1 · Organization</CardTitle>
                 <CardDescription>
-                  Used on event pages, invoices, support messages, and team invites.
+                  Used on event pages, receipts, support messages, and admin review.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -186,11 +251,10 @@ function OnboardingPage() {
                     <Input
                       id={nameId}
                       name="name"
-                      defaultValue={defaultValues.name}
                       placeholder="Kovai Road Runners"
                       autoComplete="organization"
                       aria-invalid={Boolean(errors.name)}
-                      aria-describedby={errors.name ? `${nameId}-error` : undefined}
+                      disabled={!canCreateOrganizer || isSaving}
                     />
                     <ErrorText id={`${nameId}-error`}>{errors.name}</ErrorText>
                   </Field>
@@ -199,10 +263,9 @@ function OnboardingPage() {
                     <Input
                       id={legalNameId}
                       name="legalName"
-                      defaultValue={defaultValues.legalName}
                       placeholder="Kovai Road Runners Sports Trust"
                       aria-invalid={Boolean(errors.legalName)}
-                      aria-describedby={errors.legalName ? `${legalNameId}-error` : undefined}
+                      disabled={!canCreateOrganizer || isSaving}
                     />
                     <FieldDescription>Shown on receipts and finance reports.</FieldDescription>
                     <ErrorText id={`${legalNameId}-error`}>{errors.legalName}</ErrorText>
@@ -211,8 +274,9 @@ function OnboardingPage() {
                     <FieldLabel>Billing address</FieldLabel>
                     <Textarea
                       name="billingAddress"
-                      defaultValue="Race Course Road, Coimbatore, Tamil Nadu 641018"
+                      placeholder="Race Course Road, Coimbatore, Tamil Nadu 641018"
                       rows={3}
+                      disabled={!canCreateOrganizer || isSaving}
                     />
                   </Field>
                 </FieldGroup>
@@ -231,6 +295,7 @@ function OnboardingPage() {
                   value={entityType}
                   onValueChange={(value) => setEntityType(value as EntityType)}
                   className="grid gap-3"
+                  disabled={!canCreateOrganizer || isSaving}
                 >
                   <label
                     htmlFor="entity-gst"
@@ -252,15 +317,11 @@ function OnboardingPage() {
                     htmlFor="entity-non-gst"
                     className="flex cursor-pointer gap-3 rounded-2xl border border-border p-4 focus-within:ring-2 focus-within:ring-primary"
                   >
-                    <RadioGroupItem
-                      id="entity-non-gst"
-                      value="non-gst"
-                      aria-label="Non-GST club trust society"
-                    />
+                    <RadioGroupItem id="entity-non-gst" value="non-gst" aria-label="Non-GST club" />
                     <span>
                       <span className="block font-semibold">Non-GST club / trust / society</span>
                       <span className="block text-sm text-muted-foreground">
-                        Payment report only; no organizer GST invoice is generated.
+                        Payment reports only; organizer GST invoice export stays unavailable.
                       </span>
                     </span>
                   </label>
@@ -272,10 +333,9 @@ function OnboardingPage() {
                       <Input
                         id={gstinId}
                         name="gstin"
-                        defaultValue={defaultValues.gstin}
                         placeholder="33AAECK1042R1Z5"
                         aria-invalid={Boolean(errors.gstin)}
-                        aria-describedby={errors.gstin ? `${gstinId}-error` : undefined}
+                        disabled={!canCreateOrganizer || isSaving}
                       />
                       <ErrorText id={`${gstinId}-error`}>{errors.gstin}</ErrorText>
                     </Field>
@@ -283,8 +343,8 @@ function OnboardingPage() {
                     <Alert className="border-info/30 bg-info/10 text-info-text">
                       <AlertTitle>Non-GST branch</AlertTitle>
                       <AlertDescription>
-                        Participants receive payment confirmations and organizer reports; GST tax
-                        invoice export stays unavailable for this profile.
+                        Participants receive confirmations and organizer reports; GST export stays
+                        unavailable.
                       </AlertDescription>
                     </Alert>
                   )}
@@ -295,51 +355,73 @@ function OnboardingPage() {
 
           <Card className="rounded-[1.5rem]">
             <CardHeader>
-              <CardTitle className="font-display text-3xl uppercase">
-                3 · Contacts & review
-              </CardTitle>
+              <CardTitle className="font-display text-3xl uppercase">3 · Contacts & city</CardTitle>
               <CardDescription>
-                Support owner is required before public registration links are shared.
+                Support and location data are required before public registration links are shared.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-5 lg:grid-cols-2">
+              <Field>
+                <FieldLabel htmlFor={phoneId}>Organizer phone</FieldLabel>
+                <Input
+                  id={phoneId}
+                  name="phone"
+                  placeholder="+91 98765 43210"
+                  autoComplete="tel"
+                  aria-invalid={Boolean(errors.phone)}
+                  disabled={!canCreateOrganizer || isSaving}
+                />
+                <ErrorText id={`${phoneId}-error`}>{errors.phone}</ErrorText>
+              </Field>
               <Field>
                 <FieldLabel htmlFor={supportId}>Primary event support contact</FieldLabel>
                 <Input
                   id={supportId}
                   name="supportContact"
-                  defaultValue={defaultValues.supportContact}
                   placeholder="support@kovairoadclub.in"
                   autoComplete="email"
                   aria-invalid={Boolean(errors.supportContact)}
-                  aria-describedby={errors.supportContact ? `${supportId}-error` : undefined}
+                  disabled={!canCreateOrganizer || isSaving}
                 />
                 <ErrorText id={`${supportId}-error`}>{errors.supportContact}</ErrorText>
               </Field>
               <Field>
+                <FieldLabel htmlFor={cityId}>City</FieldLabel>
+                <Input
+                  id={cityId}
+                  name="city"
+                  placeholder="Coimbatore"
+                  aria-invalid={Boolean(errors.city)}
+                  disabled={!canCreateOrganizer || isSaving}
+                />
+                <ErrorText id={`${cityId}-error`}>{errors.city}</ErrorText>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor={stateId}>State</FieldLabel>
+                <Input
+                  id={stateId}
+                  name="state"
+                  placeholder="Tamil Nadu"
+                  aria-invalid={Boolean(errors.state)}
+                  disabled={!canCreateOrganizer || isSaving}
+                />
+                <ErrorText id={`${stateId}-error`}>{errors.state}</ErrorText>
+              </Field>
+              <Field className="lg:col-span-2">
                 <FieldLabel htmlFor={financeId}>Finance contact</FieldLabel>
                 <Input
                   id={financeId}
                   name="financeContact"
-                  defaultValue={defaultValues.financeContact}
                   placeholder="finance@kovairoadclub.in"
                   autoComplete="email"
+                  disabled={!canCreateOrganizer || isSaving}
                 />
                 <FieldDescription>Receives settlement and GST report reminders.</FieldDescription>
               </Field>
-              <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-4 lg:col-span-2">
-                <p className="text-sm font-semibold">Document upload placeholder</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  PAN, cancelled cheque, and trust/company documents are captured in payment
-                  onboarding. No files leave this frontend demo.
-                </p>
-              </div>
               <div className="flex flex-wrap gap-3 lg:col-span-2">
-                <Button type="submit">Save & continue</Button>
-                <Button asChild type="button" variant="outline">
-                  <Link to="/onboarding/payment" search={{ demo: "default", kyc: "not-started" }}>
-                    Continue to payment KYC
-                  </Link>
+                <Button type="submit" disabled={!canCreateOrganizer || isSaving}>
+                  {isSaving ? <Spinner /> : null}
+                  Submit for review
                 </Button>
               </div>
             </CardContent>
@@ -350,57 +432,154 @@ function OnboardingPage() {
       <aside className="space-y-4">
         <Card className="rounded-[1.5rem]">
           <CardHeader>
-            <CardTitle className="font-display text-2xl uppercase">Pilot gate</CardTitle>
-            <CardDescription>Profile readiness for {activeEventId}.</CardDescription>
+            <CardTitle className="font-display text-2xl uppercase">Review gate</CardTitle>
+            <CardDescription>What happens after submission.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <StatusBadge status="ok" label="Club details drafted" />
-            <StatusBadge
-              status={entityType === "gst" ? "ok" : "info"}
-              label={entityType === "gst" ? "GST invoice branch" : "Non-GST report branch"}
-            />
-            <StatusBadge status="pending" label="Payment KYC next" />
+            <StatusBadge status="ok" label="Owner membership created" />
+            <StatusBadge status="pending" label="Admin profile review" />
+            <StatusBadge status="pending" label="Event publishing locked" />
             <p className="text-sm text-muted-foreground">
-              Last seeded from {organizer.ownerName} on {formatDate(organizer.createdAt)}.
+              You can prepare drafts after the event domain slice lands. Approval is required before
+              public launch and payments.
             </p>
           </CardContent>
         </Card>
-        <Card className="rounded-[1.5rem] border-primary/30 bg-brand-tint/60">
-          <CardHeader>
-            <CardTitle className="font-display text-2xl uppercase">Demo URLs</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-2 text-sm">
-            <Link
-              className="underline underline-offset-4"
-              to="/onboarding"
-              search={{ demo: "default" }}
-            >
-              Default GST profile
-            </Link>
-            <Link
-              className="underline underline-offset-4"
-              to="/onboarding"
-              search={{ demo: "validation-error" }}
-            >
-              Validation errors
-            </Link>
-            <Link
-              className="underline underline-offset-4"
-              to="/onboarding"
-              search={{ demo: "empty" }}
-            >
-              Non-GST empty draft
-            </Link>
-            <Link
-              className="underline underline-offset-4"
-              to="/onboarding"
-              search={{ demo: "success" }}
-            >
-              Admin-created saved
-            </Link>
-          </CardContent>
-        </Card>
       </aside>
+    </div>
+  );
+}
+
+function ExistingOrganizer({
+  organizer,
+  notice,
+}: {
+  organizer: OrganizerSummary;
+  notice: string | null;
+}) {
+  return (
+    <div className="mx-auto max-w-5xl">
+      <Card className="overflow-hidden rounded-[2rem]">
+        <CardHeader className="bg-[#0f172a] text-white">
+          <Badge variant="outline" className="w-fit border-white/20 text-white">
+            {organizer.reviewStatus}
+          </Badge>
+          <CardTitle className="font-display text-5xl uppercase leading-none">
+            {organizer.name}
+          </CardTitle>
+          <CardDescription className="text-slate-300">
+            {organizer.legalName} · {organizer.city}, {organizer.state}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-5 p-6 md:grid-cols-2">
+          {notice ? (
+            <Alert className="border-success/30 bg-success/10 text-success-text md:col-span-2">
+              <AlertTitle>Profile saved</AlertTitle>
+              <AlertDescription>{notice}</AlertDescription>
+            </Alert>
+          ) : null}
+          <Detail label="Entity type" value={organizer.entityType === "gst" ? "GST" : "Non-GST"} />
+          <Detail label="GSTIN" value={organizer.gstin ?? "Not applicable"} />
+          <Detail label="Support contact" value={organizer.supportContact} />
+          <Detail label="Finance contact" value={organizer.financeContact ?? "Not set"} />
+          <Detail label="Billing address" value={organizer.billingAddress ?? "Not set"} wide />
+          <StatusAlert organizer={organizer} />
+          <Card className="rounded-[1.5rem] border-primary/20 bg-brand-tint/50 md:col-span-2">
+            <CardHeader>
+              <CardTitle className="font-display text-2xl uppercase">What happens next</CardTitle>
+              <CardDescription>{nextStepCopy(organizer.reviewStatus)}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-3">
+              <Button asChild variant="outline">
+                <a href="/onboarding/payment">View payment onboarding</a>
+              </Button>
+              <Button type="button" disabled>
+                Event creation coming next
+              </Button>
+            </CardContent>
+          </Card>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function StatusAlert({ organizer }: { organizer: OrganizerSummary }) {
+  if (organizer.reviewStatus === "approved") {
+    return (
+      <Alert className="border-success/30 bg-success/10 text-success-text md:col-span-2">
+        <AlertTitle>Approved by Corral</AlertTitle>
+        <AlertDescription>
+          This organizer passed review. Real event creation is the next organizer/event domain
+          slice.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (organizer.reviewStatus === "changes-requested") {
+    return (
+      <Alert className="border-warning/30 bg-warning/10 text-warning-text md:col-span-2">
+        <AlertTitle>Changes requested</AlertTitle>
+        <AlertDescription>
+          Corral needs updates before this organizer can launch public events.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (organizer.reviewStatus === "rejected") {
+    return (
+      <Alert variant="destructive" className="md:col-span-2">
+        <AlertTitle>Organizer rejected</AlertTitle>
+        <AlertDescription>Contact Corral support before creating events.</AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (organizer.reviewStatus === "suspended") {
+    return (
+      <Alert variant="destructive" className="md:col-span-2">
+        <AlertTitle>Organizer suspended</AlertTitle>
+        <AlertDescription>Event publishing and payments are unavailable.</AlertDescription>
+      </Alert>
+    );
+  }
+
+  return (
+    <Alert className="border-warning/30 bg-warning/10 text-warning-text md:col-span-2">
+      <AlertTitle>Pending Corral review</AlertTitle>
+      <AlertDescription>
+        Platform admins can approve, request changes, reject, or suspend this organizer from the
+        admin organizer queue.
+      </AlertDescription>
+    </Alert>
+  );
+}
+
+function nextStepCopy(reviewStatus: OrganizerSummary["reviewStatus"]) {
+  if (reviewStatus === "approved") {
+    return "Your organizer is approved. Event setup will unlock when the event-domain APIs are implemented.";
+  }
+
+  if (reviewStatus === "pending") {
+    return "Corral will review the organizer details. You are not stuck: payment onboarding can be previewed while event creation is being built.";
+  }
+
+  return "Review this profile status with Corral support before launching events.";
+}
+
+function isEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function Detail({ label, value, wide }: { label: string; value: string; wide?: boolean }) {
+  return (
+    <div
+      className={`rounded-2xl border border-border bg-muted/30 p-4 ${wide ? "md:col-span-2" : ""}`}
+    >
+      <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
+      <p className="mt-2 font-semibold">{value}</p>
     </div>
   );
 }

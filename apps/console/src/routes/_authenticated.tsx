@@ -1,4 +1,6 @@
+import type { ConsoleMembership, ConsoleMeResponse } from "@corral/schema";
 import { AccessDenied } from "@corral/ui/components/access-denied";
+import { Badge } from "@corral/ui/components/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,6 +9,13 @@ import {
   BreadcrumbSeparator,
 } from "@corral/ui/components/breadcrumb";
 import { Button } from "@corral/ui/components/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@corral/ui/components/card";
 import {
   Sidebar,
   SidebarContent,
@@ -18,23 +27,16 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@corral/ui/components/sidebar";
-import { createFileRoute, Outlet, redirect, useMatches } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useMatches, useRouter } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
 
-import { ConsoleShellProvider } from "../components/console-shell-context";
-import {
-  activeEventId as defaultEventId,
-  getActivePersona,
-  getMockSessionResult,
-  isPersonaId,
-  MockStoreProvider,
-  mockEvents,
-  personaIds,
-} from "../mocks";
-import type { DemoState, PersonaId } from "../mocks/types";
+import { type ConsolePersona, ConsoleShellProvider } from "../components/console-shell-context";
+import { consoleApiClient } from "../lib/api";
+import { authClient } from "../lib/auth";
+import { activeEventId as defaultEventId, MockStoreProvider } from "../mocks";
+import type { DemoState } from "../mocks/types";
 
 type ConsoleSearch = {
-  as?: PersonaId;
   demo: DemoState;
 };
 
@@ -54,34 +56,60 @@ function isDemoState(value: unknown): value is DemoState {
   return typeof value === "string" && demoStates.includes(value as DemoState);
 }
 
-function searchStringFromHref(href: string) {
-  const index = href.indexOf("?");
-  return index === -1 ? "" : href.slice(index);
-}
-
-function redirectHrefWithoutPersona(href: string) {
+function redirectHref(href: string) {
   const url = new URL(href, "http://console.local");
-  url.searchParams.delete("as");
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
 export const Route = createFileRoute("/_authenticated")({
   validateSearch: (search): ConsoleSearch => ({
-    as: isPersonaId(search.as) ? search.as : undefined,
     demo: isDemoState(search.demo) ? search.demo : "default",
   }),
-  beforeLoad: async ({ location }) => {
-    const persona = getActivePersona(searchStringFromHref(location.href));
-    const result = await getMockSessionResult(persona);
+  beforeLoad: async ({ context, location }) => {
+    const sessionResult = await context.authClient.getSession();
 
-    if (persona.isSessionExpired || !result.data) {
+    if (!sessionResult.data) {
       throw redirect({
-        to: "/session-expired",
-        search: { redirect: redirectHrefWithoutPersona(location.href) },
+        to: "/login",
+        search: { redirect: redirectHref(location.href), demo: "default" },
       });
     }
 
-    return { session: result.data, persona };
+    const response = await consoleApiClient.me({ headers: {} });
+
+    if (response.status === 401) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: redirectHref(location.href), demo: "default" },
+      });
+    }
+
+    if (response.status !== 200) {
+      throw new Error(response.body.message);
+    }
+
+    const isOnboardingRoute = location.pathname.startsWith("/onboarding");
+    const hasMembership = response.body.memberships.length > 0;
+
+    if (sessionResult.data.user.emailVerified === false) {
+      throw redirect({
+        to: "/check-email",
+        search: { email: sessionResult.data.user.email },
+      });
+    }
+
+    if (!hasMembership && !response.body.user.isPlatformAdmin && !isOnboardingRoute) {
+      throw redirect({
+        to: "/onboarding",
+        search: { demo: "default" },
+      });
+    }
+
+    if (!hasMembership && response.body.user.isPlatformAdmin && !isOnboardingRoute) {
+      throw redirect({ to: "/admin", search: { demo: "default" } });
+    }
+
+    return { session: sessionResult.data, consoleContext: response.body };
   },
   staticData: { breadcrumb: "Console" },
   component: AuthenticatedLayout,
@@ -112,27 +140,27 @@ const navSections = [
   },
 ];
 
-function readInitialEventId() {
+function readInitialEventId(events: Array<{ id: string }>) {
   if (typeof window === "undefined") {
-    return defaultEventId;
+    return events[0]?.id ?? defaultEventId;
   }
 
   const pathEventId = window.location.pathname.match(/\/events\/([^/]+)/)?.[1];
-  if (pathEventId && mockEvents.some((event) => event.id === pathEventId)) {
+  if (pathEventId && events.some((event) => event.id === pathEventId)) {
     return pathEventId;
   }
 
   const storedEventId = window.localStorage.getItem("corral.console.activeEventId");
-  if (storedEventId && mockEvents.some((event) => event.id === storedEventId)) {
+  if (storedEventId && events.some((event) => event.id === storedEventId)) {
     return storedEventId;
   }
 
-  return defaultEventId;
+  return events[0]?.id ?? defaultEventId;
 }
 
-function setSearchParam(key: "as" | "demo", value: string) {
+function setDemoSearchParam(value: string) {
   const url = new URL(window.location.href);
-  url.searchParams.set(key, value);
+  url.searchParams.set("demo", value);
   window.location.href = `${url.pathname}${url.search}${url.hash}`;
 }
 
@@ -147,39 +175,120 @@ function useRouteBreadcrumbs() {
 }
 
 function AuthenticatedLayout() {
-  const { persona } = Route.useRouteContext();
+  const router = useRouter();
+  const { consoleContext } = Route.useRouteContext();
   const { demo } = Route.useSearch();
-  const [activeEventId, setActiveEventIdState] = useState(readInitialEventId);
+  const [activeEventId, setActiveEventIdState] = useState(() =>
+    readInitialEventId(consoleContext.events),
+  );
   const breadcrumbs = useRouteBreadcrumbs();
-
-  const activeEvent = useMemo(
-    () => mockEvents.find((event) => event.id === activeEventId) ?? mockEvents[0],
-    [activeEventId],
+  const activeConsoleEvent = useMemo(
+    () => consoleContext.events.find((event) => event.id === activeEventId),
+    [activeEventId, consoleContext.events],
+  );
+  const activeMembership = useMemo(
+    () =>
+      activeConsoleEvent
+        ? consoleContext.memberships.find(
+            (membership) => membership.organizer.id === activeConsoleEvent.organizerId,
+          )
+        : undefined,
+    [activeConsoleEvent, consoleContext.memberships],
+  );
+  const firstMembership = consoleContext.memberships[0];
+  const persona = useMemo(
+    () => buildConsolePersona(consoleContext, activeMembership),
+    [activeMembership, consoleContext],
   );
 
-  const setActiveEventId = useCallback((eventId: string) => {
-    setActiveEventIdState(eventId);
-    window.localStorage.setItem("corral.console.activeEventId", eventId);
+  const setActiveEventId = useCallback(
+    (eventId: string) => {
+      if (!consoleContext.events.some((event) => event.id === eventId)) {
+        return;
+      }
 
-    const path = window.location.pathname;
-    if (path.startsWith("/events/")) {
-      window.location.href =
-        path.replace(/\/events\/[^/]+/, `/events/${eventId}`) + window.location.search;
-    }
-  }, []);
+      setActiveEventIdState(eventId);
+      window.localStorage.setItem("corral.console.activeEventId", eventId);
 
-  if (persona.isAccessDenied) {
+      const path = window.location.pathname;
+      if (path.startsWith("/events/")) {
+        window.location.href =
+          path.replace(/\/events\/[^/]+/, `/events/${eventId}`) + window.location.search;
+      }
+    },
+    [consoleContext.events],
+  );
+
+  async function handleSignOut() {
+    await authClient.signOut();
+    await router.navigate({ to: "/login", search: { demo: "default" } });
+  }
+
+  if (!activeMembership && window.location.pathname.startsWith("/onboarding")) {
+    return (
+      <main className="min-h-screen bg-background text-foreground">
+        <header className="border-b border-border bg-background/95 px-6 py-5 backdrop-blur xl:px-8">
+          <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.35em] text-primary">
+                Organizer onboarding
+              </p>
+              <h1 className="font-display text-4xl font-black uppercase tracking-tight">Corral</h1>
+            </div>
+            <Button type="button" variant="outline" onClick={handleSignOut}>
+              Sign out
+            </Button>
+          </div>
+        </header>
+        <section className="px-6 py-8 xl:px-8">
+          <Outlet />
+        </section>
+      </main>
+    );
+  }
+
+  if (firstMembership && !activeConsoleEvent) {
+    return (
+      <main className="min-h-screen bg-background p-8 text-foreground">
+        <div className="mx-auto max-w-4xl">
+          <Card className="overflow-hidden rounded-[2rem]">
+            <CardHeader className="bg-[#0f172a] text-white">
+              <Badge variant="outline" className="w-fit border-white/20 text-white">
+                {firstMembership.organizer.reviewStatus}
+              </Badge>
+              <CardTitle className="font-display text-5xl uppercase leading-none">
+                Organizer profile created
+              </CardTitle>
+              <CardDescription className="text-slate-300">
+                {firstMembership.organizer.name} is connected to your account. Event draft creation
+                is handled in the next organizer/event domain slice.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 p-6">
+              <p className="text-sm text-muted-foreground">
+                {profileStatusMessage(firstMembership.organizer.reviewStatus)}
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button asChild variant="outline">
+                  <a href="/onboarding">View organizer profile</a>
+                </Button>
+                <Button onClick={handleSignOut}>Sign out</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    );
+  }
+
+  if (!activeMembership || !activeConsoleEvent) {
     return (
       <main className="min-h-screen bg-background p-8 text-foreground">
         <AccessDenied
-          title="Organizer access denied"
-          description="This demo persona has no organizer console capabilities. Switch personas to continue."
-          roleContext={persona.role}
-          actions={
-            <Button type="button" onClick={() => setSearchParam("as", "org-owner")}>
-              Use organizer owner
-            </Button>
-          }
+          title="Organizer access required"
+          description="Your Corral account is signed in, but it is not assigned to an organizer for this event."
+          roleContext={consoleContext.user.email}
+          actions={<Button onClick={handleSignOut}>Sign out</Button>}
         />
       </main>
     );
@@ -188,9 +297,10 @@ function AuthenticatedLayout() {
   return (
     <MockStoreProvider>
       <ConsoleShellProvider
-        activeEventId={activeEvent.id}
+        activeEventId={activeConsoleEvent.id}
         setActiveEventId={setActiveEventId}
         persona={persona}
+        consoleContext={consoleContext}
         demo={demo}
       >
         <div className="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[17rem_1fr]">
@@ -211,7 +321,7 @@ function AuthenticatedLayout() {
                   <SidebarGroupLabel>{section.label}</SidebarGroupLabel>
                   <SidebarMenu>
                     {section.items.map((item) => {
-                      const href = item.href(activeEvent.id);
+                      const href = item.href(activeConsoleEvent.id);
                       const active =
                         typeof window !== "undefined" && window.location.pathname === href;
                       return (
@@ -251,7 +361,7 @@ function AuthenticatedLayout() {
                     </BreadcrumbList>
                   </Breadcrumb>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    {activeEvent.name} · {activeEvent.venueName}
+                    {activeConsoleEvent.name} · {activeConsoleEvent.venueName}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
@@ -259,10 +369,10 @@ function AuthenticatedLayout() {
                     Event context
                     <select
                       className="h-10 min-w-72 rounded-md border border-input bg-background px-3 text-sm font-medium normal-case tracking-normal text-foreground"
-                      value={activeEvent.id}
+                      value={activeConsoleEvent.id}
                       onChange={(event) => setActiveEventId(event.target.value)}
                     >
-                      {mockEvents.map((event) => (
+                      {consoleContext.events.map((event) => (
                         <option key={event.id} value={event.id}>
                           {event.name}
                         </option>
@@ -272,22 +382,10 @@ function AuthenticatedLayout() {
                   {import.meta.env.DEV ? (
                     <div className="flex flex-wrap gap-2 rounded-xl border border-dashed border-primary/40 bg-brand-tint px-3 py-2">
                       <select
-                        aria-label="Demo persona"
-                        className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                        value={persona.id}
-                        onChange={(event) => setSearchParam("as", event.target.value)}
-                      >
-                        {personaIds.map((id) => (
-                          <option key={id} value={id}>
-                            {id}
-                          </option>
-                        ))}
-                      </select>
-                      <select
                         aria-label="Demo state"
                         className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                         value={demo}
-                        onChange={(event) => setSearchParam("demo", event.target.value)}
+                        onChange={(event) => setDemoSearchParam(event.target.value)}
                       >
                         {demoStates.map((state) => (
                           <option key={state} value={state}>
@@ -295,8 +393,15 @@ function AuthenticatedLayout() {
                           </option>
                         ))}
                       </select>
+                      <Button type="button" variant="outline" size="sm" onClick={handleSignOut}>
+                        Sign out
+                      </Button>
                     </div>
-                  ) : null}
+                  ) : (
+                    <Button type="button" variant="outline" onClick={handleSignOut}>
+                      Sign out
+                    </Button>
+                  )}
                 </div>
               </div>
             </header>
@@ -308,4 +413,78 @@ function AuthenticatedLayout() {
       </ConsoleShellProvider>
     </MockStoreProvider>
   );
+}
+
+function buildConsolePersona(
+  consoleContext: ConsoleMeResponse,
+  activeMembership: ConsoleMembership | undefined,
+): ConsolePersona {
+  const platformAdmin = consoleContext.user.isPlatformAdmin;
+
+  if (!activeMembership) {
+    return {
+      id: platformAdmin ? "platform-admin" : "no-organizer-membership",
+      label: platformAdmin ? "Corral admin" : "No organizer membership",
+      user: {
+        id: consoleContext.user.id,
+        name: consoleContext.user.name,
+        email: consoleContext.user.email,
+      },
+      role: platformAdmin ? "Corral Admin" : "Read-only Viewer",
+      capabilities: platformAdmin ? consoleContext.user.platformCapabilities : [],
+      isAdmin: platformAdmin,
+      isSessionExpired: false,
+      isAccessDenied: false,
+    };
+  }
+
+  return {
+    id: consoleContext.user.isPlatformAdmin
+      ? "corral-admin"
+      : roleCompatibilityId(activeMembership.role),
+    label: activeMembership.organizer.name,
+    user: {
+      id: consoleContext.user.id,
+      name: consoleContext.user.name,
+      email: consoleContext.user.email,
+    },
+    role: activeMembership.role,
+    capabilities: activeMembership.capabilities,
+    organizerId: activeMembership.organizer.id,
+    isAdmin: platformAdmin,
+    isSessionExpired: false,
+    isAccessDenied: false,
+  };
+}
+
+function profileStatusMessage(reviewStatus: ConsoleMembership["organizer"]["reviewStatus"]) {
+  if (reviewStatus === "approved") {
+    return "Your organizer is approved. Event draft creation is the next organizer/event domain slice.";
+  }
+
+  if (reviewStatus === "changes-requested") {
+    return "Corral requested changes to this organizer profile. Update support details when profile editing is available, or contact support.";
+  }
+
+  if (reviewStatus === "rejected") {
+    return "This organizer profile was rejected. Contact Corral support before creating events.";
+  }
+
+  if (reviewStatus === "suspended") {
+    return "This organizer is suspended. Event publishing and payments remain unavailable.";
+  }
+
+  return "Corral admins can review and approve this organizer from the admin queue. Publishing and payments remain blocked until approval gates are enforced in the event slice.";
+}
+
+function roleCompatibilityId(role: ConsoleMembership["role"]) {
+  if (role === "Read-only Viewer") {
+    return "org-readonly";
+  }
+
+  if (role === "Support/Check-in") {
+    return "org-staff";
+  }
+
+  return "org-owner";
 }

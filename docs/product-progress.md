@@ -3,7 +3,7 @@
 > Single source of truth for **what has been planned, built, validated, blocked, or deferred** across
 > the Corral product. Future AI agents must read this file before starting implementation work.
 
-Last updated: **2026-06-03**
+Last updated: **2026-06-07**
 
 ---
 
@@ -58,17 +58,16 @@ Screen work has pivoted to direct in-app React frontend builds: no backend integ
 
 ### Current recommended next action
 
-1. **Diagnose local `auth:seed-admin` failure** seen in the latest terminal context before relying on
-   console login for new feature testing.
-2. Create and execute the next domain slice:
-   `docs/impl-plan/feature-event-organizer-domain-1.md`.
+1. Continue from organizer self-signup into the next organizer/event domain APIs for draft event
+   creation, publish gates, categories, registration, payments, roster, and audit logging.
+2. Add console route/component tests for live auth flows once the console test harness is established.
 
 ### Current implementation checkpoint
 
 | Area | Status | Evidence / Notes | Next action |
 |---|---|---|---|
 | Bootstrap scaffold | `Done` | `docs/bootstrap-plan.md`; apps/packages exist; README documents health, build, DB, and deployment workflow. | Keep as foundation; update only when tooling changes. |
-| Better Auth foundation | `Validation needed` | Implementation exists and README documents login/seed flow. Auth plan exists at `docs/impl-plan/feature-auth-better-auth-1.md`, but its task table has not been backfilled with completion marks. Latest terminal context shows `pnpm --filter @corral/api auth:seed-admin` exited with code `1`. | Fix/verify `auth:seed-admin`; backfill auth plan checklist; record final test evidence. |
+| Better Auth foundation | `Done` | Backend Better Auth foundation remains complete. Console login, protected organizer shell, admin guard, admin user/membership management, email/password organizer self-signup, verified onboarding, and admin organizer review now use live Better Auth plus Corral-owned organizer RBAC/review state. API and console typechecks/lints pass. | Wire a real email provider before non-local signup; complete manual OAuth checks with real Google credentials; add console component/route tests when harness is available. |
 | Product-wide progress process | `Done` | This file plus `docs/impl-plan/process-product-progress-tracking-1.md`. | Future agents must keep it updated. |
 
 ---
@@ -80,8 +79,8 @@ Source of truth for product scope: `docs/plan.md` and `docs/implementation-plan.
 | Capability ID | MVP capability | Source spec | Status | Implementation plan | Code areas | Evidence / blockers | Next action |
 |---|---|---|---|---|---|---|---|
 | MVP-00 | Base monorepo scaffold, health checks, shared packages, local infra | `docs/bootstrap-plan.md` | `Done` | `docs/bootstrap-plan.md` | `apps/*`, `packages/*`, `docker-compose.yml`, `turbo.json` | Existing repo scaffold and README workflow. | Maintain only. |
-| MVP-01 | Authentication foundation for console/admin access | `docs/impl-plan/feature-auth-better-auth-1.md` | `Validation needed` | `docs/impl-plan/feature-auth-better-auth-1.md` | `apps/api/src/auth`, `apps/console/src/lib/auth.ts`, console routes, `packages/db/src/schema/auth.ts` | Local seed-admin command currently failing in terminal context; task checklist not backfilled. | Fix seed/admin validation before domain UI work. |
-| MVP-02 | Organizer + event setup | `docs/implementation-plan.md#11-event-setup` | `Not started` | Needed: `docs/impl-plan/feature-event-organizer-domain-1.md` | `packages/db`, `packages/schema`, `apps/api`, `apps/console` | This is the logical next domain slice. | Design Organizer/Event/Category schema, contracts, API, and console screens. |
+| MVP-01 | Authentication foundation for console/admin access | `docs/impl-plan/feature-auth-better-auth-1.md` | `Done` | `docs/impl-plan/feature-auth-better-auth-1.md` | `apps/api/src/auth`, `apps/api/src/console`, `apps/console/src/lib/auth.ts`, console auth/signup/onboarding/admin routes, `packages/db/src/schema/auth.ts`, `packages/db/src/schema/organizer.ts` | Console auth is live: Better Auth session/login/admin identity, email/password self-signup with required verification, Corral `/console/me`, organizer onboarding, organizer memberships, organizer-scoped capabilities, and admin organizer review are wired. Public participant app remains unauthenticated. | Wire production email delivery, complete manual Google OAuth checks, and add console route tests. |
+| MVP-02 | Organizer + event setup | `docs/implementation-plan.md#11-event-setup` | `In progress` | Needed: `docs/impl-plan/feature-event-organizer-domain-1.md` | `packages/db`, `packages/schema`, `apps/api`, `apps/console` | Organizer identity/onboarding/review is now live. Event ownership tables exist, but business domain APIs for event draft creation, categories, registration setup, and publish workflow are not complete. | Create the full Organizer/Event domain plan and start real draft-event APIs with server-side organizer review/payment gates. |
 | MVP-03 | Public participant event page | `docs/implementation-plan.md#17-participant-event-page` | `Not started` | Needed | `apps/web`, `packages/schema`, `apps/api` | Depends on event setup. | Start after MVP-02 creates published events/categories. |
 | MVP-04 | Registration form and participant capture | `docs/implementation-plan.md#12-registration` | `Not started` | Needed | `packages/db`, `packages/schema`, `apps/web`, `apps/api`, `apps/console` | Depends on MVP-02. | Build standard fields, waiver, medical declaration, guardian flow. |
 | MVP-05 | Bulk/group registration | `docs/implementation-plan.md#12-registration` | `Not started` | Needed | Registration domain, payment domain, console/admin UI | Depends on MVP-04 and payment decisions. | Add coordinator/group model after single registration works. |
@@ -111,7 +110,7 @@ Source of truth for product scope: `docs/plan.md` and `docs/implementation-plan.
 
 | Phase | Goal | Status | Notes |
 |---|---|---|---|
-| Phase 0 — Foundation | Apps, packages, infra, auth base | `Validation needed` | Scaffold is done. Auth needs final seed/test evidence. |
+| Phase 0 — Foundation | Apps, packages, infra, auth base | `Done` | Scaffold + auth closure done; deferred real console-auth client checks are documented and intentionally postponed during frontend mock phase. |
 | Phase 1 — Trust Loop | Run 5 real Coimbatore events with no Corral-caused critical failure | `Not started` | Start with Organizer/Event domain, then registration, payments, roster, comms, results, certificates. |
 | Phase 2 — Participant Delight | Runner-facing experience and post-event delight | `Deferred` | Do not start before Phase 1 core loop is reliable. |
 | Phase 3 — Race-Day Operations | Race-day dashboard, check-in, offline modes | `Deferred` | Later; avoid scope creep. |
@@ -123,8 +122,8 @@ Source of truth for product scope: `docs/plan.md` and `docs/implementation-plan.
 
 | ID | Decision / question | Status | Owner / next action |
 |---|---|---|---|
-| DEC-001 | Use Better Auth Organization plugin now or defer? | `Open` | Decide during `feature-event-organizer-domain-1.md`. Auth plan intentionally deferred this. |
-| DEC-002 | Model `organizer` as a first-class domain table independent of auth user? | `Open` | Recommended yes; decide with event ownership schema. |
+| DEC-001 | Use Better Auth Organization plugin now or defer? | `Decided` | Do not use it for MVP organizer membership. Better Auth owns identity/session; Corral owns organizer membership/RBAC. |
+| DEC-002 | Model `organizer` as a first-class domain table independent of auth user? | `Decided` | Yes. `organizer`, `organizer_member`, and `event` domain tables are the source for console organizer context. |
 | DEC-003 | Keep public participant web unauthenticated in MVP? | `Decided` | Yes. Participant account/profile is Phase 2. |
 | DEC-004 | Payments provider | `Decided` | Razorpay Route behind `PaymentPort`; never make Corral a payment aggregator. |
 | DEC-005 | Default result workflow | `Decided` | CSV-first timing import; no live timing in MVP. |
@@ -136,12 +135,11 @@ Source of truth for product scope: `docs/plan.md` and `docs/implementation-plan.
 
 | Priority | Work item | Why it matters | Suggested plan file |
 |---|---|---|---|
-| P0 | Fix/verify `auth:seed-admin` locally | Console testing depends on working admin login. | Existing auth plan |
-| P0 | Backfill auth plan checklist | Future agents need reliable completion state. | Existing auth plan |
-| P0 | Event + Organizer domain | Unlocks every product workflow. | `docs/impl-plan/feature-event-organizer-domain-1.md` |
+| P0 | Complete Organizer/Event domain | Unlocks draft event creation after organizer self-signup and every workflow beyond auth context. | `docs/impl-plan/feature-event-organizer-domain-1.md` |
 | P1 | Audit log foundation | Sensitive admin actions begin with event/registration mutation. | `docs/impl-plan/feature-audit-log-foundation-1.md` |
 | P1 | Participant event page | Needed before real registrations. | `docs/impl-plan/feature-public-event-page-1.md` |
 | P1 | Registration domain | Core business workflow. | `docs/impl-plan/feature-registration-foundation-1.md` |
+| P2 | Console auth test coverage | Lock down live login, protected route, no-membership, sign-out, and admin user-management UI behavior. | Existing auth plan follow-up |
 
 ---
 

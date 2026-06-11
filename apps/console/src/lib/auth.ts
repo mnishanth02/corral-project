@@ -51,6 +51,18 @@ export type AuthClient = {
     }) => AuthResult<unknown>;
     social: (input: { provider: "google"; callbackURL?: string }) => AuthResult<unknown>;
   };
+  signUp: {
+    email: (input: {
+      name: string;
+      email: string;
+      password: string;
+      callbackURL?: string;
+    }) => AuthResult<unknown>;
+  };
+  sendVerificationEmail: (input: {
+    email: string;
+    callbackURL?: string;
+  }) => AuthResult<{ status: boolean }>;
   signOut: () => AuthResult<unknown>;
   admin: {
     listUsers: (input: {
@@ -66,12 +78,15 @@ export type AuthClient = {
       name: string;
       password: string;
       role: "user";
+      data?: Record<string, unknown>;
     }) => AuthResult<{ user: AuthUser }>;
   };
 };
 
 export const authClient = createAuthClient({
   baseURL,
+  basePath: "/api/auth",
+  fetchOptions: { credentials: "include" },
   plugins: [adminClient()],
 }) as unknown as AuthClient;
 

@@ -1,12 +1,28 @@
+import type { Capability, ConsoleMeResponse, TeamRole } from "@corral/schema";
 import { createContext, type PropsWithChildren, useContext, useMemo } from "react";
-
-import type { MockPersona } from "../mocks/personas";
 import type { DemoState } from "../mocks/types";
+
+export type ConsolePersona = {
+  id: string;
+  label: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  role: TeamRole | "Corral Admin";
+  capabilities: Capability[];
+  organizerId?: string;
+  isAdmin: boolean;
+  isSessionExpired: false;
+  isAccessDenied: false;
+};
 
 export type ConsoleShellContextValue = {
   activeEventId: string;
   setActiveEventId: (eventId: string) => void;
-  persona: MockPersona;
+  persona: ConsolePersona;
+  consoleContext: ConsoleMeResponse;
   demo: DemoState;
 };
 
@@ -16,12 +32,13 @@ export function ConsoleShellProvider({
   activeEventId,
   setActiveEventId,
   persona,
+  consoleContext,
   demo,
   children,
 }: PropsWithChildren<ConsoleShellContextValue>) {
   const value = useMemo(
-    () => ({ activeEventId, setActiveEventId, persona, demo }),
-    [activeEventId, demo, persona, setActiveEventId],
+    () => ({ activeEventId, setActiveEventId, persona, consoleContext, demo }),
+    [activeEventId, consoleContext, demo, persona, setActiveEventId],
   );
 
   return <ConsoleShellContext.Provider value={value}>{children}</ConsoleShellContext.Provider>;

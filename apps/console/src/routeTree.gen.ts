@@ -9,8 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SessionExpiredRouteImport } from './routes/session-expired'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CheckEmailRouteImport } from './routes/check-email'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -62,6 +64,11 @@ import { Route as AuthenticatedEventsEventIdCertificatesStatusRouteImport } from
 import { Route as AuthenticatedEventsEventIdBibsValidateRouteImport } from './routes/_authenticated.events.$eventId.bibs.validate'
 import { Route as AuthenticatedEventsEventIdBibsChipsRouteImport } from './routes/_authenticated.events.$eventId.bibs.chips'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SessionExpiredRoute = SessionExpiredRouteImport.update({
   id: '/session-expired',
   path: '/session-expired',
@@ -70,6 +77,11 @@ const SessionExpiredRoute = SessionExpiredRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckEmailRoute = CheckEmailRouteImport.update({
+  id: '/check-email',
+  path: '/check-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -362,8 +374,10 @@ const AuthenticatedEventsEventIdBibsChipsRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/check-email': typeof CheckEmailRoute
   '/login': typeof LoginRoute
   '/session-expired': typeof SessionExpiredRoute
+  '/signup': typeof SignupRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/calendar': typeof AdminCalendarRoute
@@ -413,8 +427,10 @@ export interface FileRoutesByFullPath {
   '/events/$eventId/roster/': typeof AuthenticatedEventsEventIdRosterIndexRoute
 }
 export interface FileRoutesByTo {
+  '/check-email': typeof CheckEmailRoute
   '/login': typeof LoginRoute
   '/session-expired': typeof SessionExpiredRoute
+  '/signup': typeof SignupRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/calendar': typeof AdminCalendarRoute
@@ -467,8 +483,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/check-email': typeof CheckEmailRoute
   '/login': typeof LoginRoute
   '/session-expired': typeof SessionExpiredRoute
+  '/signup': typeof SignupRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/calendar': typeof AdminCalendarRoute
@@ -523,8 +541,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/check-email'
     | '/login'
     | '/session-expired'
+    | '/signup'
     | '/onboarding'
     | '/admin/audit'
     | '/admin/calendar'
@@ -574,8 +594,10 @@ export interface FileRouteTypes {
     | '/events/$eventId/roster/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/check-email'
     | '/login'
     | '/session-expired'
+    | '/signup'
     | '/onboarding'
     | '/admin/audit'
     | '/admin/calendar'
@@ -627,8 +649,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/admin'
+    | '/check-email'
     | '/login'
     | '/session-expired'
+    | '/signup'
     | '/_authenticated/onboarding'
     | '/admin/audit'
     | '/admin/calendar'
@@ -682,12 +706,21 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  CheckEmailRoute: typeof CheckEmailRoute
   LoginRoute: typeof LoginRoute
   SessionExpiredRoute: typeof SessionExpiredRoute
+  SignupRoute: typeof SignupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/session-expired': {
       id: '/session-expired'
       path: '/session-expired'
@@ -700,6 +733,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/check-email': {
+      id: '/check-email'
+      path: '/check-email'
+      fullPath: '/check-email'
+      preLoaderRoute: typeof CheckEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -1243,8 +1283,10 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  CheckEmailRoute: CheckEmailRoute,
   LoginRoute: LoginRoute,
   SessionExpiredRoute: SessionExpiredRoute,
+  SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

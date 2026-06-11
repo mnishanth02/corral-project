@@ -153,8 +153,8 @@ function TeamPage() {
           roleContext={`${persona.user.name} · ${persona.role}`}
           actions={
             <Button asChild variant="outline">
-              <Link to="/settings/team" search={{ demo: "default", as: "org-owner" }}>
-                Switch to owner demo
+              <Link to="/settings/team" search={{ demo: "default" }}>
+                Return to default state
               </Link>
             </Button>
           }
@@ -326,7 +326,7 @@ function TeamPage() {
           <Link
             className="underline underline-offset-4"
             to="/settings/team"
-            search={{ demo: "permission-denied", as: "org-readonly" }}
+            search={{ demo: "permission-denied" }}
           >
             Permission denied
           </Link>

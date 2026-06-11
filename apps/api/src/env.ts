@@ -17,7 +17,7 @@ const envSchema = z.object({
     }),
   CORS_ORIGINS: z
     .string()
-    .default("http://localhost:5173,http://localhost:5174")
+    .default("http://localhost:5173,http://localhost:5174,http://localhost:5274")
     .refine((value) => parseCsv(value).every(isValidUrl), {
       message: "CORS_ORIGINS must be a comma-separated list of absolute URLs",
     }),
@@ -27,7 +27,7 @@ const envSchema = z.object({
   BETTER_AUTH_URL: z.string().url(),
   BETTER_AUTH_TRUSTED_ORIGINS: z
     .string()
-    .default("http://localhost:5173,http://localhost:5174")
+    .default("http://localhost:5173,http://localhost:5174,http://localhost:5274")
     .refine((value) => parseCsv(value).every(isValidUrl), {
       message: "BETTER_AUTH_TRUSTED_ORIGINS must be a comma-separated list of absolute URLs",
     }),
@@ -37,11 +37,35 @@ const envSchema = z.object({
   AUTH_BOOTSTRAP_ADMIN_EMAIL: z.string().email().optional(),
   AUTH_BOOTSTRAP_ADMIN_PASSWORD: z.string().min(8).optional(),
   AUTH_BOOTSTRAP_ADMIN_NAME: z.string().min(1).optional(),
+  AUTH_ORGANIZER_SIGNUP_ENABLED: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((value) => value === "true"),
+  AUTH_EMAIL_DELIVERY_MODE: z.enum(["log", "disabled"]).default("log"),
+  AUTH_SEED_DEMO_DATA: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
 });
 
 export type ApiEnv = z.infer<typeof envSchema>;
 
-export const getEnv = (): ApiEnv => parseEnv(envSchema, process.env);
+export const getEnv = (): ApiEnv => {
+  const env = parseEnv(envSchema, process.env);
+
+  if (
+    env.AUTH_ORGANIZER_SIGNUP_ENABLED &&
+    env.AUTH_EMAIL_DELIVERY_MODE === "log" &&
+    env.NODE_ENV !== "development" &&
+    env.NODE_ENV !== "test"
+  ) {
+    throw new Error(
+      "AUTH_ORGANIZER_SIGNUP_ENABLED cannot use log-only email delivery outside development/test",
+    );
+  }
+
+  return env;
+};
 
 export function parseCsv(value: string): string[] {
   return value

@@ -50,4 +50,15 @@ describe("getEnv", () => {
       "BETTER_AUTH_TRUSTED_ORIGINS must be a comma-separated list of absolute URLs",
     );
   });
+
+  it("rejects enabled organizer signup with log-only email outside local environments", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("AUTH_ORGANIZER_SIGNUP_ENABLED", "true");
+    vi.stubEnv("AUTH_EMAIL_DELIVERY_MODE", "log");
+    const { getEnv } = await import("./env.js");
+
+    expect(() => getEnv()).toThrow(
+      "AUTH_ORGANIZER_SIGNUP_ENABLED cannot use log-only email delivery outside development/test",
+    );
+  });
 });

@@ -190,9 +190,7 @@ function AdminDeliveryPage() {
             <StatusBadge key={label} status={statusKind(label)} label={label} />
           ))}
           <Button asChild variant="outline">
-            <a href="/admin/ops?demo=webhook-pending&tab=webhooks&as=corral-admin">
-              Open A-08 webhook-pending
-            </a>
+            <a href="/admin/ops?demo=webhook-pending&tab=webhooks">Open A-08 webhook-pending</a>
           </Button>
         </DetailCard>
       </DemoBoundary>

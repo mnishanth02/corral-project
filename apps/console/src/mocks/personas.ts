@@ -232,7 +232,10 @@ export function getActivePersona(
   return mockPersonas["org-owner"];
 }
 
-export function hasCapability(persona: MockPersona, capability: Capability) {
+export function hasCapability(
+  persona: { capabilities: readonly Capability[] },
+  capability: Capability,
+) {
   return persona.capabilities.includes(capability);
 }
 

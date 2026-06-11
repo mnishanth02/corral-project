@@ -36,7 +36,7 @@ function ConsoleNotFound() {
                 <a href="/">Organizer home</a>
               </Button>
               <Button asChild variant="outline">
-                <a href="/admin?as=corral-admin">Admin home</a>
+                <a href="/admin">Admin home</a>
               </Button>
               <Button asChild variant="outline">
                 <a href="/login">Login</a>
@@ -62,7 +62,7 @@ function ConsoleError({ error, reset }: ErrorComponentProps) {
                 Retry
               </Button>
               <Button asChild variant="outline">
-                <a href="/admin/support?as=corral-admin">Support route</a>
+                <a href="/admin/support">Support route</a>
               </Button>
             </span>
           </AlertDescription>

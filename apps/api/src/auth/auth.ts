@@ -1,11 +1,10 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-import { Logger } from "@nestjs/common";
 import { betterAuth } from "better-auth";
 import { admin } from "better-auth/plugins";
 import { getEnv, parseCsv } from "../env";
+import { sendAuthEmailLink } from "./auth-email";
 
 const env = getEnv();
-const logger = new Logger("BetterAuth");
 const { db, schema } = require("@corral/db") as typeof import("@corral/db");
 
 export const auth = betterAuth({
@@ -30,16 +29,20 @@ export const auth = betterAuth({
       : {}),
   },
   emailVerification: {
+    sendOnSignUp: true,
     sendVerificationEmail: async ({ user, url }) => {
-      logger.log(`Email verification requested for ${user.email}: ${url}`);
+      await sendAuthEmailLink("verification", { email: user.email, url });
     },
   },
   emailAndPassword: {
     enabled: true,
-    disableSignUp: true,
+    disableSignUp: !env.AUTH_ORGANIZER_SIGNUP_ENABLED,
+    requireEmailVerification: true,
+    minPasswordLength: 10,
+    autoSignIn: false,
     revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user, url }) => {
-      logger.log(`Password reset requested for ${user.email}: ${url}`);
+      await sendAuthEmailLink("password-reset", { email: user.email, url });
     },
   },
   socialProviders: {

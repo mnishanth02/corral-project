@@ -25,7 +25,7 @@ function SessionExpiredPage() {
         <EmptyState
           className="w-full rounded-[2rem] border-solid"
           title="Session expired"
-          description="Your console demo session has ended. Sign in again or switch to an active mock persona."
+          description="Your console session has ended. Sign in again to continue."
           action={
             <Button asChild>
               <a href={loginHref}>Return to login</a>

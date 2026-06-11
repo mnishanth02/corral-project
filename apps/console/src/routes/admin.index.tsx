@@ -37,10 +37,10 @@ function AdminHomePage() {
         actions={
           <>
             <Button asChild>
-              <a href="/admin/impersonate?as=corral-admin">Act on behalf</a>
+              <a href="/admin/impersonate">Act on behalf</a>
             </Button>
             <Button asChild variant="outline">
-              <a href="/admin/ops?as=corral-admin">Open ops</a>
+              <a href="/admin/ops">Open ops</a>
             </Button>
           </>
         }
@@ -119,10 +119,10 @@ function AdminHomePage() {
               <span>{row.owner}</span>,
               <span className="flex flex-wrap gap-2">
                 <Button asChild size="sm">
-                  <a href={`/admin/impersonate?as=corral-admin&event=${event.id}`}>Act</a>
+                  <a href={`/admin/impersonate?event=${event.id}`}>Act</a>
                 </Button>
                 <Button asChild size="sm" variant="outline">
-                  <a href="/admin/audit?as=corral-admin">Audit</a>
+                  <a href="/admin/audit">Audit</a>
                 </Button>
               </span>,
             );

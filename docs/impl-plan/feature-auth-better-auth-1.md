@@ -2,7 +2,7 @@
 goal: Implement Better Auth Foundation for Corral
 version: 1.0
 date_created: 2026-06-01
-last_updated: 2026-06-01
+last_updated: 2026-06-07
 owner: Corral Engineering
 tags: feature, auth, better-auth, nestjs, drizzle, react, console, security
 ---
@@ -13,21 +13,117 @@ This implementation plan defines the first production-shaped authentication foun
 
 This plan is based on research completed on 2026-06-01 against current Better Auth documentation, the current Better Auth GitHub repository, the current `@thallesp/nestjs-better-auth` README, current TanStack Router documentation, and the existing Corral repo structure.
 
+## Validation closure update — 2026-06-05
+
+### Closed in this validation pass
+
+- MVP-01 acceptance in this pass is scoped to backend auth foundation. Per the 2026-06-03
+  frontend-mock direction, live console auth-client verification is not part of this closure pass.
+- Local infra + data path validated: `docker compose up -d postgres redis`, `pnpm db:migrate`,
+  `pnpm --filter @corral/api auth:seed-admin`.
+- `auth:seed-admin` failure is resolved; command is now idempotent (existing admin email path verified).
+- Live API checks passed:
+  - `GET /health` returns `200` anonymous.
+  - `GET /api/auth/get-session` returns `200` with unauthenticated `null`.
+  - `POST /api/auth/sign-up/email` returns `400` with `EMAIL_PASSWORD_SIGN_UP_DISABLED`.
+- Automated checks passed:
+  - `pnpm --filter @corral/api test` (includes `auth.spec.ts`, env, and health tests) ✅
+  - `pnpm biome:ci` ✅
+  - `pnpm typecheck` ✅
+  - `pnpm build` ✅
+
+### Explicitly open or deferred after closure
+
+- Console routes are currently in frontend mock mode by design (see `docs/product-progress.md` direction
+  change). The login/dashboard/admin users flows do not currently call live Better Auth APIs.
+- Console auth verification tasks that require real `authClient` calls and route-guard tests remain
+  deferred until the app exits mock-only mode:
+  - TASK-060, TASK-064, TASK-067, TASK-069, TASK-070, TASK-079.
+- OAuth manual checks requiring real interactive Google sign-in remain open:
+  - TASK-081, TASK-082, TASK-083, TASK-084.
+- Workspace `pnpm test` is not a reliable global gate yet because `apps/web` and `apps/console` have
+  no test files and exit with code `1`; API auth tests do pass.
+
+### Task disposition snapshot (closure pass)
+
+- Done in this pass or already validated as implemented: TASK-001..TASK-059, TASK-061..TASK-063,
+  TASK-065, TASK-066, TASK-068, TASK-071, TASK-072, TASK-073..TASK-075, TASK-085, TASK-086,
+  TASK-088.
+- Deferred/open: TASK-060, TASK-064, TASK-067, TASK-069, TASK-070, TASK-079, TASK-081..TASK-084,
+  TASK-087.
+
+## Console integration update — 2026-06-07
+
+### Closed in this integration pass
+
+- Console login now calls live Better Auth email/password and Google sign-in APIs with credentialed
+  fetch behavior; login-time mock persona selection and persona localStorage writes were removed.
+- Console protected routes now require a Better Auth session and fetch Corral console context from
+  `/console/me` before rendering organizer screens.
+- Internal admin routes now require the Better Auth Admin role instead of mock admin personas.
+- `/admin/users` now uses Better Auth Admin client methods for user list/create and Corral admin
+  membership APIs for organizer assignment.
+- Corral-owned `organizer`, `organizer_member`, and `event` tables were added for real organizer
+  membership/RBAC, with deterministic local seed IDs aligned to current console fixture event IDs.
+- Better Auth Organization plugin remains intentionally unused. Corral owns organizer membership,
+  roles, capabilities, and event ownership; Better Auth owns identity, sessions, OAuth, and platform
+  admin identity.
+
+### Still open after this pass
+
+- Public participant app auth remains out of scope and unauthenticated.
+- Business data screens still render typed mock fixtures until their domain APIs are implemented.
+- Event category/registration/payment/roster domains remain future MVP slices.
+- Interactive Google OAuth still needs environment-specific manual validation with real Google Cloud
+  redirect URIs and credentials.
+- Console route/component tests are still not present; API service tests cover the new console context
+  and RBAC mapping behavior.
+
+## Organizer self-signup update — 2026-06-07
+
+### Closed in this signup/onboarding pass
+
+- Better Auth email/password signup is enabled for organizer owners with required email verification,
+  `autoSignIn: false`, stronger password length, and public Google signup still disabled.
+- Verification and reset delivery now goes through an auth email abstraction. Local development can log
+  links, but signup with log-only email is rejected outside development/test.
+- `organizer` now stores review/profile fields: review status, entity type, billing address, finance
+  contact, creator/reviewer metadata, and review reason.
+- Corral ts-rest contracts now include onboarding status/create endpoints and platform-admin organizer
+  review endpoints.
+- `POST /console/onboarding/organizer` requires an authenticated verified user, trusted browser Origin,
+  no existing organizer membership, and creates organizer + owner membership in one transaction.
+- Console UI now includes `/signup`, `/check-email`, live organizer onboarding, verified zero-membership
+  redirect to onboarding, and a live `/admin/organizers` review queue.
+
+### Still open after this pass
+
+- Public Google organizer signup remains intentionally deferred until account-linking trust rules are
+  revisited.
+- Event draft creation/publishing is the next organizer/event domain slice. Pending organizers cannot
+  create real events yet because event CRUD is out of this auth slice.
+- A production email provider still needs to be selected and wired behind the email abstraction before
+  staging/production self-signup is enabled.
+- Server-side publish/payment gates must be enforced when those event/payment mutations are implemented.
+
 ## 1. Requirements & Constraints
 
 - **REQ-001**: The authentication provider MUST be Better Auth.
 - **REQ-002**: The API MUST expose Better Auth routes at `/api/auth/*`.
 - **REQ-003**: The initial auth methods MUST be email/password and Google OAuth.
-- **REQ-004**: Public sign-up MUST be disabled. Accounts MUST be admin-created only.
+- **REQ-004**: Organizer owner email/password sign-up MAY be enabled only with required email
+  verification and Corral-owned organizer onboarding/review. Public Google signup remains disabled in
+  this slice.
 - **REQ-005**: Better Auth Admin plugin MUST be included in this slice.
 - **REQ-006**: Better Auth Organization plugin MUST NOT be included in this slice.
 - **REQ-007**: The default Better Auth roles `admin` and `user` MUST be used. A custom `organizer` role MUST NOT be added in this slice.
 - **REQ-008**: The public `apps/web` application MUST remain public and unauthenticated in this slice.
 - **REQ-009**: The `apps/console` application MUST require authentication for the existing dashboard route `/`.
 - **REQ-010**: The console MUST provide a public login route at `/login`.
-- **REQ-011**: The console MUST NOT provide a public sign-up route.
+- **REQ-011**: The console MUST provide a public organizer owner sign-up route for email/password only.
 - **REQ-012**: A seed script MUST exist to create the first admin user without exposing admin bootstrap over HTTP.
-- **REQ-013**: Password reset and email verification email delivery MUST be stubbed/logged only in this slice.
+- **REQ-013**: Password reset and email verification delivery MUST use the auth email abstraction;
+  log-only delivery is local/test only.
 - **REQ-014**: Corral product APIs MUST continue to use ts-rest contracts, but Better Auth routes MUST NOT be wrapped in ts-rest.
 
 - **SEC-001**: `BETTER_AUTH_SECRET` MUST be validated as at least 32 characters.
@@ -59,8 +155,10 @@ This plan is based on research completed on 2026-06-01 against current Better Au
 - **GUD-003**: Use a TanStack Router pathless layout route for console route protection.
 - **GUD-004**: Use `beforeLoad` for route-level auth redirects in the console.
 - **GUD-005**: Use `@AllowAnonymous()` from `@thallesp/nestjs-better-auth` for public API routes.
-- **GUD-006**: Keep email hooks as log-only stubs until the notification/email slice is implemented.
-- **GUD-007**: Keep the Organization plugin decision coupled to future Event/Organizer domain modeling.
+- **GUD-006**: Keep email hooks behind a provider abstraction. Log-only delivery is allowed only in
+  local development/test; staging/production must use a real sender before signup is enabled.
+- **GUD-007**: Do not use the Better Auth Organization plugin for organizer membership. Corral owns
+  organizer, membership, role, capability, and event ownership tables linked to Better Auth users.
 
 - **PAT-001**: Follow existing `apps/api/src/env.ts` pattern using `parseEnv` and `z` from `@corral/config/env`.
 - **PAT-002**: Follow existing Drizzle schema barrel pattern in `packages/db/src/schema/index.ts`.
@@ -209,7 +307,10 @@ This plan is based on research completed on 2026-06-01 against current Better Au
 
 ## 3. Alternatives
 
-- **ALT-001**: Use Better Auth Organization plugin immediately. Rejected for this slice because organizer membership, active organization, invitations, and event ownership should be designed with the upcoming Event/Organizer domain model.
+- **ALT-001**: Use Better Auth Organization plugin for organizer membership. Rejected for this slice
+  because Corral needs first-class organizer/event domain tables, admin-created users plus manual
+  membership assignment, and product-specific roles/capabilities without coupling authorization to a
+  provider plugin.
 - **ALT-002**: Add a custom `organizer` role now. Rejected because the initial admin plugin roles `admin` and `user` are sufficient for the first slice and avoid custom access-control complexity before event ownership exists.
 - **ALT-003**: Enable public sign-up. Rejected because the confirmed MVP operating model is admin-created accounts and white-glove onboarding.
 - **ALT-004**: Use Better Auth cookie cache immediately. Rejected because immediate admin session revocation is more important than reducing session DB reads in the first slice.
@@ -300,7 +401,9 @@ This plan is based on research completed on 2026-06-01 against current Better Au
 - **RISK-007**: Admin-created users with temporary passwords require secure operational handling. Mitigation: prefer passwordless admin-created users or force reset once real email exists.
 - **RISK-008**: Generated schema may omit performance indexes recommended by Better Auth docs. Mitigation: inspect and add explicit Drizzle indexes.
 - **RISK-009**: User role `user` may be semantically confusing compared to Corral’s organizer terminology. Mitigation: map `user` to organizer behavior in app UI until domain roles are designed.
-- **RISK-010**: Deferring Organization plugin means event-level authorization must not assume organization membership exists. Mitigation: design Event/Organizer ownership explicitly in the next slice.
+- **RISK-010**: Corral-owned membership means product APIs must consistently resolve event ownership
+  to an organizer before checking membership/capabilities. Mitigation: keep authorization checks
+  server-side and compute organizer-scoped capabilities through `/console/me` and future API guards.
 
 - **ASSUMPTION-001**: `apps/api` remains the only auth server for console in this slice.
 - **ASSUMPTION-002**: `apps/console` and API share a parent domain in staging/prod.

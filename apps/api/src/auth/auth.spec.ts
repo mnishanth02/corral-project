@@ -41,10 +41,14 @@ describe("Better Auth server options", () => {
     expect(auth.options.trustedOrigins).toEqual(["http://localhost:5173", "http://localhost:5174"]);
   }, 30_000);
 
-  it("disables public signup while allowing admin-created users to link Google", async () => {
+  it("enables verified email signup while keeping public Google signup disabled", async () => {
     const { auth } = await import("./auth.js");
 
-    expect(auth.options.emailAndPassword?.disableSignUp).toBe(true);
+    expect(auth.options.emailAndPassword?.disableSignUp).toBe(false);
+    expect(auth.options.emailAndPassword?.requireEmailVerification).toBe(true);
+    expect(auth.options.emailAndPassword?.minPasswordLength).toBe(10);
+    expect(auth.options.emailAndPassword?.autoSignIn).toBe(false);
+    expect(auth.options.emailVerification?.sendOnSignUp).toBe(true);
     expect(auth.options.socialProviders?.google?.disableSignUp).toBe(true);
     expect(auth.options.socialProviders?.google?.disableImplicitSignUp).toBe(true);
     expect(auth.options.account?.accountLinking?.enabled).toBe(true);

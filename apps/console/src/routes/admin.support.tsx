@@ -130,10 +130,7 @@ function AdminSupportPage() {
                 ]}
                 rows={supportTickets.map((item) =>
                   cells(
-                    <a
-                      className="font-bold text-primary"
-                      href={`/admin/support?ticket=${item.id}&as=corral-admin`}
-                    >
+                    <a className="font-bold text-primary" href={`/admin/support?ticket=${item.id}`}>
                       {item.id}
                     </a>,
                     item.requester,
