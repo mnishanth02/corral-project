@@ -3,7 +3,7 @@
 > Single source of truth for **what has been planned, built, validated, blocked, or deferred** across
 > the Corral product. Future AI agents must read this file before starting implementation work.
 
-Last updated: **2026-06-12**
+Last updated: **2026-06-13**
 
 ---
 
@@ -58,7 +58,9 @@ Screen work has pivoted to direct in-app React frontend builds: no backend integ
 
 ### Current recommended next action
 
-1. Start the next domain slice unlocked by MVP-03: registration foundation or audit-log foundation.
+1. **Implement MVP-04 registration foundation** per `docs/impl-plan/feature-registration-foundation-1.md`
+   (plan written + Opus 4.8-reviewed). Sequence: schema+migration → contracts → API+tests → web
+   wiring → minimal console list/cancel → validation → docs.
 2. Add console route/component tests for live auth and live event setup flows once the console test
    harness is established.
 
@@ -81,8 +83,8 @@ Source of truth for product scope: `docs/plan.md` and `docs/implementation-plan.
 | MVP-00 | Base monorepo scaffold, health checks, shared packages, local infra | `docs/bootstrap-plan.md` | `Done` | `docs/bootstrap-plan.md` | `apps/*`, `packages/*`, `docker-compose.yml`, `turbo.json` | Existing repo scaffold and README workflow. | Maintain only. |
 | MVP-01 | Authentication foundation for console/admin access | `docs/impl-plan/feature-auth-better-auth-1.md` | `Done` | `docs/impl-plan/feature-auth-better-auth-1.md` | `apps/api/src/auth`, `apps/api/src/console`, `apps/console/src/lib/auth.ts`, console auth/signup/onboarding/admin routes, `packages/db/src/schema/auth.ts`, `packages/db/src/schema/organizer.ts` | Console auth is live: Better Auth session/login/admin identity, email/password self-signup with required verification, Corral `/console/me`, organizer onboarding, organizer memberships, organizer-scoped capabilities, and admin organizer review are wired. Public participant app remains unauthenticated. | Wire production email delivery, complete manual Google OAuth checks, and add console route tests. |
 | MVP-02 | Organizer + event setup | `docs/implementation-plan.md#11-event-setup` | `Done` | `docs/impl-plan/feature-event-organizer-domain-1.md` | `packages/db`, `packages/schema`, `apps/api`, `apps/console` | Event setup contracts/schemas, Drizzle migration `0003_jazzy_mandroid`, organizer-scoped event CRUD, category/fee-tier CRUD, readiness, ready/revert/publish transitions, admin payment-account status shim, controller handlers, API regression tests, typecheck/lint validation, and live console setup wiring are complete. Browser validation created `Browser Validation 10K`, saved basics/fees/form/policies, marked ready, and published via live API requests after applying the local DB migration. | Start public participant event page or registration foundation; add console route/component tests once the harness is available. |
-| MVP-03 | Public participant event page | `docs/implementation-plan.md#17-participant-event-page` | `Done` | `docs/impl-plan/feature-public-event-page-1.md` | `apps/web`, `packages/schema`, `apps/api` | Public event contracts/API and participant web live wiring are complete. Anonymous `/public/events` and `/public/events/:organizerSlug/:eventSlug` expose approved-organizer published events only, hide draft/ready/unapproved/missing records behind the same 404, exclude hidden categories, and avoid console/internal fields. Browser validation covered live calendar, landing, details, refund, waiver, category preview, disabled CTA states, and missing-event not-found behavior. Validation: schema build/typecheck/lint; API typecheck/lint/test; web build/typecheck/lint; Opus 4.8 review and re-review passed. | Start MVP-04 registration foundation or audit-log foundation. |
-| MVP-04 | Registration form and participant capture | `docs/implementation-plan.md#12-registration` | `Not started` | Needed | `packages/db`, `packages/schema`, `apps/web`, `apps/api`, `apps/console` | Depends on MVP-02. | Build standard fields, waiver, medical declaration, guardian flow. |
+| MVP-03 | Public participant event page | `docs/implementation-plan.md#17-participant-event-page` | `Done` | `docs/impl-plan/feature-public-event-page-1.md` | `apps/web`, `packages/schema`, `apps/api` | Public event contracts/API and participant web live wiring are complete. Anonymous `/public/events` and `/public/events/:organizerSlug/:eventSlug` expose approved-organizer published events only, hide draft/ready/unapproved/missing records behind the same 404, exclude hidden categories, and avoid console/internal fields. Browser validation covered live calendar, landing, details, refund, waiver, category preview, disabled CTA states, and missing-event not-found behavior. Validation: schema build/typecheck/lint; API typecheck/lint/test; web build/typecheck/lint; Opus 4.8 review and re-review passed. | Implement MVP-04 registration foundation (plan ready: `docs/impl-plan/feature-registration-foundation-1.md`). |
+| MVP-04 | Registration form and participant capture | `docs/implementation-plan.md#12-registration` | `Planned` | `docs/impl-plan/feature-registration-foundation-1.md` | `packages/db`, `packages/schema`, `apps/web`, `apps/api`, `apps/console` | Detailed plan written and reviewed with Opus 4.8 (verdict: approach sound, ready with should-fix changes — all folded in). Scope: persisted single individual registration for published events via anonymous submit/quote endpoints, server-authoritative pricing, race-safe capacity holds, UUID idempotency, age/minor/consent validation, organizer-scoped read + cancel (release valve), web wizard unified onto slug routing, minimal console list. Deferred: payments/confirmation (MVP-08), coupons (MVP-06), bulk (MVP-05), spot/offline (MVP-07), insurance (MVP-22), full roster (MVP-10), BIB (MVP-13). | Implement per the plan's 8 todos: schema+migration → contracts → API+tests → web wiring → console list/cancel → validation → docs. |
 | MVP-05 | Bulk/group registration | `docs/implementation-plan.md#12-registration` | `Not started` | Needed | Registration domain, payment domain, console/admin UI | Depends on MVP-04 and payment decisions. | Add coordinator/group model after single registration works. |
 | MVP-06 | Coupon codes + early-bird pricing | `docs/implementation-plan.md#12-registration` | `Not started` | Needed | Event/category pricing, registration checkout | Depends on MVP-02 and MVP-04. | Model discount and pricing rules before payment capture. |
 | MVP-07 | Spot/cash/offline registration capture | `docs/implementation-plan.md#12-registration` | `Not started` | Needed | Console roster/admin registration UI | Depends on MVP-04. | Build admin-created registrations with payment mode flags. |
@@ -135,7 +137,7 @@ Source of truth for product scope: `docs/plan.md` and `docs/implementation-plan.
 
 | Priority | Work item | Why it matters | Suggested plan file |
 |---|---|---|---|
-| P0 | Registration foundation | Turns public event/category interest into persisted participant registrations. | `docs/impl-plan/feature-registration-foundation-1.md` |
+| P0 | Registration foundation | Turns public event/category interest into persisted participant registrations. | `docs/impl-plan/feature-registration-foundation-1.md` (written + reviewed) |
 | P1 | Audit log foundation | Sensitive admin actions begin with event/registration mutation. | `docs/impl-plan/feature-audit-log-foundation-1.md` |
 | P1 | Participant event page | Needed before real registrations. | `docs/impl-plan/feature-public-event-page-1.md` |
 | P1 | Registration domain | Core business workflow. | `docs/impl-plan/feature-registration-foundation-1.md` |
