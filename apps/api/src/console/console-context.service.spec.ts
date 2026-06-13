@@ -120,6 +120,56 @@ const adminOrganizerDetailRow = {
   updated_at: new Date("2026-01-02T00:00:00.000Z"),
 };
 
+const eventDetailRow = {
+  ...eventRow,
+  status: "draft",
+  registration_opens_at: "2026-06-01T00:00:00.000Z",
+  registration_closes_at: "2026-08-08T00:00:00.000Z",
+  description: "A city marathon.",
+  map_url: "https://maps.example/race",
+  contact_email: "race@example.com",
+  contact_phone: null,
+  race_instructions: "Arrive 60 minutes early.",
+  waiver_text: "I accept the waiver.",
+  refund_policy: "No refunds after registration closes.",
+  medical_declaration: "I am fit to participate.",
+  form_fields: ["dateOfBirth", "emergencyContact"],
+  tshirt_sizes: ["S", "M", "L"],
+  logo_url: null,
+  banner_url: null,
+  ready_at: null,
+  published_at: null,
+  published_by_user_id: null,
+  created_by_user_id: "user-owner",
+  organizer_review_status: "approved",
+  organizer_payment_account_status: "verified",
+};
+
+const categoryRow = {
+  id: "cat-10k",
+  event_id: "coimbatore-marathon-2026",
+  label: "10K",
+  distance: "10K",
+  min_age: 14,
+  max_age: null,
+  capacity: 500,
+  registered_count: 0,
+  sort_order: 0,
+  status: "active",
+};
+
+const feeTierRow = {
+  id: "tier-early",
+  category_id: "cat-10k",
+  label: "Early bird",
+  amount_in_paise: 120_000,
+  starts_at: null,
+  ends_at: null,
+  registration_cap: null,
+  registration_count: 0,
+  is_active: true,
+};
+
 const trustedRequest = {
   headers: {
     cookie: "better-auth.session_token=test",
@@ -380,6 +430,158 @@ describe("ConsoleContextService", () => {
       status: 400,
       message: "Provide a role or status to update.",
     });
+  });
+
+  it("creates draft events only for approved organizers with event write access", async () => {
+    const transaction = vi.fn().mockResolvedValueOnce([]);
+    queryClient.begin.mockImplementationOnce(async (handler) => handler(transaction));
+    queryClient
+      .mockResolvedValueOnce([membershipRow])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([eventDetailRow])
+      .mockResolvedValueOnce([]);
+
+    const response = await new ConsoleContextService().createOrganizerEvent(
+      trustedRequest,
+      "org-kovai-road-runners",
+      { name: "Coimbatore Marathon 2026" },
+    );
+
+    expect(queryClient.begin).toHaveBeenCalledTimes(1);
+    expect(response.event).toMatchObject({
+      id: "coimbatore-marathon-2026",
+      organizerId: "org-kovai-road-runners",
+      status: "draft",
+      readiness: expect.objectContaining({ ready: false }),
+    });
+  });
+
+  it("blocks event creation for unapproved organizers", async () => {
+    queryClient.mockResolvedValueOnce([{ ...membershipRow, review_status: "pending" }]);
+
+    await expect(
+      new ConsoleContextService().createOrganizerEvent(trustedRequest, "org-kovai-road-runners", {
+        name: "Coimbatore Marathon 2026",
+      }),
+    ).rejects.toMatchObject({
+      status: 403,
+      message: "Only approved organizers can create events.",
+    });
+  });
+
+  it("marks a complete draft event ready", async () => {
+    queryClient
+      .mockResolvedValueOnce([membershipRow])
+      .mockResolvedValueOnce([eventDetailRow])
+      .mockResolvedValueOnce([eventDetailRow])
+      .mockResolvedValueOnce([categoryRow])
+      .mockResolvedValueOnce([feeTierRow])
+      .mockResolvedValueOnce([]);
+
+    const response = await new ConsoleContextService().markOrganizerEventReady(
+      trustedRequest,
+      "org-kovai-road-runners",
+      "coimbatore-marathon-2026",
+    );
+
+    expect(response.transitioned).toBe(true);
+    expect(response.readiness.ready).toBe(true);
+  });
+
+  it("returns readiness blockers without transitioning incomplete drafts", async () => {
+    queryClient
+      .mockResolvedValueOnce([membershipRow])
+      .mockResolvedValueOnce([{ ...eventDetailRow, waiver_text: null }])
+      .mockResolvedValueOnce([{ ...eventDetailRow, waiver_text: null }])
+      .mockResolvedValueOnce([categoryRow])
+      .mockResolvedValueOnce([feeTierRow]);
+
+    const response = await new ConsoleContextService().markOrganizerEventReady(
+      trustedRequest,
+      "org-kovai-road-runners",
+      "coimbatore-marathon-2026",
+    );
+
+    expect(response.transitioned).toBe(false);
+    expect(response.readiness.blocking).toEqual(
+      expect.arrayContaining([expect.objectContaining({ code: "waiver" })]),
+    );
+  });
+
+  it("rejects category updates that would invert min and max age", async () => {
+    queryClient
+      .mockResolvedValueOnce([membershipRow])
+      .mockResolvedValueOnce([eventDetailRow])
+      .mockResolvedValueOnce([{ ...categoryRow, min_age: 14, max_age: 40 }]);
+
+    await expect(
+      new ConsoleContextService().updateOrganizerEventCategory(
+        trustedRequest,
+        "org-kovai-road-runners",
+        "coimbatore-marathon-2026",
+        "cat-10k",
+        { minAge: 50 },
+      ),
+    ).rejects.toMatchObject({
+      status: 400,
+      message: "Minimum age cannot be greater than maximum age.",
+    });
+  });
+
+  it("requires at least one active category before marking ready", async () => {
+    queryClient
+      .mockResolvedValueOnce([membershipRow])
+      .mockResolvedValueOnce([eventDetailRow])
+      .mockResolvedValueOnce([eventDetailRow])
+      .mockResolvedValueOnce([{ ...categoryRow, status: "hidden" }])
+      .mockResolvedValueOnce([feeTierRow]);
+
+    const response = await new ConsoleContextService().markOrganizerEventReady(
+      trustedRequest,
+      "org-kovai-road-runners",
+      "coimbatore-marathon-2026",
+    );
+
+    expect(response.transitioned).toBe(false);
+    expect(response.readiness.blocking).toEqual(
+      expect.arrayContaining([expect.objectContaining({ code: "active-categories" })]),
+    );
+  });
+
+  it("blocks publish until organizer payment account is verified", async () => {
+    queryClient
+      .mockResolvedValueOnce([{ ...membershipRow, payment_account_status: "pending" }])
+      .mockResolvedValueOnce([{ ...eventDetailRow, status: "ready" }])
+      .mockResolvedValueOnce([categoryRow])
+      .mockResolvedValueOnce([feeTierRow]);
+
+    await expect(
+      new ConsoleContextService().publishOrganizerEvent(
+        trustedRequest,
+        "org-kovai-road-runners",
+        "coimbatore-marathon-2026",
+      ),
+    ).rejects.toMatchObject({
+      status: 409,
+      message: "Verify the organizer payment account before publishing.",
+    });
+  });
+
+  it("lets platform admins update organizer payment account status", async () => {
+    getSession.mockResolvedValue({ user: adminUser, session: { id: "session-id" } });
+    queryClient
+      .mockResolvedValueOnce([{ id: "org-kovai-road-runners" }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ ...adminOrganizerDetailRow, payment_account_status: "verified" }])
+      .mockResolvedValueOnce([adminMembershipRow]);
+
+    const response = await new ConsoleContextService().updateAdminOrganizerPaymentAccount(
+      trustedRequest,
+      "org-kovai-road-runners",
+      "verified",
+    );
+
+    expect(response.organizer.paymentAccountStatus).toBe("verified");
   });
 
   it("surfaces invalid stored roles as sanitized console API errors", async () => {

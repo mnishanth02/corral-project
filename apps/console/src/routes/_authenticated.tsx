@@ -28,7 +28,7 @@ import {
   SidebarMenuItem,
 } from "@corral/ui/components/sidebar";
 import { createFileRoute, Outlet, redirect, useMatches, useRouter } from "@tanstack/react-router";
-import { useCallback, useMemo, useState } from "react";
+import { type FormEvent, useCallback, useMemo, useState } from "react";
 
 import { type ConsolePersona, ConsoleShellProvider } from "../components/console-shell-context";
 import { consoleApiClient } from "../lib/api";
@@ -181,6 +181,9 @@ function AuthenticatedLayout() {
   const [activeEventId, setActiveEventIdState] = useState(() =>
     readInitialEventId(consoleContext.events),
   );
+  const [eventName, setEventName] = useState("");
+  const [createEventError, setCreateEventError] = useState<string | null>(null);
+  const [isCreatingEvent, setIsCreatingEvent] = useState(false);
   const breadcrumbs = useRouteBreadcrumbs();
   const activeConsoleEvent = useMemo(
     () => consoleContext.events.find((event) => event.id === activeEventId),
@@ -224,6 +227,49 @@ function AuthenticatedLayout() {
     await router.navigate({ to: "/login", search: { demo: "default" } });
   }
 
+  async function handleCreateFirstEvent(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!firstMembership) {
+      return;
+    }
+
+    const name = eventName.trim();
+
+    if (name.length < 2) {
+      setCreateEventError("Enter at least 2 characters for the event name.");
+      return;
+    }
+
+    setIsCreatingEvent(true);
+    setCreateEventError(null);
+
+    try {
+      const response = await consoleApiClient.createOrganizerEvent({
+        headers: {},
+        params: { organizerId: firstMembership.organizer.id },
+        body: { name },
+      });
+
+      if (response.status !== 201) {
+        setCreateEventError(response.body.message);
+        return;
+      }
+
+      window.localStorage.setItem("corral.console.activeEventId", response.body.event.id);
+      await router.invalidate();
+      await router.navigate({
+        to: "/events/$eventId/setup/basics",
+        params: { eventId: response.body.event.id },
+        search: { demo },
+      });
+    } catch (error) {
+      setCreateEventError(error instanceof Error ? error.message : "Event creation failed.");
+    } finally {
+      setIsCreatingEvent(false);
+    }
+  }
+
   if (!activeMembership && window.location.pathname.startsWith("/onboarding")) {
     return (
       <main className="min-h-screen bg-background text-foreground">
@@ -248,6 +294,10 @@ function AuthenticatedLayout() {
   }
 
   if (firstMembership && !activeConsoleEvent) {
+    const canCreateEvent =
+      firstMembership.organizer.reviewStatus === "approved" &&
+      firstMembership.capabilities.includes("events:write");
+
     return (
       <main className="min-h-screen bg-background p-8 text-foreground">
         <div className="mx-auto max-w-4xl">
@@ -257,21 +307,54 @@ function AuthenticatedLayout() {
                 {firstMembership.organizer.reviewStatus}
               </Badge>
               <CardTitle className="font-display text-5xl uppercase leading-none">
-                Organizer profile created
+                Create your first event
               </CardTitle>
               <CardDescription className="text-slate-300">
-                {firstMembership.organizer.name} is connected to your account. Event draft creation
-                is handled in the next organizer/event domain slice.
+                {firstMembership.organizer.name} is connected to your account. Create a draft event
+                now, then complete basics, fees, policies, readiness, and publishing in setup.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 p-6">
               <p className="text-sm text-muted-foreground">
                 {profileStatusMessage(firstMembership.organizer.reviewStatus)}
               </p>
+              {canCreateEvent ? (
+                <form
+                  className="grid gap-3 rounded-2xl border p-4"
+                  onSubmit={handleCreateFirstEvent}
+                >
+                  <label
+                    className="grid gap-2 text-sm font-medium text-foreground"
+                    htmlFor="first-event-name"
+                  >
+                    Event name
+                    <input
+                      id="first-event-name"
+                      className="h-11 rounded-md border border-input bg-background px-3 text-sm font-normal"
+                      placeholder="Coimbatore Marathon 2026"
+                      value={eventName}
+                      onChange={(inputEvent) => setEventName(inputEvent.currentTarget.value)}
+                      disabled={isCreatingEvent}
+                    />
+                  </label>
+                  {createEventError ? (
+                    <p className="text-sm font-medium text-destructive">{createEventError}</p>
+                  ) : null}
+                  <div className="flex flex-wrap gap-3">
+                    <Button type="submit" disabled={isCreatingEvent}>
+                      {isCreatingEvent ? "Creating..." : "Create draft event"}
+                    </Button>
+                    <Button asChild variant="outline">
+                      <a href="/onboarding">View organizer profile</a>
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm text-warning-text">
+                  Event creation unlocks after Corral approves this organizer profile.
+                </div>
+              )}
               <div className="flex flex-wrap gap-3">
-                <Button asChild variant="outline">
-                  <a href="/onboarding">View organizer profile</a>
-                </Button>
                 <Button onClick={handleSignOut}>Sign out</Button>
               </div>
             </CardContent>
@@ -361,13 +444,15 @@ function AuthenticatedLayout() {
                     </BreadcrumbList>
                   </Breadcrumb>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    {activeConsoleEvent.name} · {activeConsoleEvent.venueName}
+                    {activeConsoleEvent.name} · {activeConsoleEvent.venueName ?? "Venue pending"}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <label className="grid gap-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     Event context
                     <select
+                      id="console-active-event"
+                      name="activeEventId"
                       className="h-10 min-w-72 rounded-md border border-input bg-background px-3 text-sm font-medium normal-case tracking-normal text-foreground"
                       value={activeConsoleEvent.id}
                       onChange={(event) => setActiveEventId(event.target.value)}
@@ -383,6 +468,8 @@ function AuthenticatedLayout() {
                     <div className="flex flex-wrap gap-2 rounded-xl border border-dashed border-primary/40 bg-brand-tint px-3 py-2">
                       <select
                         aria-label="Demo state"
+                        id="console-demo-state"
+                        name="demo"
                         className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                         value={demo}
                         onChange={(event) => setDemoSearchParam(event.target.value)}
