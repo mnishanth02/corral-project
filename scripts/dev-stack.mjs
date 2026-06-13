@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { execFile, spawn } from "node:child_process";
+import { execFile, execFileSync, spawn } from "node:child_process";
 import { copyFileSync, existsSync, readFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { dirname, resolve } from "node:path";
@@ -155,8 +155,6 @@ const children = [
       "@corral/web",
       "exec",
       "vite",
-      "--host",
-      "0.0.0.0",
       "--port",
       String(selected.web.port),
       "--strictPort",
@@ -171,8 +169,6 @@ const children = [
       "@corral/console",
       "exec",
       "vite",
-      "--host",
-      "0.0.0.0",
       "--port",
       String(selected.console.port),
       "--strictPort",
@@ -595,7 +591,30 @@ function stopChildren(children, except) {
       continue;
     }
 
-    child.kill("SIGTERM");
+    stopChild(child);
+  }
+}
+
+function stopChild(child) {
+  if (isWindows) {
+    stopWindowsProcessTree(child);
+    return;
+  }
+
+  child.kill("SIGTERM");
+}
+
+function stopWindowsProcessTree(child) {
+  if (!child.pid) {
+    return;
+  }
+
+  try {
+    execFileSync("taskkill", ["/pid", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+  } catch {
+    if (!child.killed) {
+      child.kill("SIGTERM");
+    }
   }
 }
 

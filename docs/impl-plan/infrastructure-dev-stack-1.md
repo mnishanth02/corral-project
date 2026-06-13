@@ -48,7 +48,7 @@ This plan defines a local development stack launcher for Corral. The launcher st
 |------|-------------|-----------|------|
 | TASK-004 | Update `docker-compose.yml` so Postgres and Redis host ports use `${POSTGRES_PORT:-5432}` and `${REDIS_PORT:-6379}` while preserving container ports. | ✅ | 2026-06-11 |
 | TASK-005 | Add `scripts/dev-stack.mjs` using Node.js built-in modules to load `.env`, create `.env` from `.env.example` when missing, find available ports, start Docker Compose, run `pnpm db:migrate`, optionally run `pnpm --filter @corral/api auth:seed-admin`, spawn API, worker, web, and console, and print final URLs and credentials. | ✅ | 2026-06-11 |
-| TASK-006 | Add `scripts/dev-stack.sh` as a Bash convenience wrapper that executes `node scripts/dev-stack.mjs`. | ✅ | 2026-06-11 |
+| TASK-006 | Add `scripts/dev-stack.sh` as a POSIX shell convenience wrapper that executes `node scripts/dev-stack.mjs`. | ✅ | 2026-06-11 |
 | TASK-007 | Update root `package.json` with `dev:stack` as a delegation to `node scripts/dev-stack.mjs`. | ✅ | 2026-06-11 |
 
 ### Implementation Phase 3
