@@ -1,3 +1,4 @@
+import type { ConsoleEvent, EventFormField, UpdateEventRequest } from "@corral/schema";
 import { Badge } from "@corral/ui/components/badge";
 import { Button } from "@corral/ui/components/button";
 import {
@@ -35,10 +36,13 @@ import {
   TableRow,
 } from "@corral/ui/components/table";
 import { Textarea } from "@corral/ui/components/textarea";
-import { Link } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link, useRouter } from "@tanstack/react-router";
 import type * as React from "react";
+import { type FormEvent, useState } from "react";
 import { useConsoleShell } from "../components/console-shell-context";
 import { SetupStepper } from "../components/wizard-steppers";
+import { consoleApiClient } from "../lib/api";
 import {
   findMockEvent,
   mockCoupons,
@@ -55,6 +59,20 @@ import { formatDate, formatINR, formatTime } from "../mocks/utils";
 type Search = { as?: PersonaId; demo: DemoState };
 
 type ScreenProps = { eventId?: string };
+
+const eventDetailQueryKey = (eventId: string) => ["console", "event-detail", eventId] as const;
+
+const formFieldOptions = [
+  { key: "dateOfBirth", label: "DOB" },
+  { key: "gender", label: "Gender" },
+  { key: "bloodGroup", label: "Blood group" },
+  { key: "emergencyContact", label: "Emergency contact" },
+  { key: "medicalInfo", label: "Medical notes" },
+  { key: "tshirtSize", label: "T-shirt size" },
+  { key: "guardianName", label: "Guardian name" },
+  { key: "guardianContact", label: "Guardian contact" },
+  { key: "clubName", label: "Club/team" },
+] as const satisfies readonly { key: EventFormField; label: string }[];
 
 type AppLinkProps = {
   to: string;
@@ -139,8 +157,96 @@ function StepShell({
 }
 
 function useCurrentEvent(eventId?: string) {
-  const { activeEventId } = useConsoleShell();
+  const { activeEventId, consoleContext } = useConsoleShell();
+  const requestedEventId = eventId ?? activeEventId;
+  const liveEvent = consoleContext.events.find((event) => event.id === requestedEventId);
+
+  if (liveEvent) {
+    return liveConsoleEventToMockEvent(liveEvent);
+  }
+
   return findMockEvent(eventId ?? activeEventId) ?? findMockEvent(activeEventId) ?? mockEvents[0];
+}
+
+function useLiveEventDetail(eventId?: string) {
+  const { activeEventId, consoleContext } = useConsoleShell();
+  const requestedEventId = eventId ?? activeEventId;
+  const liveEvent = consoleContext.events.find((event) => event.id === requestedEventId);
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  const query = useQuery({
+    queryKey: eventDetailQueryKey(requestedEventId),
+    enabled: Boolean(liveEvent),
+    queryFn: async () => {
+      if (!liveEvent) {
+        throw new Error("Event context is required.");
+      }
+
+      const response = await consoleApiClient.getOrganizerEvent({
+        headers: {},
+        params: { organizerId: liveEvent.organizerId, eventId: liveEvent.id },
+      });
+
+      if (response.status !== 200) {
+        throw new Error(response.body.message);
+      }
+
+      return response.body.event;
+    },
+  });
+
+  const invalidate = async () => {
+    if (liveEvent) {
+      await queryClient.invalidateQueries({ queryKey: eventDetailQueryKey(liveEvent.id) });
+      await router.invalidate();
+    }
+  };
+
+  return {
+    liveEvent,
+    event: query.data,
+    isLoading: query.isLoading,
+    error: query.error instanceof Error ? query.error.message : null,
+    invalidate,
+  };
+}
+
+function liveConsoleEventToMockEvent(event: ConsoleEvent): Event {
+  const route = `/events/${event.id}/setup/basics`;
+  return {
+    id: event.id,
+    organizerId: event.organizerId,
+    slug: event.slug,
+    name: event.name,
+    status: event.status,
+    date: event.date ?? "",
+    startTime: event.startsAt ?? "",
+    venueName: event.venueName ?? "",
+    venueAddress: event.venueAddress ?? "",
+    city: event.city ?? "",
+    timezone: "Asia/Kolkata",
+    categories: [],
+    setup: {
+      currentStep: "basics",
+      completedSteps: [],
+      blockers: [
+        {
+          id: "event-basics",
+          label: "Complete event basics",
+          status:
+            event.date && event.startsAt && event.venueName && event.venueAddress && event.city
+              ? "complete"
+              : "blocked",
+          ownerRole: "Owner",
+          route,
+        },
+      ],
+    },
+    publicUrl: `/events/${event.slug}`,
+    registrationOpensAt: "",
+    registrationClosesAt: "",
+  };
 }
 
 function DemoAlert({
@@ -190,7 +296,7 @@ function EventStatusBadge({ status }: { status: Event["status"] }) {
 }
 
 export function EventsDashboardScreen() {
-  const { demo } = useConsoleShell();
+  const { consoleContext, demo, persona } = useConsoleShell();
   const events = demo === "empty" ? [] : mockEvents;
   const displayedEvents = events.map((event, index) =>
     index === 1 ? { ...event, status: "closed" as const } : event,
@@ -233,9 +339,9 @@ export function EventsDashboardScreen() {
         title="Events dashboard"
         description="Calm control room for Coimbatore races: setup status, registration pace, revenue, and quick operational links."
         actions={
-          <Button asChild>
-            <AppLink to="/">Create event</AppLink>
-          </Button>
+          <CreateEventAction
+            organizerId={persona.organizerId ?? consoleContext.defaultOrganizerId}
+          />
         }
       />
       {displayedEvents.length === 0 ? (
@@ -409,6 +515,81 @@ export function EventsDashboardScreen() {
   );
 }
 
+function CreateEventAction({ organizerId }: { organizerId?: string | null }) {
+  const router = useRouter();
+  const { demo } = useConsoleShell();
+  const [name, setName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!organizerId) {
+      setError("Organizer context is required before creating an event.");
+      return;
+    }
+
+    const eventName = name.trim();
+
+    if (eventName.length < 2) {
+      setError("Enter at least 2 characters.");
+      return;
+    }
+
+    setIsCreating(true);
+    setError(null);
+
+    try {
+      const response = await consoleApiClient.createOrganizerEvent({
+        headers: {},
+        params: { organizerId },
+        body: { name: eventName },
+      });
+
+      if (response.status !== 201) {
+        setError(response.body.message);
+        return;
+      }
+
+      window.localStorage.setItem("corral.console.activeEventId", response.body.event.id);
+      await router.invalidate();
+      await router.navigate({
+        to: "/events/$eventId/setup/basics",
+        params: { eventId: response.body.event.id },
+        search: { demo },
+      });
+    } catch (unknownError) {
+      setError(unknownError instanceof Error ? unknownError.message : "Event creation failed.");
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
+  return (
+    <form className="flex flex-wrap items-end gap-2" onSubmit={handleSubmit}>
+      <label
+        className="grid gap-1 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground"
+        htmlFor="dashboard-event-name"
+      >
+        New event
+        <Input
+          id="dashboard-event-name"
+          className="h-9 w-64 normal-case tracking-normal"
+          placeholder="Coimbatore Marathon 2026"
+          value={name}
+          onChange={(event) => setName(event.currentTarget.value)}
+          disabled={isCreating}
+        />
+      </label>
+      <Button type="submit" disabled={isCreating}>
+        {isCreating ? "Creating..." : "Create event"}
+      </Button>
+      {error ? <p className="basis-full text-sm font-medium text-destructive">{error}</p> : null}
+    </form>
+  );
+}
+
 function MetricCard({ label, value, note }: { label: string; value: string; note: string }) {
   return (
     <Card className="rounded-[1.5rem]">
@@ -425,16 +606,61 @@ function MetricCard({ label, value, note }: { label: string; value: string; note
 
 export function BasicsScreen({ eventId }: ScreenProps) {
   const event = useCurrentEvent(eventId);
+  const live = useLiveEventDetail(eventId);
   const { eventSetupDrafts, updateEventSetupDraft } = useMockStore();
+  const [saveError, setSaveError] = useState<string | null>(null);
   const draft = eventSetupDrafts[event.id];
-  const basics = draft?.basics ?? {
-    name: event.name,
-    date: event.date,
-    startTime: event.startTime,
-    venueName: event.venueName,
-    venueAddress: event.venueAddress,
-    city: event.city,
+  const liveBasics = live.event
+    ? {
+        name: live.event.name,
+        date: live.event.date ?? "",
+        startTime: live.event.startsAt ?? "",
+        venueName: live.event.venueName ?? "",
+        venueAddress: live.event.venueAddress ?? "",
+        city: live.event.city ?? "",
+      }
+    : null;
+  const basics = draft?.basics ??
+    liveBasics ?? {
+      name: event.name,
+      date: event.date,
+      startTime: event.startTime,
+      venueName: event.venueName,
+      venueAddress: event.venueAddress,
+      city: event.city,
+    };
+  const liveEvent = live.liveEvent;
+  const updateMutation = useMutation({
+    mutationFn: async (patch: UpdateEventRequest) => {
+      if (!liveEvent) {
+        return;
+      }
+
+      const response = await consoleApiClient.updateOrganizerEvent({
+        headers: {},
+        params: { organizerId: liveEvent.organizerId, eventId: liveEvent.id },
+        body: patch,
+      });
+
+      if (response.status !== 200) {
+        throw new Error(response.body.message);
+      }
+    },
+    onSuccess: () => {
+      setSaveError(null);
+      void live.invalidate();
+    },
+    onError: (error) => {
+      setSaveError(error instanceof Error ? error.message : "Event save failed.");
+    },
+  });
+  const saveLiveEventPatch = async (patch: UpdateEventRequest) => {
+    if (!liveEvent) {
+      return;
+    }
+    updateMutation.mutate(patch);
   };
+
   return (
     <StepShell eventId={event.id} activeStep="basics">
       <ScreenHeader
@@ -452,59 +678,78 @@ export function BasicsScreen({ eventId }: ScreenProps) {
       <Card className="rounded-[1.5rem]">
         <CardHeader>
           <CardTitle>Race identity</CardTitle>
-          <CardDescription>Saved locally in the mock setup draft.</CardDescription>
+          <CardDescription>
+            {liveEvent
+              ? "Saved to the Corral event draft API."
+              : "Saved locally in the mock setup draft."}
+          </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-5 lg:grid-cols-2">
+          {saveError ? (
+            <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm font-medium text-destructive lg:col-span-2">
+              {saveError}
+            </div>
+          ) : null}
           <TextField
             id="event-name"
             label="Event name"
             defaultValue={basics.name}
-            onBlur={(value) =>
-              updateEventSetupDraft(event.id, { basics: { ...basics, name: value } })
-            }
+            onBlur={(value) => {
+              updateEventSetupDraft(event.id, { basics: { ...basics, name: value } });
+              void saveLiveEventPatch({ name: value });
+            }}
           />
           <TextField
             id="event-city"
             label="City"
             defaultValue={basics.city}
-            onBlur={(value) =>
-              updateEventSetupDraft(event.id, { basics: { ...basics, city: value } })
-            }
+            onBlur={(value) => {
+              updateEventSetupDraft(event.id, { basics: { ...basics, city: value } });
+              void saveLiveEventPatch({ city: value || null });
+            }}
           />
           <TextField
             id="event-date"
             label="Race date"
             type="date"
             defaultValue={basics.date}
-            onBlur={(value) =>
-              updateEventSetupDraft(event.id, { basics: { ...basics, date: value } })
-            }
+            onBlur={(value) => {
+              updateEventSetupDraft(event.id, { basics: { ...basics, date: value } });
+              void saveLiveEventPatch({ date: value || null });
+            }}
           />
           <TextField
             id="event-start"
             label="Start datetime"
             type="datetime-local"
-            defaultValue={basics.startTime.slice(0, 16)}
-            onBlur={(value) =>
+            defaultValue={basics.startTime ? basics.startTime.slice(0, 16) : ""}
+            onBlur={(value) => {
               updateEventSetupDraft(event.id, {
                 basics: { ...basics, startTime: `${value}:00+05:30` },
-              })
-            }
+              });
+              void saveLiveEventPatch({ startsAt: value ? `${value}:00+05:30` : null });
+            }}
           />
           <TextField
             id="venue-name"
             label="Venue"
             defaultValue={basics.venueName}
-            onBlur={(value) =>
-              updateEventSetupDraft(event.id, { basics: { ...basics, venueName: value } })
-            }
+            onBlur={(value) => {
+              updateEventSetupDraft(event.id, { basics: { ...basics, venueName: value } });
+              void saveLiveEventPatch({ venueName: value || null });
+            }}
           />
           <TextField
             id="map-link"
             label="Map link"
             type="url"
-            defaultValue="https://maps.google.com/?q=CODISSIA+Trade+Fair+Complex"
+            defaultValue={
+              live.event?.mapUrl ?? "https://maps.google.com/?q=CODISSIA+Trade+Fair+Complex"
+            }
             description="Same-origin app stores a public map URL only; no private hostnames."
+            onBlur={(value) => {
+              void saveLiveEventPatch({ mapUrl: value || null });
+            }}
           />
           <Field className="lg:col-span-2">
             <FieldLabel htmlFor="venue-address">Venue address</FieldLabel>
@@ -513,11 +758,12 @@ export function BasicsScreen({ eventId }: ScreenProps) {
               name="venueAddress"
               defaultValue={basics.venueAddress}
               rows={4}
-              onBlur={(e) =>
+              onBlur={(e) => {
                 updateEventSetupDraft(event.id, {
                   basics: { ...basics, venueAddress: e.currentTarget.value },
-                })
-              }
+                });
+                void saveLiveEventPatch({ venueAddress: e.currentTarget.value || null });
+              }}
             />
           </Field>
         </CardContent>
@@ -563,15 +809,282 @@ function TextField({
 export function FeesScreen({ eventId }: ScreenProps) {
   const event = useCurrentEvent(eventId);
   const { demo } = useConsoleShell();
+  const live = useLiveEventDetail(eventId);
   const { eventSetupDrafts, updateEventSetupDraft } = useMockStore();
-  const categories = eventSetupDrafts[event.id]?.categories ?? event.categories;
+  const [saveError, setSaveError] = useState<string | null>(null);
+  type DisplayCategory = Omit<EventCategory, "distance"> & { distance: string; tierId?: string };
+  const categories: DisplayCategory[] = live.event
+    ? live.event.categories.map((category) => ({
+        id: category.id,
+        label: category.label,
+        distance: category.distance,
+        feeInPaise: category.feeTiers[0]?.amountInPaise ?? 0,
+        capacity: category.capacity,
+        registered: category.registeredCount,
+        minAge: category.minAge ?? undefined,
+        tierId: category.feeTiers[0]?.id,
+      }))
+    : (eventSetupDrafts[event.id]?.categories ?? event.categories);
   const showWarnings = demo === "validation-error";
-  const updateCategory = (category: EventCategory, patch: Partial<EventCategory>) =>
-    updateEventSetupDraft(event.id, {
-      categories: categories.map((item) =>
-        item.id === category.id ? { ...item, ...patch } : item,
-      ),
-    });
+  const reportLiveError = (error: unknown) => {
+    setSaveError(error instanceof Error ? error.message : "Event setup save failed.");
+  };
+  const updateCategory = async (category: DisplayCategory, patch: Partial<DisplayCategory>) => {
+    if (!live.liveEvent) {
+      updateEventSetupDraft(event.id, {
+        categories: categories.map((item) =>
+          item.id === category.id
+            ? ({ ...item, ...patch } as EventCategory)
+            : (item as EventCategory),
+        ),
+      });
+      return;
+    }
+
+    try {
+      if (patch.label || patch.capacity) {
+        const response = await consoleApiClient.updateOrganizerEventCategory({
+          headers: {},
+          params: {
+            organizerId: live.liveEvent.organizerId,
+            eventId: live.liveEvent.id,
+            categoryId: category.id,
+          },
+          body: {
+            label: patch.label,
+            capacity: patch.capacity,
+          },
+        });
+
+        if (response.status !== 200) {
+          throw new Error(response.body.message);
+        }
+      }
+
+      if (patch.feeInPaise != null) {
+        const response = category.tierId
+          ? await consoleApiClient.updateOrganizerEventFeeTier({
+              headers: {},
+              params: {
+                organizerId: live.liveEvent.organizerId,
+                eventId: live.liveEvent.id,
+                categoryId: category.id,
+                tierId: category.tierId,
+              },
+              body: { amountInPaise: patch.feeInPaise },
+            })
+          : await consoleApiClient.createOrganizerEventFeeTier({
+              headers: {},
+              params: {
+                organizerId: live.liveEvent.organizerId,
+                eventId: live.liveEvent.id,
+                categoryId: category.id,
+              },
+              body: { label: "Standard", amountInPaise: patch.feeInPaise, isActive: true },
+            });
+
+        if (response.status !== 200 && response.status !== 201) {
+          throw new Error(response.body.message);
+        }
+      }
+
+      setSaveError(null);
+      await live.invalidate();
+    } catch (error) {
+      reportLiveError(error);
+    }
+  };
+  const updateEventPatch = async (patch: UpdateEventRequest) => {
+    if (!live.liveEvent) {
+      return;
+    }
+
+    try {
+      const response = await consoleApiClient.updateOrganizerEvent({
+        headers: {},
+        params: { organizerId: live.liveEvent.organizerId, eventId: live.liveEvent.id },
+        body: patch,
+      });
+
+      if (response.status !== 200) {
+        throw new Error(response.body.message);
+      }
+
+      setSaveError(null);
+      await live.invalidate();
+    } catch (error) {
+      reportLiveError(error);
+    }
+  };
+  const updateFeeTier = async (
+    categoryId: string,
+    tierId: string,
+    patch: { label?: string; amountInPaise?: number; endsAt?: string | null },
+  ) => {
+    if (!live.liveEvent) {
+      return;
+    }
+
+    try {
+      const response = await consoleApiClient.updateOrganizerEventFeeTier({
+        headers: {},
+        params: {
+          organizerId: live.liveEvent.organizerId,
+          eventId: live.liveEvent.id,
+          categoryId,
+          tierId,
+        },
+        body: patch,
+      });
+
+      if (response.status !== 200) {
+        throw new Error(response.body.message);
+      }
+
+      setSaveError(null);
+      await live.invalidate();
+    } catch (error) {
+      reportLiveError(error);
+    }
+  };
+  const addFeeTier = async (categoryId: string) => {
+    if (!live.liveEvent) {
+      return;
+    }
+
+    try {
+      const response = await consoleApiClient.createOrganizerEventFeeTier({
+        headers: {},
+        params: {
+          organizerId: live.liveEvent.organizerId,
+          eventId: live.liveEvent.id,
+          categoryId,
+        },
+        body: { label: "Early bird", amountInPaise: 90_000, isActive: true },
+      });
+
+      if (response.status !== 201) {
+        throw new Error(response.body.message);
+      }
+
+      setSaveError(null);
+      await live.invalidate();
+    } catch (error) {
+      reportLiveError(error);
+    }
+  };
+  const deleteFeeTier = async (categoryId: string, tierId: string) => {
+    if (!live.liveEvent) {
+      return;
+    }
+
+    try {
+      const response = await consoleApiClient.deleteOrganizerEventFeeTier({
+        headers: {},
+        params: {
+          organizerId: live.liveEvent.organizerId,
+          eventId: live.liveEvent.id,
+          categoryId,
+          tierId,
+        },
+      });
+
+      if (response.status !== 200) {
+        throw new Error(response.body.message);
+      }
+
+      setSaveError(null);
+      await live.invalidate();
+    } catch (error) {
+      reportLiveError(error);
+    }
+  };
+  const addCategory = async () => {
+    if (!live.liveEvent) {
+      updateEventSetupDraft(event.id, {
+        categories: [
+          ...categories.map((category) => category as EventCategory),
+          {
+            id: `mock-category-${categories.length + 1}`,
+            label: "10K",
+            distance: "10K",
+            feeInPaise: 100_000,
+            capacity: 100,
+            registered: 0,
+          },
+        ],
+      });
+      return;
+    }
+
+    try {
+      const existingIds = new Set(live.event?.categories.map((category) => category.id) ?? []);
+      const categoryResponse = await consoleApiClient.createOrganizerEventCategory({
+        headers: {},
+        params: { organizerId: live.liveEvent.organizerId, eventId: live.liveEvent.id },
+        body: { label: "10K", distance: "10K", capacity: 100, status: "active" },
+      });
+
+      if (categoryResponse.status !== 201) {
+        throw new Error(categoryResponse.body.message);
+      }
+
+      const createdCategory = categoryResponse.body.event.categories.find(
+        (category) => !existingIds.has(category.id),
+      );
+
+      if (createdCategory) {
+        const tierResponse = await consoleApiClient.createOrganizerEventFeeTier({
+          headers: {},
+          params: {
+            organizerId: live.liveEvent.organizerId,
+            eventId: live.liveEvent.id,
+            categoryId: createdCategory.id,
+          },
+          body: { label: "Standard", amountInPaise: 100_000, isActive: true },
+        });
+
+        if (tierResponse.status !== 201) {
+          throw new Error(tierResponse.body.message);
+        }
+      }
+
+      setSaveError(null);
+      await live.invalidate();
+    } catch (error) {
+      reportLiveError(error);
+    }
+  };
+  const deleteCategory = async (categoryId: string) => {
+    if (!live.liveEvent) {
+      updateEventSetupDraft(event.id, {
+        categories: categories
+          .filter((category) => category.id !== categoryId)
+          .map((category) => category as EventCategory),
+      });
+      return;
+    }
+
+    try {
+      const response = await consoleApiClient.deleteOrganizerEventCategory({
+        headers: {},
+        params: {
+          organizerId: live.liveEvent.organizerId,
+          eventId: live.liveEvent.id,
+          categoryId,
+        },
+      });
+
+      if (response.status !== 200) {
+        throw new Error(response.body.message);
+      }
+
+      setSaveError(null);
+      await live.invalidate();
+    } catch (error) {
+      reportLiveError(error);
+    }
+  };
   return (
     <StepShell eventId={event.id} activeStep="fees">
       <ScreenHeader
@@ -607,7 +1120,17 @@ export function FeesScreen({ eventId }: ScreenProps) {
             fee.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="grid gap-4">
+          {saveError ? (
+            <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm font-medium text-destructive">
+              {saveError}
+            </div>
+          ) : null}
+          <div>
+            <Button type="button" variant="outline" onClick={() => void addCategory()}>
+              Add category
+            </Button>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -616,6 +1139,7 @@ export function FeesScreen({ eventId }: ScreenProps) {
                 <TableHead>Fee</TableHead>
                 <TableHead>Capacity cap</TableHead>
                 <TableHead>Registered</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -625,7 +1149,9 @@ export function FeesScreen({ eventId }: ScreenProps) {
                     <Input
                       aria-label={`${category.label} name`}
                       defaultValue={category.label}
-                      onBlur={(e) => updateCategory(category, { label: e.currentTarget.value })}
+                      onBlur={(e) =>
+                        void updateCategory(category, { label: e.currentTarget.value })
+                      }
                     />
                   </TableCell>
                   <TableCell>
@@ -638,7 +1164,7 @@ export function FeesScreen({ eventId }: ScreenProps) {
                       inputMode="numeric"
                       defaultValue={category.feeInPaise / 100}
                       onBlur={(e) =>
-                        updateCategory(category, {
+                        void updateCategory(category, {
                           feeInPaise: Number(e.currentTarget.value) * 100,
                         })
                       }
@@ -653,7 +1179,7 @@ export function FeesScreen({ eventId }: ScreenProps) {
                         showWarnings && index === 0 ? category.registered : category.capacity
                       }
                       onBlur={(e) =>
-                        updateCategory(category, { capacity: Number(e.currentTarget.value) })
+                        void updateCategory(category, { capacity: Number(e.currentTarget.value) })
                       }
                     />
                   </TableCell>
@@ -663,6 +1189,16 @@ export function FeesScreen({ eventId }: ScreenProps) {
                     ) : (
                       `${category.registered}/${category.capacity}`
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => void deleteCategory(category.id)}
+                    >
+                      Delete
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -677,23 +1213,91 @@ export function FeesScreen({ eventId }: ScreenProps) {
             <CardDescription>Date/count step tiers for Coimbatore launch offers.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <TierRow
-              name="KOVAI-FIRST500"
-              detail="₹150 off until first 500 registrations"
-              date="2026-03-15"
-              warning={showWarnings}
-            />
-            <TierRow
-              name="CODISSIA-COUNT"
-              detail="10% off sponsor teams"
-              date="2026-06-01"
-              warning={showWarnings}
-            />
-            <TierRow
-              name="RACEWEEK"
-              detail="Last-week no discount, capacity protection"
-              date="2026-07-05"
-            />
+            {live.event ? (
+              <>
+                {live.event.categories[0] ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => void addFeeTier(live.event?.categories[0]?.id ?? "")}
+                  >
+                    Add fee tier
+                  </Button>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Add a category before fee tiers.</p>
+                )}
+                {live.event.categories.flatMap((category) =>
+                  category.feeTiers.map((tier) => (
+                    <div
+                      key={tier.id}
+                      className="grid gap-3 rounded-2xl border p-4 md:grid-cols-[1fr_9rem_11rem_6rem]"
+                    >
+                      <div>
+                        <Input
+                          aria-label={`${tier.label} tier label`}
+                          defaultValue={tier.label}
+                          onBlur={(event) =>
+                            void updateFeeTier(category.id, tier.id, {
+                              label: event.currentTarget.value,
+                            })
+                          }
+                        />
+                        <p className="mt-1 text-xs text-muted-foreground">{category.label}</p>
+                      </div>
+                      <Input
+                        aria-label={`${tier.label} amount in rupees`}
+                        type="number"
+                        defaultValue={tier.amountInPaise / 100}
+                        onBlur={(event) =>
+                          void updateFeeTier(category.id, tier.id, {
+                            amountInPaise: Number(event.currentTarget.value) * 100,
+                          })
+                        }
+                      />
+                      <Input
+                        aria-label={`${tier.label} end date`}
+                        type="datetime-local"
+                        defaultValue={tier.endsAt?.slice(0, 16) ?? ""}
+                        onBlur={(event) =>
+                          void updateFeeTier(category.id, tier.id, {
+                            endsAt: event.currentTarget.value
+                              ? `${event.currentTarget.value}:00+05:30`
+                              : null,
+                          })
+                        }
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => void deleteFeeTier(category.id, tier.id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  )),
+                )}
+              </>
+            ) : (
+              <>
+                <TierRow
+                  name="KOVAI-FIRST500"
+                  detail="₹150 off until first 500 registrations"
+                  date="2026-03-15"
+                  warning={showWarnings}
+                />
+                <TierRow
+                  name="CODISSIA-COUNT"
+                  detail="10% off sponsor teams"
+                  date="2026-06-01"
+                  warning={showWarnings}
+                />
+                <TierRow
+                  name="RACEWEEK"
+                  detail="Last-week no discount, capacity protection"
+                  date="2026-07-05"
+                />
+              </>
+            )}
           </CardContent>
         </Card>
         <Card className="rounded-[1.5rem]">
@@ -705,16 +1309,27 @@ export function FeesScreen({ eventId }: ScreenProps) {
               id="opens-at"
               label="Opens"
               type="datetime-local"
-              defaultValue={event.registrationOpensAt.slice(0, 16)}
+              defaultValue={(live.event?.registrationOpensAt ?? event.registrationOpensAt).slice(
+                0,
+                16,
+              )}
+              onBlur={(value) =>
+                void updateEventPatch({ registrationOpensAt: value ? `${value}:00+05:30` : null })
+              }
             />
             <TextField
               id="closes-at"
               label="Closes"
               type="datetime-local"
               defaultValue={
-                showWarnings ? "2026-07-20T23:59" : event.registrationClosesAt.slice(0, 16)
+                showWarnings
+                  ? "2026-07-20T23:59"
+                  : (live.event?.registrationClosesAt ?? event.registrationClosesAt).slice(0, 16)
               }
               error={showWarnings ? "Close date must be before race day." : undefined}
+              onBlur={(value) =>
+                void updateEventPatch({ registrationClosesAt: value ? `${value}:00+05:30` : null })
+              }
             />
           </CardContent>
         </Card>
@@ -761,23 +1376,92 @@ function TierRow({
 
 export function FormBuilderScreen({ eventId }: ScreenProps) {
   const event = useCurrentEvent(eventId);
+  const live = useLiveEventDetail(eventId);
   const { eventSetupDrafts, updateEventSetupDraft } = useMockStore();
-  const fields = eventSetupDrafts[event.id]?.formFields ?? [];
-  const toggleField = (field: string, checked: boolean) =>
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const mockFields = eventSetupDrafts[event.id]?.formFields ?? [];
+  const liveFields = live.event?.formFields ?? null;
+  const enabledFieldKeys = liveFields ?? [];
+  const displayedFields = liveFields
+    ? formFieldOptions
+        .filter((field) => enabledFieldKeys.includes(field.key))
+        .map((field) => field.label)
+    : mockFields;
+  const saveLiveFields = async (formFields: EventFormField[]) => {
+    if (!live.liveEvent) {
+      return;
+    }
+
+    try {
+      const response = await consoleApiClient.updateOrganizerEvent({
+        headers: {},
+        params: { organizerId: live.liveEvent.organizerId, eventId: live.liveEvent.id },
+        body: { formFields },
+      });
+
+      if (response.status !== 200) {
+        throw new Error(response.body.message);
+      }
+
+      setSaveError(null);
+      await live.invalidate();
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Form setup save failed.");
+    }
+  };
+  const saveLivePatch = async (patch: UpdateEventRequest) => {
+    if (!live.liveEvent) {
+      return;
+    }
+
+    try {
+      const response = await consoleApiClient.updateOrganizerEvent({
+        headers: {},
+        params: { organizerId: live.liveEvent.organizerId, eventId: live.liveEvent.id },
+        body: patch,
+      });
+
+      if (response.status !== 200) {
+        throw new Error(response.body.message);
+      }
+
+      setSaveError(null);
+      await live.invalidate();
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Form setup save failed.");
+    }
+  };
+  const toggleField = (field: string, checked: boolean) => {
+    if (liveFields) {
+      const key = field as EventFormField;
+      const nextFields = checked
+        ? [...new Set([...enabledFieldKeys, key])]
+        : enabledFieldKeys.filter((item) => item !== key);
+      void saveLiveFields(nextFields);
+      return;
+    }
+
     updateEventSetupDraft(event.id, {
-      formFields: checked ? [...fields, field] : fields.filter((item) => item !== field),
+      formFields: checked ? [...mockFields, field] : mockFields.filter((item) => item !== field),
     });
-  const allFields = [
-    "Full name",
-    "Mobile",
-    "Email",
-    "Emergency contact",
-    "T-shirt size",
-    "Club/team",
-    "DOB",
-    "Guardian contact",
-    "Medical notes",
-  ];
+  };
+  const allFields = liveFields
+    ? formFieldOptions.map((field) => ({
+        id: field.key,
+        label: field.label,
+        checked: enabledFieldKeys.includes(field.key),
+      }))
+    : [
+        "Full name",
+        "Mobile",
+        "Email",
+        "Emergency contact",
+        "T-shirt size",
+        "Club/team",
+        "DOB",
+        "Guardian contact",
+        "Medical notes",
+      ].map((field) => ({ id: field, label: field, checked: mockFields.includes(field) }));
   return (
     <StepShell eventId={event.id} activeStep="form">
       <ScreenHeader
@@ -801,22 +1485,27 @@ export function FormBuilderScreen({ eventId }: ScreenProps) {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2">
+            {saveError ? (
+              <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm font-medium text-destructive md:col-span-2">
+                {saveError}
+              </div>
+            ) : null}
             {allFields.map((field) => (
               <label
-                key={field}
-                htmlFor={`field-${field.replace(/\\W/g, "-")}`}
+                key={field.id}
+                htmlFor={`field-${field.id.replace(/\\W/g, "-")}`}
                 className="flex items-start gap-3 rounded-2xl border p-4"
               >
                 <Checkbox
-                  id={`field-${field.replace(/\\W/g, "-")}`}
-                  checked={fields.includes(field)}
-                  onCheckedChange={(value) => toggleField(field, value === true)}
-                  aria-label={`Include ${field}`}
+                  id={`field-${field.id.replace(/\\W/g, "-")}`}
+                  checked={field.checked}
+                  onCheckedChange={(value) => toggleField(field.id, value === true)}
+                  aria-label={`Include ${field.label}`}
                 />
                 <span>
-                  <span className="font-medium">{field}</span>
+                  <span className="font-medium">{field.label}</span>
                   <span className="block text-sm text-muted-foreground">
-                    {field === "Medical notes"
+                    {field.label === "Medical notes"
                       ? "Shown to race-day medical desk."
                       : "Participant-provided registration data."}
                   </span>
@@ -828,10 +1517,10 @@ export function FormBuilderScreen({ eventId }: ScreenProps) {
         <Card className="rounded-[1.5rem]">
           <CardHeader>
             <CardTitle>Preview</CardTitle>
-            <CardDescription>{fields.length} fields enabled</CardDescription>
+            <CardDescription>{displayedFields.length} fields enabled</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-2">
-            {fields.map((field) => (
+            {displayedFields.map((field) => (
               <div key={field} className="rounded-xl bg-secondary px-3 py-2 text-sm">
                 {field}
               </div>
@@ -849,7 +1538,13 @@ export function FormBuilderScreen({ eventId }: ScreenProps) {
             <Textarea
               id="waiver-text"
               rows={8}
-              defaultValue="I confirm I am medically fit to participate in Coimbatore Marathon 2026 and accept organizer safety instructions."
+              defaultValue={
+                live.event?.waiverText ??
+                "I confirm I am medically fit to participate in Coimbatore Marathon 2026 and accept organizer safety instructions."
+              }
+              onBlur={(event) =>
+                void saveLivePatch({ waiverText: event.currentTarget.value || null })
+              }
             />
           </Field>
           <Field>
@@ -857,7 +1552,13 @@ export function FormBuilderScreen({ eventId }: ScreenProps) {
             <Textarea
               id="medical-text"
               rows={8}
-              defaultValue="Share allergies, chronic conditions, emergency medication, and the emergency contact authorized for race-day support."
+              defaultValue={
+                live.event?.medicalDeclaration ??
+                "Share allergies, chronic conditions, emergency medication, and the emergency contact authorized for race-day support."
+              }
+              onBlur={(event) =>
+                void saveLivePatch({ medicalDeclaration: event.currentTarget.value || null })
+              }
             />
           </Field>
         </CardContent>
@@ -1040,8 +1741,32 @@ function UploadCard({
 
 export function PoliciesScreen({ eventId }: ScreenProps) {
   const event = useCurrentEvent(eventId);
+  const live = useLiveEventDetail(eventId);
   const { demo } = useConsoleShell();
+  const [saveError, setSaveError] = useState<string | null>(null);
   const validation = demo === "validation-error";
+  const saveLivePatch = async (patch: UpdateEventRequest) => {
+    if (!live.liveEvent) {
+      return;
+    }
+
+    try {
+      const response = await consoleApiClient.updateOrganizerEvent({
+        headers: {},
+        params: { organizerId: live.liveEvent.organizerId, eventId: live.liveEvent.id },
+        body: patch,
+      });
+
+      if (response.status !== 200) {
+        throw new Error(response.body.message);
+      }
+
+      setSaveError(null);
+      await live.invalidate();
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Policy save failed.");
+    }
+  };
   return (
     <StepShell eventId={event.id} activeStep="policies">
       <ScreenHeader
@@ -1061,6 +1786,11 @@ export function PoliciesScreen({ eventId }: ScreenProps) {
           Refund and waiver copy must be completed before publishing.
         </DemoAlert>
       ) : null}
+      {saveError ? (
+        <DemoAlert tone="danger" title="Policy save failed">
+          {saveError}
+        </DemoAlert>
+      ) : null}
       <Card className="rounded-[1.5rem]">
         <CardContent className="grid gap-5 p-6">
           <Field>
@@ -1070,9 +1800,13 @@ export function PoliciesScreen({ eventId }: ScreenProps) {
               rows={5}
               aria-invalid={validation}
               defaultValue={
-                validation
+                live.event?.refundPolicy ??
+                (validation
                   ? ""
-                  : "Refund requests are accepted until 15 days before race day. Transfers may be approved by organizer support."
+                  : "Refund requests are accepted until 15 days before race day. Transfers may be approved by organizer support.")
+              }
+              onBlur={(event) =>
+                void saveLivePatch({ refundPolicy: event.currentTarget.value || null })
               }
             />
             <FieldError>{validation ? "Refund policy is required." : undefined}</FieldError>
@@ -1082,7 +1816,13 @@ export function PoliciesScreen({ eventId }: ScreenProps) {
             <Textarea
               id="waiver-policy"
               rows={5}
-              defaultValue="Participants confirm training readiness, obey marshal instructions, and consent to emergency assistance if needed."
+              defaultValue={
+                live.event?.waiverText ??
+                "Participants confirm training readiness, obey marshal instructions, and consent to emergency assistance if needed."
+              }
+              onBlur={(event) =>
+                void saveLivePatch({ waiverText: event.currentTarget.value || null })
+              }
             />
           </Field>
           <div className="grid gap-4 md:grid-cols-2">
@@ -1090,13 +1830,15 @@ export function PoliciesScreen({ eventId }: ScreenProps) {
               id="support-email"
               label="Support email"
               type="email"
-              defaultValue="support@kovairoadrunners.example"
+              defaultValue={live.event?.contactEmail ?? "support@kovairoadrunners.example"}
+              onBlur={(value) => void saveLivePatch({ contactEmail: value || null })}
             />
             <TextField
               id="support-phone"
               label="Support phone"
               type="tel"
-              defaultValue="+91 422 400 2026"
+              defaultValue={live.event?.contactPhone ?? "+91 422 400 2026"}
+              onBlur={(value) => void saveLivePatch({ contactPhone: value || null })}
             />
           </div>
           <Field>
@@ -1104,7 +1846,13 @@ export function PoliciesScreen({ eventId }: ScreenProps) {
             <Textarea
               id="race-instructions"
               rows={5}
-              defaultValue="Report to CODISSIA Gate C by 04:45 AM. Carry photo ID, hydration bottle, and medical information."
+              defaultValue={
+                live.event?.raceInstructions ??
+                "Report to CODISSIA Gate C by 04:45 AM. Carry photo ID, hydration bottle, and medical information."
+              }
+              onBlur={(event) =>
+                void saveLivePatch({ raceInstructions: event.currentTarget.value || null })
+              }
             />
           </Field>
         </CardContent>
@@ -1115,49 +1863,169 @@ export function PoliciesScreen({ eventId }: ScreenProps) {
 
 export function PublishScreen({ eventId }: ScreenProps) {
   const event = useCurrentEvent(eventId);
+  const live = useLiveEventDetail(eventId);
   const { demo, persona } = useConsoleShell();
-  const ready =
-    demo === "success" || event.setup.blockers.every((item) => item.status === "complete");
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [isMutating, setIsMutating] = useState(false);
+  const ready = live.event
+    ? live.event.readiness.ready
+    : demo === "success" || event.setup.blockers.every((item) => item.status === "complete");
   const warningOnly = demo === "webhook-pending" || demo === "default";
   const override = demo === "permission-denied" && persona.id.startsWith("corral-admin");
-  const blocked = demo === "validation-error" || (!ready && !warningOnly);
-  const items = [
-    { label: "Basics complete", state: "complete", href: "basics", kind: "blocking" },
-    {
-      label: "At least one distance / fee",
-      state: blocked ? "blocked" : "complete",
-      href: "fees",
-      kind: "blocking",
-    },
-    {
-      label: "Registration dates valid",
-      state: blocked ? "blocked" : "complete",
-      href: "fees",
-      kind: "blocking",
-    },
-    {
-      label: "Policies, waiver, privacy notice",
-      state: blocked ? "blocked" : "complete",
-      href: "policies",
-      kind: "blocking",
-    },
-    {
-      label: "Payment account active",
-      state: ready ? "complete" : "warning",
-      href: "",
-      kind: "blocking",
-    },
-    { label: "Sponsor branding", state: "warning", href: "branding", kind: "warning" },
-    { label: "Optional coupons", state: "warning", href: "coupons", kind: "warning" },
-  ];
+  const blocked = live.event
+    ? live.event.readiness.blocking.length > 0
+    : demo === "validation-error" || (!ready && !warningOnly);
+  const items = live.event
+    ? [
+        ...(live.event.readiness.blocking.length === 0
+          ? [
+              {
+                label: "Blocking checks passed",
+                state: "complete",
+                href: "publish",
+                kind: "blocking",
+                message: "Basics, active categories, fee tiers, dates, and policies are complete.",
+              },
+            ]
+          : live.event.readiness.blocking.map((item) => ({
+              label: item.label,
+              state: "blocked",
+              href: readinessHref(item.code),
+              kind: "blocking",
+              message: item.message,
+            }))),
+        ...live.event.readiness.warnings.map((item) => ({
+          label: item.label,
+          state: "warning",
+          href: readinessHref(item.code),
+          kind: "warning",
+          message: item.message,
+        })),
+      ]
+    : [
+        { label: "Basics complete", state: "complete", href: "basics", kind: "blocking" },
+        {
+          label: "At least one distance / fee",
+          state: blocked ? "blocked" : "complete",
+          href: "fees",
+          kind: "blocking",
+        },
+        {
+          label: "Registration dates valid",
+          state: blocked ? "blocked" : "complete",
+          href: "fees",
+          kind: "blocking",
+        },
+        {
+          label: "Policies, waiver, privacy notice",
+          state: blocked ? "blocked" : "complete",
+          href: "policies",
+          kind: "blocking",
+        },
+        {
+          label: "Payment account active",
+          state: ready ? "complete" : "warning",
+          href: "",
+          kind: "blocking",
+        },
+        { label: "Sponsor branding", state: "warning", href: "branding", kind: "warning" },
+        { label: "Optional coupons", state: "warning", href: "coupons", kind: "warning" },
+      ];
+  const runLiveAction = async (action: "ready" | "revert" | "publish") => {
+    if (!live.liveEvent) {
+      return;
+    }
+
+    setIsMutating(true);
+    setActionError(null);
+    setActionMessage(null);
+
+    try {
+      const params = { organizerId: live.liveEvent.organizerId, eventId: live.liveEvent.id };
+      const response =
+        action === "ready"
+          ? await consoleApiClient.markOrganizerEventReady({ headers: {}, params, body: {} })
+          : action === "revert"
+            ? await consoleApiClient.revertOrganizerEventToDraft({ headers: {}, params, body: {} })
+            : await consoleApiClient.publishOrganizerEvent({ headers: {}, params, body: {} });
+
+      if (response.status !== 200) {
+        throw new Error(response.body.message);
+      }
+
+      if (action === "ready" && "transitioned" in response.body && !response.body.transitioned) {
+        setActionMessage("Resolve the blocking readiness checks before marking ready.");
+      } else {
+        setActionMessage(
+          action === "ready"
+            ? "Event marked ready."
+            : action === "revert"
+              ? "Event reverted to draft."
+              : "Event published.",
+        );
+      }
+
+      await live.invalidate();
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : "Publish action failed.");
+    } finally {
+      setIsMutating(false);
+    }
+  };
+  const actions = live.event ? (
+    <div className="flex flex-wrap gap-2">
+      {live.event.status === "draft" ? (
+        <Button type="button" disabled={isMutating} onClick={() => void runLiveAction("ready")}>
+          {isMutating ? "Checking..." : "Mark ready"}
+        </Button>
+      ) : null}
+      {live.event.status === "ready" ? (
+        <>
+          <Button type="button" disabled={isMutating} onClick={() => void runLiveAction("publish")}>
+            {isMutating ? "Publishing..." : "Publish event"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isMutating}
+            onClick={() => void runLiveAction("revert")}
+          >
+            Revert to draft
+          </Button>
+        </>
+      ) : null}
+      {live.event.status === "published" ? <Button disabled>Published</Button> : null}
+    </div>
+  ) : (
+    <Button disabled={blocked && !override}>Publish event</Button>
+  );
   return (
     <StepShell eventId={event.id} activeStep="publish">
       <ScreenHeader
         eyebrow="O-10A Publish"
-        title={ready ? "Ready to publish" : blocked ? "Publish blocked" : "Warnings remaining"}
+        title={
+          live.event?.status === "published"
+            ? "Event published"
+            : ready
+              ? "Ready to publish"
+              : blocked
+                ? "Publish blocked"
+                : "Warnings remaining"
+        }
         description="Blocking items gate go-live; warning-only items can be handled after launch."
-        actions={<Button disabled={blocked && !override}>Publish event</Button>}
+        actions={actions}
       />
+      {actionMessage ? (
+        <DemoAlert tone="success" title="Publish workflow updated">
+          {actionMessage}
+        </DemoAlert>
+      ) : null}
+      {actionError ? (
+        <DemoAlert tone="danger" title="Publish action failed">
+          {actionError}
+        </DemoAlert>
+      ) : null}
       {override ? (
         <DemoAlert tone="info" title="Admin override with audit reason">
           <Field className="mt-2">
@@ -1209,7 +2077,7 @@ function ChecklistRow({
   item,
 }: {
   eventId: string;
-  item: { label: string; state: string; href: string; kind: string };
+  item: { label: string; state: string; href: string; kind: string; message?: string };
 }) {
   const variant =
     item.state === "complete" ? "success" : item.state === "blocked" ? "destructive" : "warning";
@@ -1223,7 +2091,8 @@ function ChecklistRow({
         </Badge>
         <p className="mt-2 font-medium">{item.label}</p>
         <p className="text-sm text-muted-foreground">
-          {item.kind === "blocking" ? "Blocking publish item" : "Warning-only item"}
+          {item.message ??
+            (item.kind === "blocking" ? "Blocking publish item" : "Warning-only item")}
         </p>
       </div>
       {item.href === "coupons" ? (
@@ -1248,6 +2117,31 @@ function ChecklistRow({
       )}
     </div>
   );
+}
+
+function readinessHref(code: string): string {
+  if (
+    code.includes("category") ||
+    code.includes("tier") ||
+    code.includes("registration") ||
+    code === "active-categories"
+  ) {
+    return "fees";
+  }
+
+  if (code.includes("waiver") || code.includes("refund") || code.includes("contact")) {
+    return "policies";
+  }
+
+  if (code.includes("branding") || code.includes("logo") || code.includes("banner")) {
+    return "branding";
+  }
+
+  if (code.includes("race-instructions") || code.includes("map-url")) {
+    return "policies";
+  }
+
+  return "basics";
 }
 
 export function CouponsScreen({ eventId }: ScreenProps) {

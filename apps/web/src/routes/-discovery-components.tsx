@@ -12,13 +12,19 @@ import { DegradedBanner } from "@corral/ui/components/degraded-banner";
 import { EmptyState } from "@corral/ui/components/empty-state";
 import { Separator } from "@corral/ui/components/separator";
 import { CardSkeleton, ListSkeleton } from "@corral/ui/components/skeletons";
-import { Link, notFound } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 
 import { useStickyCta } from "../components/sticky-cta";
-import { participantEvents } from "../mocks/events";
-import type { Category, DemoState, Event, FeeTier } from "../mocks/types";
+import {
+  demoPublicEvents,
+  getDemoPublicEventOrThrow,
+  type PublicDisplayCategory,
+  type PublicDisplayEvent,
+  type PublicDisplayFeeTier,
+  publicEventPath,
+} from "../lib/public-events";
+import type { DemoState } from "../mocks/types";
 import { formatDate, formatINR, formatTime, parseDemoState } from "../mocks/utils";
 
 export type DiscoverySearch = {
@@ -31,43 +37,35 @@ export function validateDemoSearch(search: Record<string, unknown>): DiscoverySe
   return { demo: demo === "default" ? undefined : demo };
 }
 
-export function getEventOrThrow(eventId: string): Event {
-  const event = participantEvents.find((item) => item.slug === eventId || item.id === eventId);
-
-  if (!event) {
-    throw notFound();
-  }
-
-  return event;
+export function getEventOrThrow(eventId: string): PublicDisplayEvent {
+  return getDemoPublicEventOrThrow(eventId);
 }
 
 function demoValue(demo: DemoState | undefined): DemoState {
   return demo ?? "default";
 }
 
-function registerPath(event: Event) {
-  return `/events/${event.slug}/register/category`;
+function registerPath(event: PublicDisplayEvent) {
+  return publicEventPath(event, "/register/category");
 }
 
-function activeTier(category: Category): FeeTier {
-  const tier = category.feeTiers.find((item) => item.active) ?? category.feeTiers[0];
-
-  if (!tier) {
-    throw new Error(`Missing fee tier for ${category.name}`);
-  }
-
-  return tier;
+function activeTier(category: PublicDisplayCategory): PublicDisplayFeeTier | undefined {
+  return category.feeTiers.find((item) => item.active) ?? category.feeTiers[0];
 }
 
-function seatsLeft(category: Category) {
+function seatsLeft(category: PublicDisplayCategory) {
   return Math.max(category.capacity - category.registeredCount, 0);
 }
 
-function lowestFee(event: Event) {
-  return Math.min(...event.categories.map((category) => activeTier(category).amount.amount));
+function lowestFee(event: PublicDisplayEvent) {
+  const amounts = event.categories
+    .map((category) => activeTier(category)?.amount.amount)
+    .filter((amount): amount is number => typeof amount === "number");
+
+  return amounts.length > 0 ? Math.min(...amounts) : null;
 }
 
-function soldOut(event: Event) {
+function soldOut(event: PublicDisplayEvent) {
   return (
     event.status === "sold-out" ||
     event.categories.every((category) => category.status === "sold-out")
@@ -75,13 +73,14 @@ function soldOut(event: Event) {
 }
 
 type LandingStatus =
+  | "registration-upcoming"
   | "registration-open"
   | "early-bird-active"
   | "closing-soon"
   | "closed"
   | "sold-out";
 
-function landingStatus(event: Event, demo: DemoState): LandingStatus {
+function landingStatus(event: PublicDisplayEvent, demo: DemoState): LandingStatus {
   if (demo === "validation-error" || soldOut(event)) {
     return "sold-out";
   }
@@ -98,7 +97,15 @@ function landingStatus(event: Event, demo: DemoState): LandingStatus {
     return "early-bird-active";
   }
 
-  return "registration-open";
+  if (event.availability === "registration-upcoming") {
+    return "registration-upcoming";
+  }
+
+  if (event.availability === "registration-closed") {
+    return "closed";
+  }
+
+  return event.availability;
 }
 
 function statusContent(status: LandingStatus) {
@@ -106,6 +113,7 @@ function statusContent(status: LandingStatus) {
     LandingStatus,
     { icon: string; label: string; tone: "success" | "warning" | "muted" }
   > = {
+    "registration-upcoming": { icon: "◌", label: "Opening soon", tone: "muted" },
     "registration-open": { icon: "●", label: "Registration open", tone: "success" },
     "early-bird-active": { icon: "↯", label: "Early bird active", tone: "success" },
     "closing-soon": { icon: "!", label: "Closing soon", tone: "warning" },
@@ -121,7 +129,7 @@ function RegisterCta({
   disabled,
   reason,
 }: {
-  event: Event;
+  event: PublicDisplayEvent;
   disabled?: boolean;
   reason?: string;
 }) {
@@ -138,27 +146,55 @@ function RegisterCta({
 
   return (
     <Button asChild className="h-12 w-full rounded-2xl text-base shadow-lg">
-      <Link to={registerPath(event) as never}>Register now</Link>
+      <a href={registerPath(event)}>Register now</a>
     </Button>
   );
 }
 
-function BackLink({ event, label = "Back to event" }: { event: Event; label?: string }) {
+function registrationCtaState(event: PublicDisplayEvent, demo: DemoState) {
+  const status = landingStatus(event, demo);
+  const disabled =
+    status === "registration-upcoming" || status === "closed" || status === "sold-out";
+  const reason =
+    status === "registration-upcoming"
+      ? `Registration opens on ${formatDate(event.registrationOpensAt)}.`
+      : status === "closed"
+        ? `Registration closed on ${formatDate(event.registrationClosesAt)}.`
+        : status === "sold-out"
+          ? "All public categories are full."
+          : undefined;
+
+  return { disabled, reason, status };
+}
+
+function BackLink({
+  event,
+  label = "Back to event",
+}: {
+  event: PublicDisplayEvent;
+  label?: string;
+}) {
   return (
     <Button asChild variant="ghost" className="min-h-11 rounded-2xl px-0 text-muted-foreground">
-      <Link to="/events/$eventId" params={{ eventId: event.slug }}>
-        ← {label}
-      </Link>
+      <a href={publicEventPath(event)}>← {label}</a>
     </Button>
   );
 }
 
-function PolicyBackCta({ event }: { event: Event }) {
+function PolicyBackCta({ event, demo }: { event: PublicDisplayEvent; demo: DemoState }) {
+  const { disabled, reason } = registrationCtaState(event, demo);
+
   return (
     <div className="grid grid-cols-[1fr_auto] gap-2">
-      <Button asChild className="h-12 rounded-2xl text-base">
-        <Link to={registerPath(event) as never}>Back to registration</Link>
-      </Button>
+      {disabled ? (
+        <Button disabled className="h-12 rounded-2xl text-base">
+          Registration unavailable
+        </Button>
+      ) : (
+        <Button asChild className="h-12 rounded-2xl text-base">
+          <a href={registerPath(event)}>Back to registration</a>
+        </Button>
+      )}
       <Button
         type="button"
         variant="outline"
@@ -167,6 +203,9 @@ function PolicyBackCta({ event }: { event: Event }) {
       >
         Print
       </Button>
+      {reason ? (
+        <p className="col-span-2 text-center text-muted-foreground text-xs">{reason}</p>
+      ) : null}
     </div>
   );
 }
@@ -194,7 +233,7 @@ function DistanceChip({
   category,
   forceSoldOut = false,
 }: {
-  category: Category;
+  category: PublicDisplayCategory;
   forceSoldOut?: boolean;
 }) {
   const tier = activeTier(category);
@@ -222,7 +261,9 @@ function DistanceChip({
       <div className="mt-4 flex items-end justify-between gap-3">
         <div>
           <p className="text-muted-foreground text-[0.68rem] uppercase tracking-[0.18em]">Fee</p>
-          <p className="font-bold text-brand-navy">{formatINR(tier.amount)}</p>
+          <p className="font-bold text-brand-navy">
+            {tier ? formatINR(tier.amount) : "Fees opening soon"}
+          </p>
         </div>
         <p className="text-right text-muted-foreground text-xs">
           {isSoldOut ? "Waitlist opens soon" : `${left} spots left`}
@@ -232,12 +273,14 @@ function DistanceChip({
   );
 }
 
-function EventMeta({ event }: { event: Event }) {
+function EventMeta({ event }: { event: PublicDisplayEvent }) {
   return (
     <dl className="grid grid-cols-3 gap-2 text-center">
       <div className="rounded-2xl bg-secondary p-3">
         <dt className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">From</dt>
-        <dd className="mt-1 font-bold text-brand-navy">{formatINR(lowestFee(event))}</dd>
+        <dd className="mt-1 font-bold text-brand-navy">
+          {lowestFee(event) == null ? "TBD" : formatINR(lowestFee(event) ?? 0)}
+        </dd>
       </div>
       <div className="rounded-2xl bg-secondary p-3">
         <dt className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">Starts</dt>
@@ -251,16 +294,17 @@ function EventMeta({ event }: { event: Event }) {
   );
 }
 
-export function CalendarPage({ demo }: DiscoverySearch) {
+export function CalendarPage({
+  demo,
+  events: liveEvents,
+}: DiscoverySearch & { events: PublicDisplayEvent[] }) {
   const state = demoValue(demo);
-  const events = state === "empty" ? [] : participantEvents;
+  const events = state === "empty" ? [] : demo ? demoPublicEvents() : liveEvents;
 
   const cta = useMemo(
     () => (
       <Button asChild className="h-12 w-full rounded-2xl text-base">
-        <Link to="/calendar" search={{ demo: "default" }}>
-          Browse upcoming races
-        </Link>
+        <a href="/calendar">Browse upcoming races</a>
       </Button>
     ),
     [],
@@ -297,9 +341,7 @@ export function CalendarPage({ demo }: DiscoverySearch) {
           description="The discovery list is intentionally empty in this demo state. Check back after the admin calendar seed."
           action={
             <Button asChild variant="outline" className="min-h-11 rounded-2xl">
-              <Link to="/calendar" search={{ demo: "default" }}>
-                Show seeded events
-              </Link>
+              <a href="/calendar?demo=default">Show seeded events</a>
             </Button>
           }
         />
@@ -325,18 +367,14 @@ export function CalendarPage({ demo }: DiscoverySearch) {
                       {formatDate(event.startsAt)} · {formatTime(event.startsAt)} · {event.city}
                     </CardDescription>
                   </div>
-                  <Badge variant="success" className="rounded-full">
-                    <span aria-hidden="true">●</span> Open
-                  </Badge>
+                  <StatusBadge status={landingStatus(event, state)} />
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground text-sm leading-6">{event.summary}</p>
                 <EventMeta event={event} />
                 <Button asChild className="min-h-11 w-full rounded-2xl">
-                  <Link to="/events/$eventId" params={{ eventId: event.slug }}>
-                    View event
-                  </Link>
+                  <a href={publicEventPath(event)}>View event</a>
                 </Button>
               </CardContent>
             </Card>
@@ -347,16 +385,9 @@ export function CalendarPage({ demo }: DiscoverySearch) {
   );
 }
 
-export function EventLandingPage({ event, demo }: { event: Event; demo?: DemoState }) {
+export function EventLandingPage({ event, demo }: { event: PublicDisplayEvent; demo?: DemoState }) {
   const state = demoValue(demo);
-  const status = landingStatus(event, state);
-  const disabled = status === "closed" || status === "sold-out";
-  const reason =
-    status === "closed"
-      ? "Registration closed on 15 Jun 2026."
-      : status === "sold-out"
-        ? "All public categories are full."
-        : undefined;
+  const { disabled, reason, status } = registrationCtaState(event, state);
 
   const cta = useMemo(
     () => <RegisterCta event={event} disabled={disabled} reason={reason} />,
@@ -377,7 +408,7 @@ export function EventLandingPage({ event, demo }: { event: Event; demo?: DemoSta
   return (
     <section className="space-y-5 py-3">
       <Button asChild variant="ghost" className="min-h-11 rounded-2xl px-0 text-muted-foreground">
-        <Link to="/calendar">← Calendar</Link>
+        <a href="/calendar">← Calendar</a>
       </Button>
 
       <article className="overflow-hidden rounded-[2rem] border border-orange-100 bg-card shadow-xl">
@@ -418,14 +449,13 @@ export function EventLandingPage({ event, demo }: { event: Event; demo?: DemoSta
         </CardHeader>
         <CardContent className="space-y-3">
           <Button asChild variant="outline" className="min-h-11 w-full rounded-2xl">
-            <a href="#venue-map">View map landmark</a>
+            <a href={event.venue.mapUrl ?? "#venue-map"}>View map landmark</a>
           </Button>
           <div
             id="venue-map"
             className="rounded-3xl bg-secondary p-4 text-muted-foreground text-sm leading-6"
           >
-            Start arch faces Avinashi Road; kit counters open near Hall E, CODISSIA Trade Fair
-            Complex.
+            {event.venue.landmark ?? event.venue.addressLine1}
           </div>
         </CardContent>
       </Card>
@@ -474,23 +504,23 @@ export function EventLandingPage({ event, demo }: { event: Event; demo?: DemoSta
 
       <div className="grid grid-cols-2 gap-3">
         <Button asChild variant="outline" className="min-h-11 rounded-2xl">
-          <Link to="/events/$eventId/details" params={{ eventId: event.slug }}>
-            Full details
-          </Link>
+          <a href={publicEventPath(event, "/details")}>Full details</a>
         </Button>
         <Button asChild variant="outline" className="min-h-11 rounded-2xl">
-          <Link to="/events/$eventId/policy/waiver" params={{ eventId: event.slug }}>
-            Read waiver
-          </Link>
+          <a href={publicEventPath(event, "/policy/waiver")}>Read waiver</a>
         </Button>
       </div>
     </section>
   );
 }
 
-export function EventDetailsPage({ event, demo }: { event: Event; demo?: DemoState }) {
+export function EventDetailsPage({ event, demo }: { event: PublicDisplayEvent; demo?: DemoState }) {
   const state = demoValue(demo);
-  const cta = useMemo(() => <RegisterCta event={event} />, [event]);
+  const { disabled, reason } = registrationCtaState(event, state);
+  const cta = useMemo(
+    () => <RegisterCta event={event} disabled={disabled} reason={reason} />,
+    [event, disabled, reason],
+  );
 
   useStickyCta(cta);
 
@@ -505,12 +535,8 @@ export function EventDetailsPage({ event, demo }: { event: Event; demo?: DemoSta
   }
 
   const schedule = [
-    ["04:45 AM", "Reporting opens at CODISSIA Hall E"],
-    ["05:20 AM", "Warm-up led by Karthik Narayanan"],
-    ["05:30 AM", "21K flag-off"],
-    ["05:45 AM", "10K flag-off"],
-    ["06:15 AM", "5K flag-off with Ananya Krishnan"],
-    ["09:30 AM", "Breakfast, medals, and medical desk close"],
+    [formatTime(event.startsAt), `${event.title} flag-off`],
+    ["After finish", "Medal, hydration, and organizer support desk"],
   ];
 
   return (
@@ -521,17 +547,13 @@ export function EventDetailsPage({ event, demo }: { event: Event; demo?: DemoSta
         <h1 className="mt-4 font-display font-black text-4xl leading-none tracking-[-0.05em] text-brand-navy">
           Everything before your start line.
         </h1>
-        <p className="mt-4 text-muted-foreground text-sm leading-6">
-          {event.summary} Hydration points are placed every 2.5 km, with medical teams stationed
-          near Race Course Road and CODISSIA.
-        </p>
+        <p className="mt-4 text-muted-foreground text-sm leading-6">{event.summary}</p>
       </header>
 
       <Section title="About the race">
         <p>
-          The Coimbatore Marathon 2026 is a community-first Sunday race across 5K, 10K, and 21K
-          categories. Your fee includes timing chip, BIB 1042-style race identification, breakfast,
-          and a finisher medal.
+          {event.title} is hosted by {event.organizerName}. Public categories currently include{" "}
+          {event.categories.map((category) => category.distance).join(", ")}.
         </p>
       </Section>
 
@@ -550,27 +572,24 @@ export function EventDetailsPage({ event, demo }: { event: Event; demo?: DemoSta
       </Section>
 
       <Section title="Race instructions">
-        <ul className="list-disc space-y-2 pl-5">
-          <li>Carry a government ID and your confirmation SMS/email for kit pickup.</li>
-          <li>Pin the BIB visibly on your chest; do not fold the timing chip strip.</li>
-          <li>
-            Use the left lane on Race Course Road and follow marshal instructions at every turn.
-          </li>
-          <li>Cut-off: 5K 1h 10m, 10K 2h, 21K 3h 30m.</li>
-        </ul>
+        <p>{event.raceInstructions ?? "Race instructions will be shared by the organizer."}</p>
       </Section>
 
       <Section title="Contact">
         <div className="grid gap-2">
-          <Button asChild variant="outline" className="min-h-11 justify-start rounded-2xl">
-            <a href="tel:+919876543210">Call support · +91 98765 43210</a>
-          </Button>
-          <Button asChild variant="whatsapp" className="min-h-11 justify-start rounded-2xl">
-            <a href="https://wa.me/919876543210">WhatsApp race desk</a>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11 justify-start rounded-2xl">
-            <a href="mailto:support@coimbatorerunners.example">Email organizer</a>
-          </Button>
+          {event.contactPhone ? (
+            <Button asChild variant="outline" className="min-h-11 justify-start rounded-2xl">
+              <a href={`tel:${event.contactPhone}`}>Call support · {event.contactPhone}</a>
+            </Button>
+          ) : null}
+          {event.contactEmail ? (
+            <Button asChild variant="outline" className="min-h-11 justify-start rounded-2xl">
+              <a href={`mailto:${event.contactEmail}`}>Email organizer · {event.contactEmail}</a>
+            </Button>
+          ) : null}
+          {!event.contactPhone && !event.contactEmail ? (
+            <p>Contact details will be shared by the organizer.</p>
+          ) : null}
         </div>
       </Section>
     </article>
@@ -620,9 +639,9 @@ const refundSections = [
   ["Contact", "Coimbatore Runners Trust, Race Course Road desk, WhatsApp +91 98765 43210."],
 ] as const;
 
-export function RefundPolicyPage({ event, demo }: { event: Event; demo?: DemoState }) {
+export function RefundPolicyPage({ event, demo }: { event: PublicDisplayEvent; demo?: DemoState }) {
   const state = demoValue(demo);
-  const cta = useMemo(() => <PolicyBackCta event={event} />, [event]);
+  const cta = useMemo(() => <PolicyBackCta event={event} demo={state} />, [event, state]);
 
   useStickyCta(cta);
 
@@ -639,9 +658,7 @@ export function RefundPolicyPage({ event, demo }: { event: Event; demo?: DemoSta
           description="This demo simulates a missing organizer policy."
           action={
             <Button asChild>
-              <Link to="/events/$eventId" params={{ eventId: event.slug }}>
-                Return to event
-              </Link>
+              <a href={publicEventPath(event)}>Return to event</a>
             </Button>
           }
         />
@@ -655,7 +672,7 @@ export function RefundPolicyPage({ event, demo }: { event: Event; demo?: DemoSta
       title="Refund & Cancellation Policy"
       label="P-04 · Legal"
       demo={state}
-      sections={refundSections}
+      sections={policySections("Organizer refund policy", event.policies.refund, refundSections)}
     />
   );
 }
@@ -695,9 +712,9 @@ const waiverSections = [
   ],
 ] as const;
 
-export function WaiverPolicyPage({ event, demo }: { event: Event; demo?: DemoState }) {
+export function WaiverPolicyPage({ event, demo }: { event: PublicDisplayEvent; demo?: DemoState }) {
   const state = demoValue(demo);
-  const cta = useMemo(() => <PolicyBackCta event={event} />, [event]);
+  const cta = useMemo(() => <PolicyBackCta event={event} demo={state} />, [event, state]);
 
   useStickyCta(cta);
 
@@ -711,12 +728,12 @@ export function WaiverPolicyPage({ event, demo }: { event: Event; demo?: DemoSta
       title="Waiver & Medical Declaration"
       label="P-05 · Full text"
       demo={state}
-      sections={waiverSections}
+      sections={policySections("Organizer waiver", event.policies.waiver, waiverSections)}
     />
   );
 }
 
-function PolicyLoading({ title, event }: { title: string; event: Event }) {
+function PolicyLoading({ title, event }: { title: string; event: PublicDisplayEvent }) {
   return (
     <section className="space-y-5 py-3" aria-busy="true">
       <BackLink event={event} />
@@ -734,7 +751,7 @@ function PolicyLayout({
   demo,
   sections,
 }: {
-  event: Event;
+  event: PublicDisplayEvent;
   title: string;
   label: string;
   demo: DemoState;
@@ -804,4 +821,12 @@ function PolicyLayout({
       ))}
     </article>
   );
+}
+
+function policySections(
+  heading: string,
+  body: string,
+  fallback: readonly (readonly [string, string])[],
+): readonly (readonly [string, string])[] {
+  return body.trim().length > 0 ? [[heading, body]] : fallback;
 }

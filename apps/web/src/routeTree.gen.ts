@@ -20,11 +20,13 @@ import { Route as EventsEventIdLeaderboardRouteImport } from './routes/events.$e
 import { Route as EventsEventIdGroupRouteImport } from './routes/events.$eventId.group'
 import { Route as EventsEventIdDetailsRouteImport } from './routes/events.$eventId.details'
 import { Route as MyRegistrationsRegistrationIdIndexRouteImport } from './routes/my.registrations.$registrationId.index'
+import { Route as EventsOrganizerSlugEventSlugIndexRouteImport } from './routes/events.$organizerSlug.$eventSlug.index'
 import { Route as EventsEventIdGroupIndexRouteImport } from './routes/events.$eventId.group.index'
 import { Route as MyRegistrationsRegistrationIdResultRouteImport } from './routes/my.registrations.$registrationId.result'
 import { Route as MyRegistrationsRegistrationIdKitRouteImport } from './routes/my.registrations.$registrationId.kit'
 import { Route as MyRegistrationsRegistrationIdInsuranceRouteImport } from './routes/my.registrations.$registrationId.insurance'
 import { Route as MyRegistrationsRegistrationIdCertificateRouteImport } from './routes/my.registrations.$registrationId.certificate'
+import { Route as EventsOrganizerSlugEventSlugDetailsRouteImport } from './routes/events.$organizerSlug.$eventSlug.details'
 import { Route as EventsEventIdRegisterWaiverRouteImport } from './routes/events.$eventId.register.waiver'
 import { Route as EventsEventIdRegisterSummaryRouteImport } from './routes/events.$eventId.register.summary'
 import { Route as EventsEventIdRegisterSuccessRouteImport } from './routes/events.$eventId.register.success'
@@ -39,6 +41,9 @@ import { Route as EventsEventIdPolicyWaiverRouteImport } from './routes/events.$
 import { Route as EventsEventIdPolicyRefundRouteImport } from './routes/events.$eventId.policy.refund'
 import { Route as EventsEventIdGroupRosterRouteImport } from './routes/events.$eventId.group.roster'
 import { Route as EventsEventIdGroupPaymentRouteImport } from './routes/events.$eventId.group.payment'
+import { Route as EventsOrganizerSlugEventSlugRegisterCategoryRouteImport } from './routes/events.$organizerSlug.$eventSlug.register.category'
+import { Route as EventsOrganizerSlugEventSlugPolicyWaiverRouteImport } from './routes/events.$organizerSlug.$eventSlug.policy.waiver'
+import { Route as EventsOrganizerSlugEventSlugPolicyRefundRouteImport } from './routes/events.$organizerSlug.$eventSlug.policy.refund'
 
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
@@ -98,6 +103,12 @@ const MyRegistrationsRegistrationIdIndexRoute =
     path: '/',
     getParentRoute: () => MyRegistrationsRegistrationIdRoute,
   } as any)
+const EventsOrganizerSlugEventSlugIndexRoute =
+  EventsOrganizerSlugEventSlugIndexRouteImport.update({
+    id: '/events/$organizerSlug/$eventSlug/',
+    path: '/events/$organizerSlug/$eventSlug/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EventsEventIdGroupIndexRoute = EventsEventIdGroupIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -126,6 +137,12 @@ const MyRegistrationsRegistrationIdCertificateRoute =
     id: '/certificate',
     path: '/certificate',
     getParentRoute: () => MyRegistrationsRegistrationIdRoute,
+  } as any)
+const EventsOrganizerSlugEventSlugDetailsRoute =
+  EventsOrganizerSlugEventSlugDetailsRouteImport.update({
+    id: '/events/$organizerSlug/$eventSlug/details',
+    path: '/events/$organizerSlug/$eventSlug/details',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const EventsEventIdRegisterWaiverRoute =
   EventsEventIdRegisterWaiverRouteImport.update({
@@ -211,6 +228,24 @@ const EventsEventIdGroupPaymentRoute =
     path: '/payment',
     getParentRoute: () => EventsEventIdGroupRoute,
   } as any)
+const EventsOrganizerSlugEventSlugRegisterCategoryRoute =
+  EventsOrganizerSlugEventSlugRegisterCategoryRouteImport.update({
+    id: '/events/$organizerSlug/$eventSlug/register/category',
+    path: '/events/$organizerSlug/$eventSlug/register/category',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EventsOrganizerSlugEventSlugPolicyWaiverRoute =
+  EventsOrganizerSlugEventSlugPolicyWaiverRouteImport.update({
+    id: '/events/$organizerSlug/$eventSlug/policy/waiver',
+    path: '/events/$organizerSlug/$eventSlug/policy/waiver',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EventsOrganizerSlugEventSlugPolicyRefundRoute =
+  EventsOrganizerSlugEventSlugPolicyRefundRouteImport.update({
+    id: '/events/$organizerSlug/$eventSlug/policy/refund',
+    path: '/events/$organizerSlug/$eventSlug/policy/refund',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -237,12 +272,17 @@ export interface FileRoutesByFullPath {
   '/events/$eventId/register/success': typeof EventsEventIdRegisterSuccessRoute
   '/events/$eventId/register/summary': typeof EventsEventIdRegisterSummaryRoute
   '/events/$eventId/register/waiver': typeof EventsEventIdRegisterWaiverRoute
+  '/events/$organizerSlug/$eventSlug/details': typeof EventsOrganizerSlugEventSlugDetailsRoute
   '/my/registrations/$registrationId/certificate': typeof MyRegistrationsRegistrationIdCertificateRoute
   '/my/registrations/$registrationId/insurance': typeof MyRegistrationsRegistrationIdInsuranceRoute
   '/my/registrations/$registrationId/kit': typeof MyRegistrationsRegistrationIdKitRoute
   '/my/registrations/$registrationId/result': typeof MyRegistrationsRegistrationIdResultRoute
   '/events/$eventId/group/': typeof EventsEventIdGroupIndexRoute
+  '/events/$organizerSlug/$eventSlug/': typeof EventsOrganizerSlugEventSlugIndexRoute
   '/my/registrations/$registrationId/': typeof MyRegistrationsRegistrationIdIndexRoute
+  '/events/$organizerSlug/$eventSlug/policy/refund': typeof EventsOrganizerSlugEventSlugPolicyRefundRoute
+  '/events/$organizerSlug/$eventSlug/policy/waiver': typeof EventsOrganizerSlugEventSlugPolicyWaiverRoute
+  '/events/$organizerSlug/$eventSlug/register/category': typeof EventsOrganizerSlugEventSlugRegisterCategoryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -267,12 +307,17 @@ export interface FileRoutesByTo {
   '/events/$eventId/register/success': typeof EventsEventIdRegisterSuccessRoute
   '/events/$eventId/register/summary': typeof EventsEventIdRegisterSummaryRoute
   '/events/$eventId/register/waiver': typeof EventsEventIdRegisterWaiverRoute
+  '/events/$organizerSlug/$eventSlug/details': typeof EventsOrganizerSlugEventSlugDetailsRoute
   '/my/registrations/$registrationId/certificate': typeof MyRegistrationsRegistrationIdCertificateRoute
   '/my/registrations/$registrationId/insurance': typeof MyRegistrationsRegistrationIdInsuranceRoute
   '/my/registrations/$registrationId/kit': typeof MyRegistrationsRegistrationIdKitRoute
   '/my/registrations/$registrationId/result': typeof MyRegistrationsRegistrationIdResultRoute
   '/events/$eventId/group': typeof EventsEventIdGroupIndexRoute
+  '/events/$organizerSlug/$eventSlug': typeof EventsOrganizerSlugEventSlugIndexRoute
   '/my/registrations/$registrationId': typeof MyRegistrationsRegistrationIdIndexRoute
+  '/events/$organizerSlug/$eventSlug/policy/refund': typeof EventsOrganizerSlugEventSlugPolicyRefundRoute
+  '/events/$organizerSlug/$eventSlug/policy/waiver': typeof EventsOrganizerSlugEventSlugPolicyWaiverRoute
+  '/events/$organizerSlug/$eventSlug/register/category': typeof EventsOrganizerSlugEventSlugRegisterCategoryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -300,12 +345,17 @@ export interface FileRoutesById {
   '/events/$eventId/register/success': typeof EventsEventIdRegisterSuccessRoute
   '/events/$eventId/register/summary': typeof EventsEventIdRegisterSummaryRoute
   '/events/$eventId/register/waiver': typeof EventsEventIdRegisterWaiverRoute
+  '/events/$organizerSlug/$eventSlug/details': typeof EventsOrganizerSlugEventSlugDetailsRoute
   '/my/registrations/$registrationId/certificate': typeof MyRegistrationsRegistrationIdCertificateRoute
   '/my/registrations/$registrationId/insurance': typeof MyRegistrationsRegistrationIdInsuranceRoute
   '/my/registrations/$registrationId/kit': typeof MyRegistrationsRegistrationIdKitRoute
   '/my/registrations/$registrationId/result': typeof MyRegistrationsRegistrationIdResultRoute
   '/events/$eventId/group/': typeof EventsEventIdGroupIndexRoute
+  '/events/$organizerSlug/$eventSlug/': typeof EventsOrganizerSlugEventSlugIndexRoute
   '/my/registrations/$registrationId/': typeof MyRegistrationsRegistrationIdIndexRoute
+  '/events/$organizerSlug/$eventSlug/policy/refund': typeof EventsOrganizerSlugEventSlugPolicyRefundRoute
+  '/events/$organizerSlug/$eventSlug/policy/waiver': typeof EventsOrganizerSlugEventSlugPolicyWaiverRoute
+  '/events/$organizerSlug/$eventSlug/register/category': typeof EventsOrganizerSlugEventSlugRegisterCategoryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -334,12 +384,17 @@ export interface FileRouteTypes {
     | '/events/$eventId/register/success'
     | '/events/$eventId/register/summary'
     | '/events/$eventId/register/waiver'
+    | '/events/$organizerSlug/$eventSlug/details'
     | '/my/registrations/$registrationId/certificate'
     | '/my/registrations/$registrationId/insurance'
     | '/my/registrations/$registrationId/kit'
     | '/my/registrations/$registrationId/result'
     | '/events/$eventId/group/'
+    | '/events/$organizerSlug/$eventSlug/'
     | '/my/registrations/$registrationId/'
+    | '/events/$organizerSlug/$eventSlug/policy/refund'
+    | '/events/$organizerSlug/$eventSlug/policy/waiver'
+    | '/events/$organizerSlug/$eventSlug/register/category'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -364,12 +419,17 @@ export interface FileRouteTypes {
     | '/events/$eventId/register/success'
     | '/events/$eventId/register/summary'
     | '/events/$eventId/register/waiver'
+    | '/events/$organizerSlug/$eventSlug/details'
     | '/my/registrations/$registrationId/certificate'
     | '/my/registrations/$registrationId/insurance'
     | '/my/registrations/$registrationId/kit'
     | '/my/registrations/$registrationId/result'
     | '/events/$eventId/group'
+    | '/events/$organizerSlug/$eventSlug'
     | '/my/registrations/$registrationId'
+    | '/events/$organizerSlug/$eventSlug/policy/refund'
+    | '/events/$organizerSlug/$eventSlug/policy/waiver'
+    | '/events/$organizerSlug/$eventSlug/register/category'
   id:
     | '__root__'
     | '/'
@@ -396,12 +456,17 @@ export interface FileRouteTypes {
     | '/events/$eventId/register/success'
     | '/events/$eventId/register/summary'
     | '/events/$eventId/register/waiver'
+    | '/events/$organizerSlug/$eventSlug/details'
     | '/my/registrations/$registrationId/certificate'
     | '/my/registrations/$registrationId/insurance'
     | '/my/registrations/$registrationId/kit'
     | '/my/registrations/$registrationId/result'
     | '/events/$eventId/group/'
+    | '/events/$organizerSlug/$eventSlug/'
     | '/my/registrations/$registrationId/'
+    | '/events/$organizerSlug/$eventSlug/policy/refund'
+    | '/events/$organizerSlug/$eventSlug/policy/waiver'
+    | '/events/$organizerSlug/$eventSlug/register/category'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -417,6 +482,11 @@ export interface RootRouteChildren {
   EventsEventIdIndexRoute: typeof EventsEventIdIndexRoute
   EventsEventIdPolicyRefundRoute: typeof EventsEventIdPolicyRefundRoute
   EventsEventIdPolicyWaiverRoute: typeof EventsEventIdPolicyWaiverRoute
+  EventsOrganizerSlugEventSlugDetailsRoute: typeof EventsOrganizerSlugEventSlugDetailsRoute
+  EventsOrganizerSlugEventSlugIndexRoute: typeof EventsOrganizerSlugEventSlugIndexRoute
+  EventsOrganizerSlugEventSlugPolicyRefundRoute: typeof EventsOrganizerSlugEventSlugPolicyRefundRoute
+  EventsOrganizerSlugEventSlugPolicyWaiverRoute: typeof EventsOrganizerSlugEventSlugPolicyWaiverRoute
+  EventsOrganizerSlugEventSlugRegisterCategoryRoute: typeof EventsOrganizerSlugEventSlugRegisterCategoryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -498,6 +568,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MyRegistrationsRegistrationIdIndexRouteImport
       parentRoute: typeof MyRegistrationsRegistrationIdRoute
     }
+    '/events/$organizerSlug/$eventSlug/': {
+      id: '/events/$organizerSlug/$eventSlug/'
+      path: '/events/$organizerSlug/$eventSlug'
+      fullPath: '/events/$organizerSlug/$eventSlug/'
+      preLoaderRoute: typeof EventsOrganizerSlugEventSlugIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/events/$eventId/group/': {
       id: '/events/$eventId/group/'
       path: '/'
@@ -532,6 +609,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/my/registrations/$registrationId/certificate'
       preLoaderRoute: typeof MyRegistrationsRegistrationIdCertificateRouteImport
       parentRoute: typeof MyRegistrationsRegistrationIdRoute
+    }
+    '/events/$organizerSlug/$eventSlug/details': {
+      id: '/events/$organizerSlug/$eventSlug/details'
+      path: '/events/$organizerSlug/$eventSlug/details'
+      fullPath: '/events/$organizerSlug/$eventSlug/details'
+      preLoaderRoute: typeof EventsOrganizerSlugEventSlugDetailsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/events/$eventId/register/waiver': {
       id: '/events/$eventId/register/waiver'
@@ -631,6 +715,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsEventIdGroupPaymentRouteImport
       parentRoute: typeof EventsEventIdGroupRoute
     }
+    '/events/$organizerSlug/$eventSlug/register/category': {
+      id: '/events/$organizerSlug/$eventSlug/register/category'
+      path: '/events/$organizerSlug/$eventSlug/register/category'
+      fullPath: '/events/$organizerSlug/$eventSlug/register/category'
+      preLoaderRoute: typeof EventsOrganizerSlugEventSlugRegisterCategoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$organizerSlug/$eventSlug/policy/waiver': {
+      id: '/events/$organizerSlug/$eventSlug/policy/waiver'
+      path: '/events/$organizerSlug/$eventSlug/policy/waiver'
+      fullPath: '/events/$organizerSlug/$eventSlug/policy/waiver'
+      preLoaderRoute: typeof EventsOrganizerSlugEventSlugPolicyWaiverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$organizerSlug/$eventSlug/policy/refund': {
+      id: '/events/$organizerSlug/$eventSlug/policy/refund'
+      path: '/events/$organizerSlug/$eventSlug/policy/refund'
+      fullPath: '/events/$organizerSlug/$eventSlug/policy/refund'
+      preLoaderRoute: typeof EventsOrganizerSlugEventSlugPolicyRefundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -721,6 +826,16 @@ const rootRouteChildren: RootRouteChildren = {
   EventsEventIdIndexRoute: EventsEventIdIndexRoute,
   EventsEventIdPolicyRefundRoute: EventsEventIdPolicyRefundRoute,
   EventsEventIdPolicyWaiverRoute: EventsEventIdPolicyWaiverRoute,
+  EventsOrganizerSlugEventSlugDetailsRoute:
+    EventsOrganizerSlugEventSlugDetailsRoute,
+  EventsOrganizerSlugEventSlugIndexRoute:
+    EventsOrganizerSlugEventSlugIndexRoute,
+  EventsOrganizerSlugEventSlugPolicyRefundRoute:
+    EventsOrganizerSlugEventSlugPolicyRefundRoute,
+  EventsOrganizerSlugEventSlugPolicyWaiverRoute:
+    EventsOrganizerSlugEventSlugPolicyWaiverRoute,
+  EventsOrganizerSlugEventSlugRegisterCategoryRoute:
+    EventsOrganizerSlugEventSlugRegisterCategoryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

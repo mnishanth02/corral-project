@@ -31,6 +31,215 @@ export class ConsoleController {
     );
   }
 
+  @TsRestHandler(consoleContract.getOrganizerEvent)
+  async getOrganizerEvent() {
+    return tsRestHandler(consoleContract.getOrganizerEvent, async ({ headers, params }) =>
+      withConsoleErrors(
+        () => this.consoleContext.getOrganizerEvent(headers, params.organizerId, params.eventId),
+        200,
+      ),
+    );
+  }
+
+  @TsRestHandler(consoleContract.createOrganizerEvent)
+  async createOrganizerEvent() {
+    return tsRestHandler(consoleContract.createOrganizerEvent, async ({ body, headers, params }) =>
+      withConsoleErrors(
+        () => this.consoleContext.createOrganizerEvent(headers, params.organizerId, body),
+        201,
+      ),
+    );
+  }
+
+  @TsRestHandler(consoleContract.updateOrganizerEvent)
+  async updateOrganizerEvent() {
+    return tsRestHandler(consoleContract.updateOrganizerEvent, async ({ body, headers, params }) =>
+      withConsoleErrors(
+        () =>
+          this.consoleContext.updateOrganizerEvent(
+            headers,
+            params.organizerId,
+            params.eventId,
+            body,
+          ),
+        200,
+      ),
+    );
+  }
+
+  @TsRestHandler(consoleContract.deleteOrganizerEvent)
+  async deleteOrganizerEvent() {
+    return tsRestHandler(consoleContract.deleteOrganizerEvent, async ({ headers, params }) =>
+      withConsoleErrors(
+        () => this.consoleContext.deleteOrganizerEvent(headers, params.organizerId, params.eventId),
+        200,
+      ),
+    );
+  }
+
+  @TsRestHandler(consoleContract.createOrganizerEventCategory)
+  async createOrganizerEventCategory() {
+    return tsRestHandler(
+      consoleContract.createOrganizerEventCategory,
+      async ({ body, headers, params }) =>
+        withConsoleErrors(
+          () =>
+            this.consoleContext.createOrganizerEventCategory(
+              headers,
+              params.organizerId,
+              params.eventId,
+              body,
+            ),
+          201,
+        ),
+    );
+  }
+
+  @TsRestHandler(consoleContract.updateOrganizerEventCategory)
+  async updateOrganizerEventCategory() {
+    return tsRestHandler(
+      consoleContract.updateOrganizerEventCategory,
+      async ({ body, headers, params }) =>
+        withConsoleErrors(
+          () =>
+            this.consoleContext.updateOrganizerEventCategory(
+              headers,
+              params.organizerId,
+              params.eventId,
+              params.categoryId,
+              body,
+            ),
+          200,
+        ),
+    );
+  }
+
+  @TsRestHandler(consoleContract.deleteOrganizerEventCategory)
+  async deleteOrganizerEventCategory() {
+    return tsRestHandler(
+      consoleContract.deleteOrganizerEventCategory,
+      async ({ headers, params }) =>
+        withConsoleErrors(
+          () =>
+            this.consoleContext.deleteOrganizerEventCategory(
+              headers,
+              params.organizerId,
+              params.eventId,
+              params.categoryId,
+            ),
+          200,
+        ),
+    );
+  }
+
+  @TsRestHandler(consoleContract.createOrganizerEventFeeTier)
+  async createOrganizerEventFeeTier() {
+    return tsRestHandler(
+      consoleContract.createOrganizerEventFeeTier,
+      async ({ body, headers, params }) =>
+        withConsoleErrors(
+          () =>
+            this.consoleContext.createOrganizerEventFeeTier(
+              headers,
+              params.organizerId,
+              params.eventId,
+              params.categoryId,
+              body,
+            ),
+          201,
+        ),
+    );
+  }
+
+  @TsRestHandler(consoleContract.updateOrganizerEventFeeTier)
+  async updateOrganizerEventFeeTier() {
+    return tsRestHandler(
+      consoleContract.updateOrganizerEventFeeTier,
+      async ({ body, headers, params }) =>
+        withConsoleErrors(
+          () =>
+            this.consoleContext.updateOrganizerEventFeeTier(
+              headers,
+              params.organizerId,
+              params.eventId,
+              params.categoryId,
+              params.tierId,
+              body,
+            ),
+          200,
+        ),
+    );
+  }
+
+  @TsRestHandler(consoleContract.deleteOrganizerEventFeeTier)
+  async deleteOrganizerEventFeeTier() {
+    return tsRestHandler(consoleContract.deleteOrganizerEventFeeTier, async ({ headers, params }) =>
+      withConsoleErrors(
+        () =>
+          this.consoleContext.deleteOrganizerEventFeeTier(
+            headers,
+            params.organizerId,
+            params.eventId,
+            params.categoryId,
+            params.tierId,
+          ),
+        200,
+      ),
+    );
+  }
+
+  @TsRestHandler(consoleContract.getOrganizerEventReadiness)
+  async getOrganizerEventReadiness() {
+    return tsRestHandler(consoleContract.getOrganizerEventReadiness, async ({ headers, params }) =>
+      withConsoleErrors(
+        () =>
+          this.consoleContext.getOrganizerEventReadiness(
+            headers,
+            params.organizerId,
+            params.eventId,
+          ),
+        200,
+      ),
+    );
+  }
+
+  @TsRestHandler(consoleContract.markOrganizerEventReady)
+  async markOrganizerEventReady() {
+    return tsRestHandler(consoleContract.markOrganizerEventReady, async ({ headers, params }) =>
+      withConsoleErrors(
+        () =>
+          this.consoleContext.markOrganizerEventReady(headers, params.organizerId, params.eventId),
+        200,
+      ),
+    );
+  }
+
+  @TsRestHandler(consoleContract.revertOrganizerEventToDraft)
+  async revertOrganizerEventToDraft() {
+    return tsRestHandler(consoleContract.revertOrganizerEventToDraft, async ({ headers, params }) =>
+      withConsoleErrors(
+        () =>
+          this.consoleContext.revertOrganizerEventToDraft(
+            headers,
+            params.organizerId,
+            params.eventId,
+          ),
+        200,
+      ),
+    );
+  }
+
+  @TsRestHandler(consoleContract.publishOrganizerEvent)
+  async publishOrganizerEvent() {
+    return tsRestHandler(consoleContract.publishOrganizerEvent, async ({ headers, params }) =>
+      withConsoleErrors(
+        () =>
+          this.consoleContext.publishOrganizerEvent(headers, params.organizerId, params.eventId),
+        200,
+      ),
+    );
+  }
+
   @TsRestHandler(consoleContract.adminListOrganizers)
   async adminListOrganizers() {
     return tsRestHandler(consoleContract.adminListOrganizers, async ({ headers, query }) =>
@@ -73,6 +282,23 @@ export class ConsoleController {
         () => this.consoleContext.reviewAdminOrganizer(headers, params.organizerId, body),
         200,
       ),
+    );
+  }
+
+  @TsRestHandler(consoleContract.adminUpdateOrganizerPaymentAccount)
+  async adminUpdateOrganizerPaymentAccount() {
+    return tsRestHandler(
+      consoleContract.adminUpdateOrganizerPaymentAccount,
+      async ({ body, headers, params }) =>
+        withConsoleErrors(
+          () =>
+            this.consoleContext.updateAdminOrganizerPaymentAccount(
+              headers,
+              params.organizerId,
+              body.paymentAccountStatus,
+            ),
+          200,
+        ),
     );
   }
 

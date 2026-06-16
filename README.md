@@ -21,8 +21,8 @@ Registration → roster → WhatsApp → results → certificates platform for I
 
 ```
 apps/
-  web/       Public participant SPA            (:5173)
-  console/   Organizer/admin/race-day SPA      (:5174)
+  web/       Public participant SPA            (:5273)
+  console/   Organizer/admin/race-day SPA      (:5274)
   api/       NestJS HTTP API (/health)         (:3000)
   worker/    NestJS + BullMQ                    (:3100)
 packages/
@@ -42,6 +42,18 @@ packages/
 
 ```bash
 pnpm install
+pnpm dev:stack                # infra + migrations + all 4 apps with smart ports
+```
+
+`pnpm dev:stack` creates `.env` from `.env.example` when missing, starts Docker Compose for
+Postgres/Redis, applies migrations, seeds the bootstrap admin when configured, starts the API,
+worker, web, and console apps, then prints the final URLs. If a preferred port is busy, it picks the
+next available port and injects matching `DATABASE_URL`, `REDIS_URL`, `VITE_API_URL`, CORS, and auth
+origin values into the local processes.
+
+If you prefer the manual flow, it still works:
+
+```bash
 cp .env.example .env          # local infra values
 docker compose up -d          # postgres:16 + redis:7
 pnpm db:migrate               # apply committed Drizzle migrations
@@ -52,7 +64,8 @@ Then:
 
 - API health: `curl localhost:3000/health` → `{ "status": "ok", "db": true, "redis": true, ... }`
 - Worker health: `curl localhost:3100/health`
-- Web: http://localhost:5173 · Console: http://localhost:5174 (System status card shows live health)
+- Web/console: use the URLs printed by `pnpm dev:stack` (defaults are http://localhost:5273 and
+  http://localhost:5274). The System status card shows live health.
 
 ## Logging in (local)
 
@@ -71,8 +84,9 @@ This reads `AUTH_BOOTSTRAP_ADMIN_EMAIL`, `AUTH_BOOTSTRAP_ADMIN_PASSWORD`, and
 `AUTH_BOOTSTRAP_ADMIN_NAME` from the root `.env`. The script is idempotent — if the user already
 exists it leaves the password and role unchanged.
 
-Then sign in at the console login page (http://localhost:5174/login, or :5274 if that is your
-console port) with the email/password from `.env`, or via Google for an already-provisioned account.
+Then sign in at the console login page printed by `pnpm dev:stack` (default
+http://localhost:5274/login) with the email/password from `.env`, or via Google for an
+already-provisioned account.
 Once signed in as admin you can create additional users from the admin users screen.
 
 Quick validation that credentials work, without the UI:
@@ -93,6 +107,7 @@ curl -s -X POST http://localhost:3000/api/auth/sign-in/email \
 
 | Command | Description |
 |---|---|
+| `pnpm dev:stack` | Start Docker infra, run migrations/seed, launch all apps, and print final dynamic URLs |
 | `pnpm dev` | Run all apps (turbo, hot reload) |
 | `pnpm build` | Build all packages + apps |
 | `pnpm lint` | Biome lint via turbo |
